@@ -24,15 +24,15 @@ const {
 let assert = require("assert");
 const express = require("express");
 const request = require("supertest");
-let { Querier } = require("../lib/build/querier");
-let { ProcessState } = require("../lib/build/processState");
-let SuperTokens = require("../");
-let Session = require("../recipe/session");
-let EmailPassword = require("../recipe/emailpassword");
-let Dashboard = require("../recipe/dashboard");
-let SessionRecipe = require("../lib/build/recipe/session/recipe").default;
-let { middleware, errorHandler } = require("../framework/express");
-let { verifySession } = require("../recipe/session/framework/express");
+let { Querier } = require("supertokens-node/lib/build/querier");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let Dashboard = require("supertokens-node/recipe/dashboard");
+let SessionRecipe = require("supertokens-node/lib/build/recipe/session/recipe").default;
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
+let { verifySession } = require("supertokens-node/recipe/session/framework/express");
 
 describe(`middleware3: ${printPath("[test/middleware3.test.js]")}`, function () {
     beforeEach(async function () {

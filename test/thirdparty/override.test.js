@@ -23,18 +23,18 @@ const {
     signUPRequest,
     assertJSONEquals,
 } = require("../utils");
-let STExpress = require("../../");
-let Session = require("../../recipe/session");
-let SessionRecipe = require("../../lib/build/recipe/session/recipe").default;
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let SessionRecipe = require("supertokens-node/lib/build/recipe/session/recipe").default;
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-const { Querier } = require("../../lib/build/querier");
-let ThirdParty = require("../../recipe/thirdparty");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+const { Querier } = require("supertokens-node/lib/build/querier");
+let ThirdParty = require("supertokens-node/recipe/thirdparty");
 const express = require("express");
 const request = require("supertest");
 let nock = require("nock");
-let AccountLinking = require("../../recipe/accountlinking");
-let { middleware, errorHandler } = require("../../framework/express");
+let AccountLinking = require("supertokens-node/recipe/accountlinking");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 describe(`overrideTest: ${printPath("[test/thirdparty/override.test.js]")}`, function () {
     before(function () {
@@ -466,7 +466,10 @@ describe(`overrideTest: ${printPath("[test/thirdparty/override.test.js]")}`, fun
         );
 
         assert.notStrictEqual(user, undefined);
-        assert.deepStrictEqual(signUpResponse, { error: "signup error", customError: true });
+        assert.deepStrictEqual(signUpResponse, {
+            error: "signup error",
+            customError: true,
+        });
 
         let signInResponse = await new Promise((resolve) =>
             request(app)
@@ -489,7 +492,10 @@ describe(`overrideTest: ${printPath("[test/thirdparty/override.test.js]")}`, fun
                 })
         );
 
-        assert.deepStrictEqual(signInResponse, { error: "signin error", customError: true });
+        assert.deepStrictEqual(signInResponse, {
+            error: "signin error",
+            customError: true,
+        });
 
         let userByIdResponse = await new Promise((resolve) =>
             request(app)
@@ -507,7 +513,10 @@ describe(`overrideTest: ${printPath("[test/thirdparty/override.test.js]")}`, fun
                 })
         );
 
-        assert.deepStrictEqual(userByIdResponse, { error: "get user error", customError: true });
+        assert.deepStrictEqual(userByIdResponse, {
+            error: "get user error",
+            customError: true,
+        });
     });
 
     it("overriding api tests, throws error", async function () {
@@ -592,7 +601,10 @@ describe(`overrideTest: ${printPath("[test/thirdparty/override.test.js]")}`, fun
 
         assert.notStrictEqual(user, undefined);
         assert.strictEqual(newUser, true);
-        assert.deepStrictEqual(signUpResponse, { error: "signup error", customError: true });
+        assert.deepStrictEqual(signUpResponse, {
+            error: "signup error",
+            customError: true,
+        });
 
         let signInResponse = await new Promise((resolve) =>
             request(app)
@@ -616,6 +628,9 @@ describe(`overrideTest: ${printPath("[test/thirdparty/override.test.js]")}`, fun
         );
 
         assert.strictEqual(newUser, false);
-        assert.deepStrictEqual(signInResponse, { error: "signin error", customError: true });
+        assert.deepStrictEqual(signInResponse, {
+            error: "signin error",
+            customError: true,
+        });
     });
 });

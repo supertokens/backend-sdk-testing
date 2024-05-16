@@ -2986,7 +2986,10 @@ PERFORMANCE OF THIS SOFTWARE.
 
                 var __setModuleDefault = Object.create
                     ? function (o, v) {
-                          Object.defineProperty(o, "default", { enumerable: true, value: v });
+                          Object.defineProperty(o, "default", {
+                              enumerable: true,
+                              value: v,
+                          });
                       }
                     : function (o, v) {
                           o["default"] = v;
@@ -14250,7 +14253,9 @@ PERFORMANCE OF THIS SOFTWARE.
                  * Use of this source code is governed by an MIT-style license that can be
                  * found in the LICENSE file at https://angular.io/license
                  */
-                const __forward_ref__ = getClosureSafeProperty({ __forward_ref__: getClosureSafeProperty });
+                const __forward_ref__ = getClosureSafeProperty({
+                    __forward_ref__: getClosureSafeProperty,
+                });
                 /**
                  * Allows to refer to references which are not yet defined.
                  *
@@ -14586,7 +14591,10 @@ PERFORMANCE OF THIS SOFTWARE.
                  * @codeGenApi
                  */
                 function ɵɵdefineInjector(options) {
-                    return { providers: options.providers || [], imports: options.imports || [] };
+                    return {
+                        providers: options.providers || [],
+                        imports: options.imports || [],
+                    };
                 }
                 /**
                  * Read the injectable def (`ɵprov`) for `type` in a way which is immune to accidentally reading
@@ -14651,11 +14659,19 @@ PERFORMANCE OF THIS SOFTWARE.
                         ? type[NG_INJ_DEF]
                         : null;
                 }
-                const NG_PROV_DEF = getClosureSafeProperty({ ɵprov: getClosureSafeProperty });
-                const NG_INJ_DEF = getClosureSafeProperty({ ɵinj: getClosureSafeProperty });
+                const NG_PROV_DEF = getClosureSafeProperty({
+                    ɵprov: getClosureSafeProperty,
+                });
+                const NG_INJ_DEF = getClosureSafeProperty({
+                    ɵinj: getClosureSafeProperty,
+                });
                 // We need to keep these around so we can read off old defs if new defs are unavailable
-                const NG_INJECTABLE_DEF = getClosureSafeProperty({ ngInjectableDef: getClosureSafeProperty });
-                const NG_INJECTOR_DEF = getClosureSafeProperty({ ngInjectorDef: getClosureSafeProperty });
+                const NG_INJECTABLE_DEF = getClosureSafeProperty({
+                    ngInjectableDef: getClosureSafeProperty,
+                });
+                const NG_INJECTOR_DEF = getClosureSafeProperty({
+                    ngInjectorDef: getClosureSafeProperty,
+                });
 
                 /**
                  * @license
@@ -15019,18 +15035,30 @@ PERFORMANCE OF THIS SOFTWARE.
                  * Use of this source code is governed by an MIT-style license that can be
                  * found in the LICENSE file at https://angular.io/license
                  */
-                const NG_COMP_DEF = getClosureSafeProperty({ ɵcmp: getClosureSafeProperty });
-                const NG_DIR_DEF = getClosureSafeProperty({ ɵdir: getClosureSafeProperty });
-                const NG_PIPE_DEF = getClosureSafeProperty({ ɵpipe: getClosureSafeProperty });
-                const NG_MOD_DEF = getClosureSafeProperty({ ɵmod: getClosureSafeProperty });
-                const NG_FACTORY_DEF = getClosureSafeProperty({ ɵfac: getClosureSafeProperty });
+                const NG_COMP_DEF = getClosureSafeProperty({
+                    ɵcmp: getClosureSafeProperty,
+                });
+                const NG_DIR_DEF = getClosureSafeProperty({
+                    ɵdir: getClosureSafeProperty,
+                });
+                const NG_PIPE_DEF = getClosureSafeProperty({
+                    ɵpipe: getClosureSafeProperty,
+                });
+                const NG_MOD_DEF = getClosureSafeProperty({
+                    ɵmod: getClosureSafeProperty,
+                });
+                const NG_FACTORY_DEF = getClosureSafeProperty({
+                    ɵfac: getClosureSafeProperty,
+                });
                 /**
                  * If a directive is diPublic, bloomAdd sets a property on the type with this constant as
                  * the key and the directive's unique ID as the value. This allows us to map directives to their
                  * bloom filter bit for DI.
                  */
                 // TODO(misko): This is wrong. The NG_ELEMENT_ID should never be minified.
-                const NG_ELEMENT_ID = getClosureSafeProperty({ __NG_ELEMENT_ID__: getClosureSafeProperty });
+                const NG_ELEMENT_ID = getClosureSafeProperty({
+                    __NG_ELEMENT_ID__: getClosureSafeProperty,
+                });
 
                 /**
                  * @license
@@ -15720,7 +15748,10 @@ PERFORMANCE OF THIS SOFTWARE.
                 function ngOnChangesSetInput(instance, value, publicName, privateName) {
                     const simpleChangesStore =
                         getSimpleChangesStore(instance) ||
-                        setSimpleChangesStore(instance, { previous: EMPTY_OBJ, current: null });
+                        setSimpleChangesStore(instance, {
+                            previous: EMPTY_OBJ,
+                            current: null,
+                        });
                     const current = simpleChangesStore.current || (simpleChangesStore.current = {});
                     const previous = simpleChangesStore.previous;
                     const declaredName = this.declaredInputs[publicName];
@@ -18067,7 +18098,9 @@ PERFORMANCE OF THIS SOFTWARE.
                                 // which prevents the property from being copied during subclassing.
                                 const meta = constructor.hasOwnProperty(PROP_METADATA)
                                     ? constructor[PROP_METADATA]
-                                    : Object.defineProperty(constructor, PROP_METADATA, { value: {} })[PROP_METADATA];
+                                    : Object.defineProperty(constructor, PROP_METADATA, {
+                                          value: {},
+                                      })[PROP_METADATA];
                                 meta[name] = (meta.hasOwnProperty(name) && meta[name]) || [];
                                 meta[name].unshift(decoratorInstance);
                                 if (additionalProcessing) additionalProcessing(target, name, ...args);
@@ -19024,7 +19057,10 @@ PERFORMANCE OF THIS SOFTWARE.
                 const NEW_LINE = /\n/gm;
                 const NO_NEW_LINE = "ɵ";
                 const SOURCE = "__source";
-                const USE_VALUE$1 = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
+                const USE_VALUE$1 = getClosureSafeProperty({
+                    provide: String,
+                    useValue: getClosureSafeProperty,
+                });
                 /**
                  * Current injector value used by `inject`.
                  * - `undefined`: it is an error to call `inject`
@@ -22834,7 +22870,10 @@ Please check that 1) the type for the parameter at index ${index} is correct and
                  */
                 function attachDebugObject(obj, debug) {
                     if (ngDevMode) {
-                        Object.defineProperty(obj, "debug", { value: debug, enumerable: false });
+                        Object.defineProperty(obj, "debug", {
+                            value: debug,
+                            enumerable: false,
+                        });
                     } else {
                         throw new Error(
                             "This method should be guarded with `ngDevMode` so that it can be tree shaken in production!"
@@ -22851,7 +22890,10 @@ Please check that 1) the type for the parameter at index ${index} is correct and
                  */
                 function attachDebugGetter(obj, debugGetter) {
                     if (ngDevMode) {
-                        Object.defineProperty(obj, "debug", { get: debugGetter, enumerable: false });
+                        Object.defineProperty(obj, "debug", {
+                            get: debugGetter,
+                            enumerable: false,
+                        });
                     } else {
                         throw new Error(
                             "This method should be guarded with `ngDevMode` so that it can be tree shaken in production!"
@@ -23417,9 +23459,18 @@ Please check that 1) the type for the parameter at index ${index} is correct and
                 function toLViewRange(tView, lView, start, end) {
                     let content = [];
                     for (let index = start; index < end; index++) {
-                        content.push({ index: index, t: tView.data[index], l: lView[index] });
+                        content.push({
+                            index: index,
+                            t: tView.data[index],
+                            l: lView[index],
+                        });
                     }
-                    return { start: start, end: end, length: end - start, content: content };
+                    return {
+                        start: start,
+                        end: end,
+                        length: end - start,
+                        content: content,
+                    };
                 }
                 /**
                  * Turns a flat list of nodes into a tree by walking the associated `TNode` tree.
@@ -26314,7 +26365,10 @@ Please check that 1) the type for the parameter at index ${index} is correct and
                     }
                     const directiveDef = getDirectiveDef(constructor);
                     if (directiveDef) {
-                        return { inputs: directiveDef.inputs, outputs: directiveDef.outputs };
+                        return {
+                            inputs: directiveDef.inputs,
+                            outputs: directiveDef.outputs,
+                        };
                     }
                     return null;
                 }
@@ -28299,7 +28353,10 @@ Please check that 1) the type for the parameter at index ${index} is correct and
                         });
                     }
                 }
-                const USE_VALUE = getClosureSafeProperty({ provide: String, useValue: getClosureSafeProperty });
+                const USE_VALUE = getClosureSafeProperty({
+                    provide: String,
+                    useValue: getClosureSafeProperty,
+                });
                 function isUseClassProvider(meta) {
                     return meta.useClass !== undefined;
                 }
@@ -38542,7 +38599,11 @@ Please check that 1) the type for the parameter at index ${index} is correct and
                                 completeFn = _wrapInTimeout(completeFn);
                             }
                         }
-                        const sink = super.subscribe({ next: nextFn, error: errorFn, complete: completeFn });
+                        const sink = super.subscribe({
+                            next: nextFn,
+                            error: errorFn,
+                            complete: completeFn,
+                        });
                         if (observerOrNext instanceof rxjs__WEBPACK_IMPORTED_MODULE_1__.Subscription) {
                             observerOrNext.add(sink);
                         }
@@ -40556,7 +40617,11 @@ Please check that 1) the type for the parameter at index ${index} is correct and
                 function getDirectiveMetadata(type, metadata) {
                     const name = type && type.name;
                     const sourceMapUrl = `ng:///${name}/ɵdir.js`;
-                    const compiler = getCompilerFacade({ usage: 0 /* Decorator */, kind: "directive", type });
+                    const compiler = getCompilerFacade({
+                        usage: 0 /* Decorator */,
+                        kind: "directive",
+                        type,
+                    });
                     const facade = directiveMetadata(type, metadata);
                     facade.typeSourceSpan = compiler.createParseSourceSpan("Directive", name, sourceMapUrl);
                     if (facade.usesInheritance) {
@@ -40609,7 +40674,9 @@ Please check that 1) the type for the parameter at index ${index} is correct and
                         inputs: metadata.inputs || EMPTY_ARRAY,
                         outputs: metadata.outputs || EMPTY_ARRAY,
                         queries: extractQueriesMetadata(type, propMetadata, isContentQuery),
-                        lifecycle: { usesOnChanges: reflect.hasLifecycleHook(type, "ngOnChanges") },
+                        lifecycle: {
+                            usesOnChanges: reflect.hasLifecycleHook(type, "ngOnChanges"),
+                        },
                         typeSourceSpan: null,
                         usesInheritance: !extendsDirectlyFromObject(type),
                         exportAs: extractExportAs(metadata.exportAs),
@@ -40840,12 +40907,16 @@ Please check that 1) the type for the parameter at index ${index} is correct and
                  * @Annotation
                  * @publicApi
                  */
-                const Input = makePropDecorator("Input", (bindingPropertyName) => ({ bindingPropertyName }));
+                const Input = makePropDecorator("Input", (bindingPropertyName) => ({
+                    bindingPropertyName,
+                }));
                 /**
                  * @Annotation
                  * @publicApi
                  */
-                const Output = makePropDecorator("Output", (bindingPropertyName) => ({ bindingPropertyName }));
+                const Output = makePropDecorator("Output", (bindingPropertyName) => ({
+                    bindingPropertyName,
+                }));
                 /**
                  * @Annotation
                  * @publicApi
@@ -42126,7 +42197,11 @@ Please check that 1) the type for the parameter at index ${index} is correct and
                                 cb(this._didWork, this.getPendingTasks());
                             }, timeout);
                         }
-                        this._callbacks.push({ doneCb: cb, timeoutId: timeoutId, updateCb: updateCb });
+                        this._callbacks.push({
+                            doneCb: cb,
+                            timeoutId: timeoutId,
+                            updateCb: updateCb,
+                        });
                     }
                     /**
                      * Wait for the application to be stable with a timeout. If the timeout is reached before that
@@ -42172,7 +42247,10 @@ Please check that 1) the type for the parameter at index ${index} is correct and
                 Testability.ɵfac = function Testability_Factory(t) {
                     return new (t || Testability)(ɵɵinject(NgZone));
                 };
-                Testability.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({ token: Testability, factory: Testability.ɵfac });
+                Testability.ɵprov = /*@__PURE__*/ ɵɵdefineInjectable({
+                    token: Testability,
+                    factory: Testability.ɵfac,
+                });
                 (function () {
                     (typeof ngDevMode === "undefined" || ngDevMode) &&
                         setClassMetadata(
@@ -42338,7 +42416,9 @@ Please check that 1) the type for the parameter at index ${index} is correct and
                         kind: "NgModule",
                         type: moduleType,
                     });
-                    const compilerInjector = Injector.create({ providers: compilerProviders });
+                    const compilerInjector = Injector.create({
+                        providers: compilerProviders,
+                    });
                     const resourceLoader = compilerInjector.get(compiler.ResourceLoader);
                     // The resource loader can also return a string while the "resolveComponentResources"
                     // always expects a promise. Therefore we need to wrap the returned value in a promise.
@@ -42446,7 +42526,10 @@ Please check that 1) the type for the parameter at index ${index} is correct and
                         name,
                         providers: [
                             { provide: INJECTOR_SCOPE, useValue: "platform" },
-                            { provide: PLATFORM_ON_DESTROY, useValue: () => (_platformInjector = null) },
+                            {
+                                provide: PLATFORM_ON_DESTROY,
+                                useValue: () => (_platformInjector = null),
+                            },
                             ...providers,
                         ],
                     });
@@ -42506,7 +42589,10 @@ Please check that 1) the type for the parameter at index ${index} is correct and
                         const ngZoneOption = options ? options.ngZone : undefined;
                         const ngZoneEventCoalescing = (options && options.ngZoneEventCoalescing) || false;
                         const ngZoneRunCoalescing = (options && options.ngZoneRunCoalescing) || false;
-                        const ngZone = getNgZone(ngZoneOption, { ngZoneEventCoalescing, ngZoneRunCoalescing });
+                        const ngZone = getNgZone(ngZoneOption, {
+                            ngZoneEventCoalescing,
+                            ngZoneRunCoalescing,
+                        });
                         const providers = [{ provide: NgZone, useValue: ngZone }];
                         // Note: Create ngZoneInjector within ngZone.run so that all of the instantiated services are
                         // created within the Angular zone
@@ -45072,7 +45158,9 @@ Please check that 1) the type for the parameter at index ${index} is correct and
                 ApplicationModule.ɵfac = function ApplicationModule_Factory(t) {
                     return new (t || ApplicationModule)(ɵɵinject(ApplicationRef));
                 };
-                ApplicationModule.ɵmod = /*@__PURE__*/ ɵɵdefineNgModule({ type: ApplicationModule });
+                ApplicationModule.ɵmod = /*@__PURE__*/ ɵɵdefineNgModule({
+                    type: ApplicationModule,
+                });
                 ApplicationModule.ɵinj = /*@__PURE__*/ ɵɵdefineInjector({});
                 (function () {
                     (typeof ngDevMode === "undefined" || ngDevMode) &&

@@ -24,9 +24,9 @@ const {
     createThirdPartyUser,
     linkUsers,
 } = require("./utils");
-let supertokens = require("../..");
+let supertokens = require("supertokens-node");
 let assert = require("assert");
-let Passwordless = require("../../recipe/passwordless");
+let Passwordless = require("supertokens-node/recipe/passwordless");
 
 describe(`thirdparty accountlinkingTests w/ session: ${printPath(
     "[test/accountlinking-with-session/thirdpartyapis.test.js]"

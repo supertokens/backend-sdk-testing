@@ -22,16 +22,16 @@ const {
     resetAll,
     startSTWithMultitenancyAndAccountLinking,
 } = require("../utils");
-let supertokens = require("../..");
-let Session = require("../../recipe/session");
+let supertokens = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let EmailPassword = require("../../recipe/emailpassword");
-let EmailVerification = require("../../recipe/emailverification");
-let AccountLinking = require("../../recipe/accountlinking");
-let Passwordless = require("../../recipe/passwordless");
-let ThirdParty = require("../../recipe/thirdparty");
-let MultiTenancy = require("../../recipe/multitenancy");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let EmailVerification = require("supertokens-node/recipe/emailverification");
+let AccountLinking = require("supertokens-node/recipe/accountlinking");
+let Passwordless = require("supertokens-node/recipe/passwordless");
+let ThirdParty = require("supertokens-node/recipe/thirdparty");
+let MultiTenancy = require("supertokens-node/recipe/multitenancy");
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.test.js]")}`, function () {
     beforeEach(async function () {
@@ -119,7 +119,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             let primUser = (await EmailPassword.signUp("public", email, password)).user;
             assert(primUser.isPrimaryUser);
 
-            const pwlessSignUpResp = await Passwordless.signInUp({ email, tenantId: "public" });
+            const pwlessSignUpResp = await Passwordless.signInUp({
+                email,
+                tenantId: "public",
+            });
             const linkRes = await AccountLinking.linkAccounts(pwlessSignUpResp.recipeUserId, primUser.id);
             assert.strictEqual(linkRes.status, "OK");
             assert.strictEqual(linkRes.user.id, primUser.id);
@@ -174,7 +177,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             let primUser = (await EmailPassword.signUp("public", email, password)).user;
             assert(primUser.isPrimaryUser);
 
-            const pwlessSignUpResp = await Passwordless.signInUp({ email, tenantId: "public" });
+            const pwlessSignUpResp = await Passwordless.signInUp({
+                email,
+                tenantId: "public",
+            });
 
             const shareRes = await MultiTenancy.associateUserToTenant(
                 "tenant1",
@@ -222,7 +228,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             let primUser = (await EmailPassword.signUp("public", email, password)).user;
             assert(primUser.isPrimaryUser);
 
-            const pwlessSignUpResp = await Passwordless.signInUp({ email, tenantId: "public" });
+            const pwlessSignUpResp = await Passwordless.signInUp({
+                email,
+                tenantId: "public",
+            });
             const linkRes = await AccountLinking.linkAccounts(pwlessSignUpResp.recipeUserId, primUser.id);
             assert.strictEqual(linkRes.status, "OK");
             assert.strictEqual(linkRes.user.id, primUser.id);
@@ -712,7 +721,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             let primUser = (await EmailPassword.signUp("public", email, password)).user;
             assert(primUser.isPrimaryUser);
 
-            const pwlessSignUpResp = await Passwordless.signInUp({ email: email2, tenantId: "tenant1" });
+            const pwlessSignUpResp = await Passwordless.signInUp({
+                email: email2,
+                tenantId: "tenant1",
+            });
             await AccountLinking.createPrimaryUser(pwlessSignUpResp.recipeUserId);
 
             const shareRes = await MultiTenancy.associateUserToTenant("tenant1", primUser.loginMethods[0].recipeUserId);
@@ -760,7 +772,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             primUser = (await AccountLinking.createPrimaryUser(primUser.loginMethods[0].recipeUserId)).user;
             assert(primUser.isPrimaryUser);
 
-            const pwlessSignUpResp = await Passwordless.signInUp({ email: email2, tenantId: "tenant1" });
+            const pwlessSignUpResp = await Passwordless.signInUp({
+                email: email2,
+                tenantId: "tenant1",
+            });
 
             const shareRes = await MultiTenancy.associateUserToTenant("tenant1", primUser.loginMethods[0].recipeUserId);
             assert.strictEqual(shareRes.status, "OK");
@@ -806,7 +821,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             let primUser = (await EmailPassword.signUp("public", email, password)).user;
             assert(primUser.isPrimaryUser);
 
-            const pwlessSignUpResp = await Passwordless.signInUp({ email: email2, tenantId: "tenant1" });
+            const pwlessSignUpResp = await Passwordless.signInUp({
+                email: email2,
+                tenantId: "tenant1",
+            });
             await AccountLinking.createPrimaryUser(pwlessSignUpResp.recipeUserId);
 
             const resp = await AccountLinking.isEmailChangeAllowed(pwlessSignUpResp.recipeUserId, email, false);

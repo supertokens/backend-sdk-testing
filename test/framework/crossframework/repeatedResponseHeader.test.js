@@ -1,8 +1,8 @@
 const { addCrossFrameworkTests } = require("../crossFramework.testgen");
-let Session = require("../../../recipe/session");
+let Session = require("supertokens-node/recipe/session");
 const { extractInfoFromResponse } = require("../../utils");
 let assert = require("assert");
-const SuperTokens = require("../../..");
+const SuperTokens = require("supertokens-node");
 
 addCrossFrameworkTests(
     (setup, callServer, tokenTransferMethod) => {
@@ -41,9 +41,15 @@ addCrossFrameworkTests(
                             method: "post",
                             verifySession: true,
                             handler: async (req, res, session, _) => {
-                                await session.mergeIntoAccessTokenPayload({ test1: Date.now() });
-                                await session.mergeIntoAccessTokenPayload({ test2: Date.now() });
-                                await session.mergeIntoAccessTokenPayload({ test3: Date.now() });
+                                await session.mergeIntoAccessTokenPayload({
+                                    test1: Date.now(),
+                                });
+                                await session.mergeIntoAccessTokenPayload({
+                                    test2: Date.now(),
+                                });
+                                await session.mergeIntoAccessTokenPayload({
+                                    test3: Date.now(),
+                                });
                                 res.setStatusCode(200);
                                 res.sendJSONResponse("");
                             },

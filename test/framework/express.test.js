@@ -13,7 +13,7 @@
  * under the License.
  */
 let assert = require("assert");
-const { ExpressRequest } = require("../../lib/build/framework/express/framework");
+const { ExpressRequest } = require("supertokens-node/lib/build/framework/express/framework");
 const sinon = require("sinon");
 
 describe(`ExpressRequest`, function () {

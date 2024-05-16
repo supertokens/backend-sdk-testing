@@ -13,18 +13,18 @@
  * under the License.
  */
 const { printPath, setupST, startSTWithMultitenancy, killAllST, cleanST, removeAppAndTenants } = require("../utils");
-let STExpress = require("../..");
+let STExpress = require("supertokens-node");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let ThirdPartyRecipe = require("../../lib/build/recipe/thirdparty/recipe").default;
-let Multitenancy = require("../../lib/build/recipe/multitenancy");
-let Session = require("../../lib/build/recipe/session");
-let ThirdParty = require("../../lib/build/recipe/thirdparty");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let ThirdPartyRecipe = require("supertokens-node/lib/build/recipe/thirdparty/recipe").default;
+let Multitenancy = require("supertokens-node/lib/build/recipe/multitenancy");
+let Session = require("supertokens-node/lib/build/recipe/session");
+let ThirdParty = require("supertokens-node/lib/build/recipe/thirdparty");
 let nock = require("nock");
 const express = require("express");
 const request = require("supertest");
 const { default: fetch } = require("cross-fetch");
-let { middleware, errorHandler } = require("../../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 const { configsForVerification, providers } = require("./tpConfigsForVerification");
 
 describe(`providerConfigTest: ${printPath("[test/thirdparty/provider.config.test.js]")}`, function () {
@@ -53,7 +53,10 @@ describe(`providerConfigTest: ${printPath("[test/thirdparty/provider.config.test
                 input: { tokenEndpoint: "https://token.example.com" },
                 expect: { tokenEndpoint: "https://token.example.com" },
             },
-            { input: { tokenEndpointBodyParams: { foo: "bar" } }, expect: { tokenEndpointBodyParams: { foo: "bar" } } },
+            {
+                input: { tokenEndpointBodyParams: { foo: "bar" } },
+                expect: { tokenEndpointBodyParams: { foo: "bar" } },
+            },
             {
                 input: { userInfoEndpoint: "https://auth.example.com/user" },
                 expect: { userInfoEndpoint: "https://auth.example.com/user" },
@@ -62,7 +65,10 @@ describe(`providerConfigTest: ${printPath("[test/thirdparty/provider.config.test
                 input: { userInfoEndpointQueryParams: { foo: "bar" } },
                 expect: { userInfoEndpointQueryParams: { foo: "bar" } },
             },
-            { input: { userInfoEndpointHeaders: { foo: "bar" } }, expect: { userInfoEndpointHeaders: { foo: "bar" } } },
+            {
+                input: { userInfoEndpointHeaders: { foo: "bar" } },
+                expect: { userInfoEndpointHeaders: { foo: "bar" } },
+            },
             {
                 input: { userInfoMap: { fromUserInfoAPI: { userId: "userid" } } },
                 expect: {
@@ -76,9 +82,15 @@ describe(`providerConfigTest: ${printPath("[test/thirdparty/provider.config.test
                 },
             },
             {
-                input: { userInfoMap: { fromUserInfoAPI: { emailVerified: "useremail_verified" } } },
+                input: {
+                    userInfoMap: {
+                        fromUserInfoAPI: { emailVerified: "useremail_verified" },
+                    },
+                },
                 expect: {
-                    userInfoMap: { fromUserInfoAPI: { emailVerified: "useremail_verified" } },
+                    userInfoMap: {
+                        fromUserInfoAPI: { emailVerified: "useremail_verified" },
+                    },
                 },
             },
             {
@@ -94,9 +106,15 @@ describe(`providerConfigTest: ${printPath("[test/thirdparty/provider.config.test
                 },
             },
             {
-                input: { userInfoMap: { fromIdTokenPayload: { emailVerified: "useremail_verified" } } },
+                input: {
+                    userInfoMap: {
+                        fromIdTokenPayload: { emailVerified: "useremail_verified" },
+                    },
+                },
                 expect: {
-                    userInfoMap: { fromIdTokenPayload: { emailVerified: "useremail_verified" } },
+                    userInfoMap: {
+                        fromIdTokenPayload: { emailVerified: "useremail_verified" },
+                    },
                 },
             },
         ];

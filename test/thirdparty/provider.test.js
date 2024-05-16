@@ -13,13 +13,13 @@
  * under the License.
  */
 const { printPath, setupST, startST, killAllST, cleanST } = require("../utils");
-let STExpress = require("../../");
+let STExpress = require("supertokens-node");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let ThirdPartyRecipe = require("../../lib/build/recipe/thirdparty/recipe").default;
-let ThirdParty = require("../../lib/build/recipe/thirdparty");
-let Session = require("../../lib/build/recipe/session");
-let { middleware, errorHandler } = require("../../framework/express");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let ThirdPartyRecipe = require("supertokens-node/lib/build/recipe/thirdparty/recipe").default;
+let ThirdParty = require("supertokens-node/lib/build/recipe/thirdparty");
+let Session = require("supertokens-node/lib/build/recipe/session");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 let nock = require("nock");
 let express = require("express");
 const request = require("supertest");

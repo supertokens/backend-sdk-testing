@@ -13,16 +13,16 @@
  * under the License.
  */
 const { printPath, setupST, startST, killAllST, cleanST, isCDIVersionCompatible } = require("../utils");
-let STExpress = require("../../");
+let STExpress = require("supertokens-node");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let ThirdPartyPasswordlessRecipe = require("../../lib/build/recipe/thirdpartypasswordless/recipe").default;
-let Multitenancy = require("../../lib/build/recipe/multitenancy");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let ThirdPartyPasswordlessRecipe = require("supertokens-node/lib/build/recipe/thirdpartypasswordless/recipe").default;
+let Multitenancy = require("supertokens-node/lib/build/recipe/multitenancy");
 let nock = require("nock");
 const express = require("express");
 const request = require("supertest");
-let Session = require("../../recipe/session");
-let { middleware, errorHandler } = require("../../framework/express");
+let Session = require("supertokens-node/recipe/session");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 describe(`authorisationTest: ${printPath("[test/thirdpartyemailpassword/authorisationFeature.test.js]")}`, function () {
     before(function () {
@@ -72,7 +72,10 @@ describe(`authorisationTest: ${printPath("[test/thirdpartyemailpassword/authoris
                 websiteDomain: "supertokens.io",
             },
             recipeList: [
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 ThirdPartyPasswordlessRecipe.init({
                     contactMethod: "EMAIL",
                     emailDelivery: {
@@ -130,7 +133,10 @@ describe(`authorisationTest: ${printPath("[test/thirdpartyemailpassword/authoris
                 websiteDomain: "supertokens.io",
             },
             recipeList: [
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 ThirdPartyPasswordlessRecipe.init({
                     contactMethod: "EMAIL",
                     flowType: "MAGIC_LINK",
@@ -179,7 +185,10 @@ describe(`authorisationTest: ${printPath("[test/thirdpartyemailpassword/authoris
                 websiteDomain: "supertokens.io",
             },
             recipeList: [
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 ThirdPartyPasswordlessRecipe.init({
                     contactMethod: "EMAIL",
                     flowType: "MAGIC_LINK",

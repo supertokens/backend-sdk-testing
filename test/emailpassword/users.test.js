@@ -13,15 +13,15 @@
  * under the License.
  */
 const { printPath, setupST, startST, stopST, killAllST, cleanST, signUPRequest } = require("../utils");
-const { getUserCount, getUsersNewestFirst, getUsersOldestFirst } = require("../../lib/build");
+const { getUserCount, getUsersNewestFirst, getUsersOldestFirst } = require("supertokens-node/lib/build");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let STExpress = require("../../");
-let Session = require("../../recipe/session");
-let EmailPassword = require("../../recipe/emailpassword");
-let { maxVersion } = require("../../lib/build/utils");
-let { Querier } = require("../../lib/build/querier");
-let { middleware, errorHandler } = require("../../framework/express");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let { maxVersion } = require("supertokens-node/lib/build/utils");
+let { Querier } = require("supertokens-node/lib/build/querier");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 const express = require("express");
 
 describe(`usersTest: ${printPath("[test/emailpassword/users.test.js]")}`, function () {
@@ -72,17 +72,29 @@ describe(`usersTest: ${printPath("[test/emailpassword/users.test.js]")}`, functi
         assert.strictEqual(users.users[0].emails[0], "test@gmail.com");
         assert.strictEqual(typeof users.nextPaginationToken, "string");
 
-        users = await getUsersOldestFirst({ tenantId: "public", limit: 1, paginationToken: users.nextPaginationToken });
+        users = await getUsersOldestFirst({
+            tenantId: "public",
+            limit: 1,
+            paginationToken: users.nextPaginationToken,
+        });
         assert.strictEqual(users.users.length, 1);
         assert.strictEqual(users.users[0].emails[0], "test1@gmail.com");
         assert.strictEqual(typeof users.nextPaginationToken, "string");
 
-        users = await getUsersOldestFirst({ tenantId: "public", limit: 5, paginationToken: users.nextPaginationToken });
+        users = await getUsersOldestFirst({
+            tenantId: "public",
+            limit: 5,
+            paginationToken: users.nextPaginationToken,
+        });
         assert.strictEqual(users.users.length, 3);
         assert.strictEqual(users.nextPaginationToken, undefined);
 
         try {
-            await getUsersOldestFirst({ tenantId: "public", limit: 10, paginationToken: "invalid-pagination-token" });
+            await getUsersOldestFirst({
+                tenantId: "public",
+                limit: 10,
+                paginationToken: "invalid-pagination-token",
+            });
             assert(false);
         } catch (err) {
             if (!err.message.includes("invalid pagination token")) {
@@ -132,10 +144,16 @@ describe(`usersTest: ${printPath("[test/emailpassword/users.test.js]")}`, functi
         await signUPRequest(app, "test3@gmail.com", "testPass123");
         await signUPRequest(app, "john@gmail.com", "testPass123");
 
-        let users = await getUsersOldestFirst({ tenantId: "public", query: { email: "doe" } });
+        let users = await getUsersOldestFirst({
+            tenantId: "public",
+            query: { email: "doe" },
+        });
         assert.strictEqual(users.users.length, 0);
 
-        users = await getUsersOldestFirst({ tenantId: "public", query: { email: "john" } });
+        users = await getUsersOldestFirst({
+            tenantId: "public",
+            query: { email: "john" },
+        });
         assert.strictEqual(users.users.length, 1);
         assert.strictEqual(users.users[0].emails[0], "john@gmail.com");
         assert.strictEqual(users.users[0].phoneNumbers[0], undefined);
@@ -181,17 +199,29 @@ describe(`usersTest: ${printPath("[test/emailpassword/users.test.js]")}`, functi
         assert.strictEqual(users.users[0].emails[0], "test4@gmail.com");
         assert.strictEqual(typeof users.nextPaginationToken, "string");
 
-        users = await getUsersNewestFirst({ tenantId: "public", limit: 1, paginationToken: users.nextPaginationToken });
+        users = await getUsersNewestFirst({
+            tenantId: "public",
+            limit: 1,
+            paginationToken: users.nextPaginationToken,
+        });
         assert.strictEqual(users.users.length, 1);
         assert.strictEqual(users.users[0].emails[0], "test3@gmail.com");
         assert.strictEqual(typeof users.nextPaginationToken, "string");
 
-        users = await getUsersNewestFirst({ tenantId: "public", limit: 5, paginationToken: users.nextPaginationToken });
+        users = await getUsersNewestFirst({
+            tenantId: "public",
+            limit: 5,
+            paginationToken: users.nextPaginationToken,
+        });
         assert.strictEqual(users.users.length, 3);
         assert.strictEqual(users.nextPaginationToken, undefined);
 
         try {
-            await getUsersOldestFirst({ tenantId: "public", limit: 10, paginationToken: "invalid-pagination-token" });
+            await getUsersOldestFirst({
+                tenantId: "public",
+                limit: 10,
+                paginationToken: "invalid-pagination-token",
+            });
             assert(false);
         } catch (err) {
             if (!err.message.includes("invalid pagination token")) {
@@ -241,10 +271,16 @@ describe(`usersTest: ${printPath("[test/emailpassword/users.test.js]")}`, functi
         await signUPRequest(app, "test3@gmail.com", "testPass123");
         await signUPRequest(app, "john@gmail.com", "testPass123");
 
-        let users = await getUsersNewestFirst({ tenantId: "public", query: { email: "doe" } });
+        let users = await getUsersNewestFirst({
+            tenantId: "public",
+            query: { email: "doe" },
+        });
         assert.strictEqual(users.users.length, 0);
 
-        users = await getUsersNewestFirst({ tenantId: "public", query: { email: "john" } });
+        users = await getUsersNewestFirst({
+            tenantId: "public",
+            query: { email: "john" },
+        });
         assert.strictEqual(users.users.length, 1);
     });
 

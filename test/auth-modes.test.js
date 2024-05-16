@@ -23,11 +23,11 @@ const {
     delay,
 } = require("./utils");
 const assert = require("assert");
-const { ProcessState } = require("../lib/build/processState");
-const SuperTokens = require("../");
-const Session = require("../recipe/session");
-const { verifySession } = require("../recipe/session/framework/express");
-const { middleware, errorHandler } = require("../framework/express");
+const { ProcessState } = require("supertokens-node/lib/build/processState");
+const SuperTokens = require("supertokens-node");
+const Session = require("supertokens-node/recipe/session");
+const { verifySession } = require("supertokens-node/recipe/session/framework/express");
+const { middleware, errorHandler } = require("supertokens-node/framework/express");
 const express = require("express");
 const request = require("supertest");
 const sinon = require("sinon");
@@ -167,7 +167,12 @@ describe(`auth-modes: ${printPath("[test/auth-modes.test.js]")}`, function () {
                             appName: "SuperTokens",
                             websiteDomain: "supertokens.io",
                         },
-                        recipeList: [Session.init({ antiCsrf: "VIA_TOKEN", getTokenTransferMethod: () => "any" })],
+                        recipeList: [
+                            Session.init({
+                                antiCsrf: "VIA_TOKEN",
+                                getTokenTransferMethod: () => "any",
+                            }),
+                        ],
                     });
 
                     const app = getTestApp();
@@ -191,7 +196,12 @@ describe(`auth-modes: ${printPath("[test/auth-modes.test.js]")}`, function () {
                             appName: "SuperTokens",
                             websiteDomain: "supertokens.io",
                         },
-                        recipeList: [Session.init({ antiCsrf: "VIA_TOKEN", getTokenTransferMethod: () => "any" })],
+                        recipeList: [
+                            Session.init({
+                                antiCsrf: "VIA_TOKEN",
+                                getTokenTransferMethod: () => "any",
+                            }),
+                        ],
                     });
 
                     const app = getTestApp();
@@ -215,7 +225,12 @@ describe(`auth-modes: ${printPath("[test/auth-modes.test.js]")}`, function () {
                             appName: "SuperTokens",
                             websiteDomain: "supertokens.io",
                         },
-                        recipeList: [Session.init({ antiCsrf: "VIA_TOKEN", getTokenTransferMethod: () => "any" })],
+                        recipeList: [
+                            Session.init({
+                                antiCsrf: "VIA_TOKEN",
+                                getTokenTransferMethod: () => "any",
+                            }),
+                        ],
                     });
 
                     const app = getTestApp();
@@ -239,7 +254,12 @@ describe(`auth-modes: ${printPath("[test/auth-modes.test.js]")}`, function () {
                             appName: "SuperTokens",
                             websiteDomain: "supertokens.io",
                         },
-                        recipeList: [Session.init({ antiCsrf: "VIA_TOKEN", getTokenTransferMethod: () => "header" })],
+                        recipeList: [
+                            Session.init({
+                                antiCsrf: "VIA_TOKEN",
+                                getTokenTransferMethod: () => "header",
+                            }),
+                        ],
                     });
 
                     const app = getTestApp();
@@ -263,7 +283,12 @@ describe(`auth-modes: ${printPath("[test/auth-modes.test.js]")}`, function () {
                             appName: "SuperTokens",
                             websiteDomain: "supertokens.io",
                         },
-                        recipeList: [Session.init({ antiCsrf: "VIA_TOKEN", getTokenTransferMethod: () => "header" })],
+                        recipeList: [
+                            Session.init({
+                                antiCsrf: "VIA_TOKEN",
+                                getTokenTransferMethod: () => "header",
+                            }),
+                        ],
                     });
 
                     const app = getTestApp();
@@ -303,7 +328,12 @@ describe(`auth-modes: ${printPath("[test/auth-modes.test.js]")}`, function () {
                             appName: "SuperTokens",
                             websiteDomain: "supertokens.io",
                         },
-                        recipeList: [Session.init({ antiCsrf: "VIA_TOKEN", getTokenTransferMethod: () => "cookie" })],
+                        recipeList: [
+                            Session.init({
+                                antiCsrf: "VIA_TOKEN",
+                                getTokenTransferMethod: () => "cookie",
+                            }),
+                        ],
                     });
 
                     const app = getTestApp();
@@ -331,7 +361,12 @@ describe(`auth-modes: ${printPath("[test/auth-modes.test.js]")}`, function () {
                             appName: "SuperTokens",
                             websiteDomain: "supertokens.io",
                         },
-                        recipeList: [Session.init({ antiCsrf: "VIA_TOKEN", getTokenTransferMethod: () => "cookie" })],
+                        recipeList: [
+                            Session.init({
+                                antiCsrf: "VIA_TOKEN",
+                                getTokenTransferMethod: () => "cookie",
+                            }),
+                        ],
                     });
 
                     const app = getTestApp();
@@ -445,7 +480,9 @@ describe(`auth-modes: ${printPath("[test/auth-modes.test.js]")}`, function () {
                     });
 
                     it(`should match line ${i + 1} with a expired token`, async () => {
-                        const connectionURI = await startST({ coreConfig: { access_token_validity: 2 } });
+                        const connectionURI = await startST({
+                            coreConfig: { access_token_validity: 2 },
+                        });
                         SuperTokens.init({
                             supertokens: {
                                 connectionURI,
@@ -492,7 +529,9 @@ describe(`auth-modes: ${printPath("[test/auth-modes.test.js]")}`, function () {
                                 break;
                             case "validatecookie":
                             case "validateheader":
-                                assert.deepStrictEqual(res.body, { message: "try refresh token" });
+                                assert.deepStrictEqual(res.body, {
+                                    message: "try refresh token",
+                                });
                         }
                     });
                 }
@@ -951,7 +990,9 @@ describe(`auth-modes: ${printPath("[test/auth-modes.test.js]")}`, function () {
 
                         if (conf.output === "unauthorised") {
                             assert.strictEqual(refreshRes.status, 401);
-                            assert.deepStrictEqual(refreshRes.body, { message: "unauthorised" });
+                            assert.deepStrictEqual(refreshRes.body, {
+                                message: "unauthorised",
+                            });
                         } else {
                             assert.strictEqual(refreshRes.status, 200);
                         }
@@ -1043,7 +1084,9 @@ describe(`auth-modes: ${printPath("[test/auth-modes.test.js]")}`, function () {
                         );
 
                         assert.strictEqual(refreshRes.status, 401);
-                        assert.deepStrictEqual(refreshRes.body, { message: "unauthorised" });
+                        assert.deepStrictEqual(refreshRes.body, {
+                            message: "unauthorised",
+                        });
                         if (conf.output === "validateheader") {
                             assert.strictEqual(refreshRes.accessTokenFromHeader, "");
                             assert.strictEqual(refreshRes.refreshTokenFromHeader, "");
@@ -1164,7 +1207,11 @@ function getTestApp(endpoints) {
     });
 
     app.get("/verify", verifySession(), async (req, res) => {
-        res.status(200).json({ message: true, sessionHandle: req.session.getHandle(), sessionExists: true });
+        res.status(200).json({
+            message: true,
+            sessionHandle: req.session.getHandle(),
+            sessionExists: true,
+        });
     });
 
     app.get("/verify-optional", verifySession({ sessionRequired: false }), async (req, res) => {

@@ -13,16 +13,16 @@
  * under the License.
  */
 const { printPath, setupST, startST, stopST, killAllST, cleanST, signUPRequest } = require("../utils");
-let STExpress = require("../../");
-let Session = require("../../recipe/session");
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-const { Querier } = require("../../lib/build/querier");
-let ThirdPartyEmailPassword = require("../../recipe/thirdpartyemailpassword");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+const { Querier } = require("supertokens-node/lib/build/querier");
+let ThirdPartyEmailPassword = require("supertokens-node/recipe/thirdpartyemailpassword");
 const request = require("supertest");
 const express = require("express");
 let bodyParser = require("body-parser");
-let { middleware, errorHandler } = require("../../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 describe(`emailExists: ${printPath("[test/thirdpartyemailpassword/emailExists.test.js]")}`, function () {
     beforeEach(async function () {

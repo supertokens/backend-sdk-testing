@@ -1,14 +1,14 @@
-const { ProcessState } = require("../lib/build/processState");
+const { ProcessState } = require("supertokens-node/lib/build/processState");
 const { printPath, killAllST, setupST, cleanST, startST } = require("./utils");
-let STExpress = require("../");
-let Dashboard = require("../recipe/dashboard");
-let EmailVerification = require("../recipe/emailverification");
-let EmailPassword = require("../recipe/emailpassword");
+let STExpress = require("supertokens-node");
+let Dashboard = require("supertokens-node/recipe/dashboard");
+let EmailVerification = require("supertokens-node/recipe/emailverification");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
 const express = require("express");
-let { middleware, errorHandler } = require("../framework/express");
-let Session = require("../recipe/session");
-let { Querier } = require("../lib/build/querier");
-const { default: NormalisedURLPath } = require("../lib/build/normalisedURLPath");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
+let Session = require("supertokens-node/recipe/session");
+let { Querier } = require("supertokens-node/lib/build/querier");
+const { default: NormalisedURLPath } = require("supertokens-node/lib/build/normalisedURLPath");
 let assert = require("assert");
 const RateLimitedStatus = 429;
 

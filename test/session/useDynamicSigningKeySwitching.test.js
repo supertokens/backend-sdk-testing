@@ -14,12 +14,12 @@
  */
 const { printPath, setupST, startST, killAllST, cleanST, extractInfoFromResponse, resetAll } = require("../utils");
 const assert = require("assert");
-const SuperTokens = require("../..");
-const Session = require("../../recipe/session");
-const JWT = require("../../recipe/jwt");
-const { maxVersion } = require("../../lib/build/utils");
-let { Querier } = require("../../lib/build/querier");
-const { parseJWTWithoutSignatureVerification } = require("../../lib/build/recipe/session/jwt");
+const SuperTokens = require("supertokens-node");
+const Session = require("supertokens-node/recipe/session");
+const JWT = require("supertokens-node/recipe/jwt");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
+let { Querier } = require("supertokens-node/lib/build/querier");
+const { parseJWTWithoutSignatureVerification } = require("supertokens-node/lib/build/recipe/session/jwt");
 
 describe(`Switching useDynamicAccessTokenSigningKey after session creation: ${printPath(
     "[test/session/sessionHandlingFuncsWithoutReq.test.js]"

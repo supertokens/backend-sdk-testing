@@ -1,24 +1,24 @@
-const SuperTokens = require("../../");
-const { ProcessState } = require("../../lib/build/processState");
+const SuperTokens = require("supertokens-node");
+const { ProcessState } = require("supertokens-node/lib/build/processState");
 const { setupST, startST, killAllST, cleanST } = require("../utils");
 
 const express = require("express");
 const request = require("supertest");
-const { verifySession: expressVerifySession } = require("../../recipe/session/framework/express");
-const ExpressFramework = require("../../framework/express");
+const { verifySession: expressVerifySession } = require("supertokens-node/recipe/session/framework/express");
+const ExpressFramework = require("supertokens-node/framework/express");
 
 const Fastify = require("fastify");
-const FastifyFramework = require("../../framework/fastify");
-const { verifySession: fastifyVerifySession } = require("../../recipe/session/framework/fastify");
+const FastifyFramework = require("supertokens-node/framework/fastify");
+const { verifySession: fastifyVerifySession } = require("supertokens-node/recipe/session/framework/fastify");
 
-const HapiFramework = require("../../framework/hapi");
+const HapiFramework = require("supertokens-node/framework/hapi");
 const Hapi = require("@hapi/hapi");
-const { verifySession: hapiVerifySession } = require("../../recipe/session/framework/hapi");
+const { verifySession: hapiVerifySession } = require("supertokens-node/recipe/session/framework/hapi");
 
 const Koa = require("koa");
-const KoaFramework = require("../../framework/koa");
+const KoaFramework = require("supertokens-node/framework/koa");
 const Router = require("@koa/router");
-const { verifySession: koaVerifySession } = require("../../recipe/session/framework/koa");
+const { verifySession: koaVerifySession } = require("supertokens-node/recipe/session/framework/koa");
 
 const loopbackRoutes = [
     {

@@ -14,11 +14,11 @@
  */
 const { printPath, startST, killAllST, setupST, cleanST, mockResponse, mockRequest } = require("../../utils");
 const assert = require("assert");
-const SuperTokens = require("../../..");
-const Session = require("../../../recipe/session");
+const SuperTokens = require("supertokens-node");
+const Session = require("supertokens-node/recipe/session");
 const sinon = require("sinon");
 const { TrueClaim, UndefinedClaim } = require("./testClaims");
-const { ProcessState } = require("../../../lib/build/processState");
+const { ProcessState } = require("supertokens-node/lib/build/processState");
 
 describe(`sessionClaims/validateClaimsForSessionHandle: ${printPath(
     "[test/session/claims/validateClaimsForSessionHandle.test.js]"

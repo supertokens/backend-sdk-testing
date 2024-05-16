@@ -9,12 +9,12 @@ const {
     mockRequest,
     setKeyValueInConfig,
 } = require("../utils");
-const { ProcessState } = require("../../lib/build/processState");
-const STExpress = require("../..");
-const UserRoles = require("../../lib/build/recipe/userroles").default;
-const Session = require("../../lib/build/recipe/session").default;
-const { Querier } = require("../../lib/build/querier");
-const { maxVersion } = require("../../lib/build/utils");
+const { ProcessState } = require("supertokens-node/lib/build/processState");
+const STExpress = require("supertokens-node");
+const UserRoles = require("supertokens-node/lib/build/recipe/userroles").default;
+const Session = require("supertokens-node/lib/build/recipe/session").default;
+const { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
 
 describe(`claimsTest: ${printPath("[test/userroles/claims.test.js]")}`, function () {
     beforeEach(async function () {

@@ -1,11 +1,11 @@
 const assert = require("assert");
 
 const { printPath, setupST, startST, killAllST, cleanST } = require("../utils");
-const STExpress = require("../..");
-const { ProcessState } = require("../../lib/build/processState");
-const UserMetadataRecipe = require("../../lib/build/recipe/usermetadata").default;
-const { Querier } = require("../../lib/build/querier");
-const { maxVersion } = require("../../lib/build/utils");
+const STExpress = require("supertokens-node");
+const { ProcessState } = require("supertokens-node/lib/build/processState");
+const UserMetadataRecipe = require("supertokens-node/lib/build/recipe/usermetadata").default;
+const { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
 
 describe(`clearUserMetadataTest: ${printPath("[test/usermetadata/clearUserMetadata.test.js]")}`, function () {
     beforeEach(async function () {

@@ -14,12 +14,14 @@
  */
 const { printPath } = require("../../utils");
 const assert = require("assert");
-const { default: SessionClass } = require("../../../lib/build/recipe/session/sessionClass");
+const { default: SessionClass } = require("supertokens-node/lib/build/recipe/session/sessionClass");
 const sinon = require("sinon");
 const { StubClaim } = require("./testClaims");
-const { default: getRecipeInterface } = require("../../../lib/build/recipe/session/recipeImplementation");
+const { default: getRecipeInterface } = require("supertokens-node/lib/build/recipe/session/recipeImplementation");
 
-const helpers = { getRecipeImpl: () => getRecipeInterface({ getAllCoreUrlsForPath: () => [] }, {}) };
+const helpers = {
+    getRecipeImpl: () => getRecipeInterface({ getAllCoreUrlsForPath: () => [] }, {}),
+};
 
 describe(`sessionClaims/assertClaims: ${printPath("[test/session/claims/assertClaims.test.js]")}`, function () {
     describe("SessionClass.assertClaims", () => {
@@ -48,7 +50,10 @@ describe(`sessionClaims/assertClaims: ${printPath("[test/session/claims/assertCl
                 {}
             );
             const mock = sinon.mock(session).expects("mergeIntoAccessTokenPayload").never();
-            const claim = new StubClaim({ key: "st-c1", validateRes: { isValid: true } });
+            const claim = new StubClaim({
+                key: "st-c1",
+                validateRes: { isValid: true },
+            });
 
             await session.assertClaims([claim.validators.stub]);
             mock.verify();

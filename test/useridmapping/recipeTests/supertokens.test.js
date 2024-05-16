@@ -1,12 +1,12 @@
 const assert = require("assert");
 const { printPath, setupST, startST, killAllST, cleanST } = require("../../utils");
-const { ProcessState } = require("../../../lib/build/processState");
-const STExpress = require("../../..");
-const EmailPasswordRecipe = require("../../../lib/build/recipe/emailpassword").default;
-const UserMetadataRecipe = require("../../../lib/build/recipe/usermetadata").default;
-const SessionRecipe = require("../../../lib/build/recipe/session").default;
-const { Querier } = require("../../../lib/build/querier");
-const { maxVersion } = require("../../../lib/build/utils");
+const { ProcessState } = require("supertokens-node/lib/build/processState");
+const STExpress = require("supertokens-node");
+const EmailPasswordRecipe = require("supertokens-node/lib/build/recipe/emailpassword").default;
+const UserMetadataRecipe = require("supertokens-node/lib/build/recipe/usermetadata").default;
+const SessionRecipe = require("supertokens-node/lib/build/recipe/session").default;
+const { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
 
 describe(`userIdMapping with supertokens recipe: ${printPath(
     "[test/useridmapping/recipeTests/supertokens.test.js]"
@@ -152,7 +152,9 @@ describe(`userIdMapping with supertokens recipe: ${printPath(
 
             // retrieve all the users using getUsersNewestFirst
             {
-                let response = await STExpress.getUsersNewestFirst({ tenantId: "public" });
+                let response = await STExpress.getUsersNewestFirst({
+                    tenantId: "public",
+                });
                 assert.strictEqual(response.users.length, 4);
                 // since the first user we created has their userId mapped we access the last element from the users array in the response
                 const oldestUsersId = response.users[response.users.length - 1].id;
@@ -161,7 +163,9 @@ describe(`userIdMapping with supertokens recipe: ${printPath(
 
             // retrieve all the users using getUsersOldestFirst
             {
-                let response = await STExpress.getUsersOldestFirst({ tenantId: "public" });
+                let response = await STExpress.getUsersOldestFirst({
+                    tenantId: "public",
+                });
                 assert.strictEqual(response.users.length, 4);
 
                 const oldestUsersId = response.users[0].id;

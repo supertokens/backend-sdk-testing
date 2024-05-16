@@ -24,18 +24,18 @@ const {
     isCDIVersionCompatible,
     assertJSONEquals,
 } = require("../utils");
-let STExpress = require("../../");
-let Session = require("../../recipe/session");
-let SessionRecipe = require("../../lib/build/recipe/session/recipe").default;
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let SessionRecipe = require("supertokens-node/lib/build/recipe/session/recipe").default;
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-const { Querier } = require("../../lib/build/querier");
-let ThirdPartyPasswordless = require("../../recipe/thirdpartypasswordless");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+const { Querier } = require("supertokens-node/lib/build/querier");
+let ThirdPartyPasswordless = require("supertokens-node/recipe/thirdpartypasswordless");
 const express = require("express");
 const request = require("supertest");
 let nock = require("nock");
-let { middleware, errorHandler } = require("../../framework/express");
-let AccountLinking = require("../../recipe/accountlinking");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
+let AccountLinking = require("supertokens-node/recipe/accountlinking");
 
 describe(`overrideTest: ${printPath("[test/thirdpartypasswordless/override.test.js]")}`, function () {
     before(function () {
@@ -494,7 +494,10 @@ describe(`overrideTest: ${printPath("[test/thirdpartypasswordless/override.test.
         );
 
         assert.notStrictEqual(user, undefined);
-        assert.deepStrictEqual(signUpResponse, { error: "signup error", customError: true });
+        assert.deepStrictEqual(signUpResponse, {
+            error: "signup error",
+            customError: true,
+        });
 
         let signInResponse = await new Promise((resolve) =>
             request(app)
@@ -517,7 +520,10 @@ describe(`overrideTest: ${printPath("[test/thirdpartypasswordless/override.test.
                 })
         );
 
-        assert.deepStrictEqual(signInResponse, { error: "signin error", customError: true });
+        assert.deepStrictEqual(signInResponse, {
+            error: "signin error",
+            customError: true,
+        });
 
         let userByIdResponse = await new Promise((resolve) =>
             request(app)
@@ -535,7 +541,10 @@ describe(`overrideTest: ${printPath("[test/thirdpartypasswordless/override.test.
                 })
         );
 
-        assert.deepStrictEqual(userByIdResponse, { error: "get user error", customError: true });
+        assert.deepStrictEqual(userByIdResponse, {
+            error: "get user error",
+            customError: true,
+        });
     });
 
     it("overriding api tests, throws error", async function () {
@@ -630,7 +639,10 @@ describe(`overrideTest: ${printPath("[test/thirdpartypasswordless/override.test.
 
         assert.notStrictEqual(user, undefined);
         assert.strictEqual(newUser, true);
-        assert.deepStrictEqual(signUpResponse, { error: "signup error", customError: true });
+        assert.deepStrictEqual(signUpResponse, {
+            error: "signup error",
+            customError: true,
+        });
 
         let signInResponse = await new Promise((resolve) =>
             request(app)
@@ -654,6 +666,9 @@ describe(`overrideTest: ${printPath("[test/thirdpartypasswordless/override.test.
         );
 
         assert.strictEqual(newUser, false);
-        assert.deepStrictEqual(signInResponse, { error: "signin error", customError: true });
+        assert.deepStrictEqual(signInResponse, {
+            error: "signin error",
+            customError: true,
+        });
     });
 });

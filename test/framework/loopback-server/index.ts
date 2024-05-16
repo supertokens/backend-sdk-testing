@@ -1,9 +1,9 @@
 import { intercept, inject } from "@loopback/core";
 import { post, response, RestApplication, RestBindings, MiddlewareContext } from "@loopback/rest";
-import { middleware } from "../../../framework/loopback";
-import { verifySession } from "../../../recipe/session/framework/loopback";
-import Session from "../../../recipe/session";
-import SuperTokens from "../../..";
+import { middleware } from "supertokens-node/framework/loopback";
+import { verifySession } from "supertokens-node/recipe/session/framework/loopback";
+import Session from "supertokens-node/recipe/session";
+import SuperTokens from "supertokens-node";
 
 class Create {
     constructor(@inject(RestBindings.Http.CONTEXT) private ctx: MiddlewareContext) {}

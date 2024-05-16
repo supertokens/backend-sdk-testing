@@ -21,16 +21,16 @@ const {
     extractInfoFromResponse,
     isCDIVersionCompatible,
 } = require("../utils");
-let STExpress = require("../../");
+let STExpress = require("supertokens-node");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let ThirdPartyPasswordless = require("../../lib/build/recipe/thirdpartypasswordless");
-const EmailVerification = require("../../lib/build/recipe/emailverification");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let ThirdPartyPasswordless = require("supertokens-node/lib/build/recipe/thirdpartypasswordless");
+const EmailVerification = require("supertokens-node/lib/build/recipe/emailverification");
 let nock = require("nock");
 const express = require("express");
 const request = require("supertest");
-let Session = require("../../recipe/session");
-let { middleware, errorHandler } = require("../../framework/express");
+let Session = require("supertokens-node/recipe/session");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 describe(`signinupTest: ${printPath("[test/thirdpartypasswordless/signinupFeature.test.js]")}`, function () {
     before(function () {
@@ -245,7 +245,10 @@ describe(`signinupTest: ${printPath("[test/thirdpartypasswordless/signinupFeatur
                 websiteDomain: "supertokens.io",
             },
             recipeList: [
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 EmailVerification.init({
                     mode: "OPTIONAL",
                     emailDelivery: {
@@ -370,7 +373,10 @@ describe(`signinupTest: ${printPath("[test/thirdpartypasswordless/signinupFeatur
                 websiteDomain: "supertokens.io",
             },
             recipeList: [
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 ThirdPartyPasswordless.init({
                     contactMethod: "EMAIL",
                     emailDelivery: {
@@ -424,7 +430,10 @@ describe(`signinupTest: ${printPath("[test/thirdpartypasswordless/signinupFeatur
                 websiteDomain: "supertokens.io",
             },
             recipeList: [
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 EmailVerification.init({
                     mode: "OPTIONAL",
                     emailDelivery: {
@@ -559,7 +568,10 @@ describe(`signinupTest: ${printPath("[test/thirdpartypasswordless/signinupFeatur
                 websiteDomain: "supertokens.io",
             },
             recipeList: [
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 ThirdPartyPasswordless.init({
                     contactMethod: "EMAIL",
                     emailDelivery: {
@@ -831,7 +843,9 @@ describe(`signinupTest: ${printPath("[test/thirdpartypasswordless/signinupFeatur
                 })
         );
         assert.strictEqual(response1.statusCode, 500);
-        assert.deepStrictEqual(response1.body, { message: "error from getProfileInfo" });
+        assert.deepStrictEqual(response1.body, {
+            message: "error from getProfileInfo",
+        });
     });
 
     it("test with thirdPartyPasswordless, invalid POST params for thirdparty module", async function () {

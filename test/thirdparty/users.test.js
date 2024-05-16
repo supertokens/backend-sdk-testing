@@ -13,13 +13,13 @@
  * under the License.
  */
 const { printPath, setupST, startST, killAllST, cleanST, signInUPCustomRequest } = require("../utils");
-const { getUserCount, getUsersNewestFirst, getUsersOldestFirst } = require("../../lib/build/");
+const { getUserCount, getUsersNewestFirst, getUsersOldestFirst } = require("supertokens-node/lib/build/");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let STExpress = require("../../");
-let Session = require("../../recipe/session");
-let ThirPartyRecipe = require("../../lib/build/recipe/thirdparty/recipe").default;
-let { middleware, errorHandler } = require("../../framework/express");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let ThirPartyRecipe = require("supertokens-node/lib/build/recipe/thirdparty/recipe").default;
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 describe(`usersTest: ${printPath("[test/thirdparty/users.test.js]")}`, function () {
     before(function () {
@@ -101,17 +101,29 @@ describe(`usersTest: ${printPath("[test/thirdparty/users.test.js]")}`, function 
         assert.strictEqual(users.users[0].emails[0], "test@gmail.com");
         assert.strictEqual(typeof users.nextPaginationToken, "string");
 
-        users = await getUsersOldestFirst({ tenantId: "public", limit: 1, paginationToken: users.nextPaginationToken });
+        users = await getUsersOldestFirst({
+            tenantId: "public",
+            limit: 1,
+            paginationToken: users.nextPaginationToken,
+        });
         assert.strictEqual(users.users.length, 1);
         assert.strictEqual(users.users[0].emails[0], "test1@gmail.com");
         assert.strictEqual(typeof users.nextPaginationToken, "string");
 
-        users = await getUsersOldestFirst({ tenantId: "public", limit: 5, paginationToken: users.nextPaginationToken });
+        users = await getUsersOldestFirst({
+            tenantId: "public",
+            limit: 5,
+            paginationToken: users.nextPaginationToken,
+        });
         assert.strictEqual(users.users.length, 3);
         assert.strictEqual(users.nextPaginationToken, undefined);
 
         try {
-            await getUsersOldestFirst({ tenantId: "public", limit: 10, paginationToken: "invalid-pagination-token" });
+            await getUsersOldestFirst({
+                tenantId: "public",
+                limit: 10,
+                paginationToken: "invalid-pagination-token",
+            });
             assert(false);
         } catch (err) {
             if (!err.message.includes("invalid pagination token")) {
@@ -172,17 +184,29 @@ describe(`usersTest: ${printPath("[test/thirdparty/users.test.js]")}`, function 
         assert.strictEqual(users.users[0].emails[0], "test4@gmail.com");
         assert.strictEqual(typeof users.nextPaginationToken, "string");
 
-        users = await getUsersNewestFirst({ tenantId: "public", limit: 1, paginationToken: users.nextPaginationToken });
+        users = await getUsersNewestFirst({
+            tenantId: "public",
+            limit: 1,
+            paginationToken: users.nextPaginationToken,
+        });
         assert.strictEqual(users.users.length, 1);
         assert.strictEqual(users.users[0].emails[0], "test3@gmail.com");
         assert.strictEqual(typeof users.nextPaginationToken, "string");
 
-        users = await getUsersNewestFirst({ tenantId: "public", limit: 5, paginationToken: users.nextPaginationToken });
+        users = await getUsersNewestFirst({
+            tenantId: "public",
+            limit: 5,
+            paginationToken: users.nextPaginationToken,
+        });
         assert.strictEqual(users.users.length, 3);
         assert.strictEqual(users.nextPaginationToken, undefined);
 
         try {
-            await getUsersOldestFirst({ tenantId: "public", limit: 10, paginationToken: "invalid-pagination-token" });
+            await getUsersOldestFirst({
+                tenantId: "public",
+                limit: 10,
+                paginationToken: "invalid-pagination-token",
+            });
             assert(false);
         } catch (err) {
             if (!err.message.includes("invalid pagination token")) {

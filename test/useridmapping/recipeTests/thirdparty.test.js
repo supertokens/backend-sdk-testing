@@ -1,11 +1,11 @@
 const assert = require("assert");
 const { printPath, setupST, startST, killAllST, cleanST } = require("../../utils");
-const { ProcessState } = require("../../../lib/build/processState");
-const STExpress = require("../../..");
-const ThirdPartyRecipe = require("../../../lib/build/recipe/thirdparty").default;
-const SessionRecipe = require("../../../lib/build/recipe/session").default;
-const { Querier } = require("../../../lib/build/querier");
-const { maxVersion } = require("../../../lib/build/utils");
+const { ProcessState } = require("supertokens-node/lib/build/processState");
+const STExpress = require("supertokens-node");
+const ThirdPartyRecipe = require("supertokens-node/lib/build/recipe/thirdparty").default;
+const SessionRecipe = require("supertokens-node/lib/build/recipe/session").default;
+const { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
 
 describe(`userIdMapping with thirdparty: ${printPath(
     "[test/useridmapping/recipeTests/thirdparty.test.js]"
@@ -223,7 +223,9 @@ describe(`userIdMapping with thirdparty: ${printPath(
             });
 
             // retrieve the user
-            let response = await STExpress.listUsersByAccountInfo("public", { email: "test@example.com" });
+            let response = await STExpress.listUsersByAccountInfo("public", {
+                email: "test@example.com",
+            });
             assert.strictEqual(response.length, 1);
             assert.strictEqual(response[0].id, externalId);
         });

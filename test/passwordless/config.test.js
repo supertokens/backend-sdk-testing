@@ -13,17 +13,17 @@
  * under the License.
  */
 const { printPath, setupST, startST, killAllST, cleanST } = require("../utils");
-let STExpress = require("../../");
-let Session = require("../../recipe/session");
-let Passwordless = require("../../recipe/passwordless");
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let Passwordless = require("supertokens-node/recipe/passwordless");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let SuperTokens = require("../../lib/build/supertokens").default;
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node/lib/build/supertokens").default;
 const request = require("supertest");
 const express = require("express");
-let { middleware, errorHandler } = require("../../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 let { isCDIVersionCompatible, generateRandomCode } = require("../utils");
-let PasswordlessRecipe = require("../../lib/build/recipe/passwordless/recipe").default;
+let PasswordlessRecipe = require("supertokens-node/lib/build/recipe/passwordless/recipe").default;
 
 describe(`config tests: ${printPath("[test/passwordless/config.test.js]")}`, function () {
     beforeEach(async function () {

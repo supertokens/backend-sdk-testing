@@ -14,22 +14,22 @@
  */
 const { printPath, setupST, startST, killAllST, cleanST, extractInfoFromResponse } = require("../utils");
 let assert = require("assert");
-let { ProcessState, PROCESS_STATE } = require("../../lib/build/processState");
-let SuperTokens = require("../../");
-let KoaFramework = require("../../framework/koa");
-let Session = require("../../recipe/session");
-let EmailPassword = require("../../recipe/emailpassword");
+let { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node");
+let KoaFramework = require("supertokens-node/framework/koa");
+let Session = require("supertokens-node/recipe/session");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
 let Koa = require("koa");
 const Router = require("@koa/router");
-let { verifySession } = require("../../recipe/session/framework/koa");
+let { verifySession } = require("supertokens-node/recipe/session/framework/koa");
 const request = require("supertest");
-let Dashboard = require("../../recipe/dashboard");
+let Dashboard = require("supertokens-node/recipe/dashboard");
 const { createUsers } = require("../utils.js");
-const { Querier } = require("../../lib/build/querier");
-const { maxVersion } = require("../../lib/build/utils");
-const Passwordless = require("../../recipe/passwordless");
-const ThirdParty = require("../../recipe/thirdparty");
-const { KoaRequest } = require("../../lib/build/framework/koa/framework");
+const { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
+const Passwordless = require("supertokens-node/recipe/passwordless");
+const ThirdParty = require("supertokens-node/recipe/thirdparty");
+const { KoaRequest } = require("supertokens-node/lib/build/framework/koa/framework");
 const sinon = require("sinon");
 
 describe(`Koa: ${printPath("[test/framework/koa.test.js]")}`, function () {
@@ -329,7 +329,12 @@ describe(`Koa: ${printPath("[test/framework/koa.test.js]")}`, function () {
                 appName: "SuperTokens",
                 websiteDomain: "http://supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         let app = new Koa();
@@ -426,7 +431,12 @@ describe(`Koa: ${printPath("[test/framework/koa.test.js]")}`, function () {
                 appName: "SuperTokens",
                 websiteDomain: "http://supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         let app = new Koa();
@@ -581,7 +591,12 @@ describe(`Koa: ${printPath("[test/framework/koa.test.js]")}`, function () {
                 appName: "SuperTokens",
                 websiteDomain: "http://supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
         let app = new Koa();
         const router = new Router();
@@ -646,7 +661,12 @@ describe(`Koa: ${printPath("[test/framework/koa.test.js]")}`, function () {
                 websiteDomain: "http://supertokens.io",
                 apiBasePath: "/",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         let app = new Koa();
@@ -798,7 +818,12 @@ describe(`Koa: ${printPath("[test/framework/koa.test.js]")}`, function () {
                 appName: "SuperTokens",
                 websiteDomain: "http://supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         let app = new Koa();
@@ -810,12 +835,16 @@ describe(`Koa: ${printPath("[test/framework/koa.test.js]")}`, function () {
         });
 
         router.post("/session/verify", async (ctx, next) => {
-            let sessionResponse = await Session.getSession(ctx, ctx, { antiCsrfCheck: true });
+            let sessionResponse = await Session.getSession(ctx, ctx, {
+                antiCsrfCheck: true,
+            });
             ctx.body = { userId: sessionResponse.userId };
         });
 
         router.post("/session/verifyAntiCsrfFalse", async (ctx, next) => {
-            let sessionResponse = await Session.getSession(ctx, ctx, { antiCsrfCheck: false });
+            let sessionResponse = await Session.getSession(ctx, ctx, {
+                antiCsrfCheck: false,
+            });
             ctx.body = { userId: sessionResponse.userId };
         });
 
@@ -881,7 +910,12 @@ describe(`Koa: ${printPath("[test/framework/koa.test.js]")}`, function () {
                 appName: "SuperTokens",
                 websiteDomain: "http://supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         let app = new Koa();
@@ -905,7 +939,9 @@ describe(`Koa: ${printPath("[test/framework/koa.test.js]")}`, function () {
         });
 
         router.post("/session/verifyAntiCsrfFalse", async (ctx, next) => {
-            let sessionResponse = await Session.getSession(ctx, ctx, { antiCsrfCheck: false });
+            let sessionResponse = await Session.getSession(ctx, ctx, {
+                antiCsrfCheck: false,
+            });
             ctx.body = { userId: sessionResponse.userId };
         });
         app.use(router.routes());
@@ -968,7 +1004,12 @@ describe(`Koa: ${printPath("[test/framework/koa.test.js]")}`, function () {
                 appName: "SuperTokens",
                 websiteDomain: "http://supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
         let app = new Koa();
         const router = new Router();
@@ -1111,7 +1152,12 @@ describe(`Koa: ${printPath("[test/framework/koa.test.js]")}`, function () {
                 appName: "SuperTokens",
                 websiteDomain: "http://supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         let app = new Koa();
@@ -1139,7 +1185,11 @@ describe(`Koa: ${printPath("[test/framework/koa.test.js]")}`, function () {
         });
 
         router.post("/updateSessionDataInvalidSessionHandle", async (ctx, _) => {
-            ctx.body = { success: !(await Session.updateSessionDataInDatabase("InvalidHandle", { key: "value3" })) };
+            ctx.body = {
+                success: !(await Session.updateSessionDataInDatabase("InvalidHandle", {
+                    key: "value3",
+                })),
+            };
         });
 
         app.use(router.routes());
@@ -1261,7 +1311,12 @@ describe(`Koa: ${printPath("[test/framework/koa.test.js]")}`, function () {
                 appName: "SuperTokens",
                 websiteDomain: "http://supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
         let app = new Koa();
         const router = new Router();

@@ -14,19 +14,19 @@
  */
 const { printPath, setupST, startST, killAllST, cleanST, extractInfoFromResponse, resetAll } = require("../utils");
 const assert = require("assert");
-const { Querier } = require("../../lib/build/querier");
+const { Querier } = require("supertokens-node/lib/build/querier");
 const express = require("express");
 const request = require("supertest");
-const { ProcessState, PROCESS_STATE } = require("../../lib/build/processState");
-const SuperTokens = require("../../");
-const Session = require("../../recipe/session");
-const EmailPassword = require("../../recipe/emailpassword");
-const { parseJWTWithoutSignatureVerification } = require("../../lib/build/recipe/session/jwt");
-const { middleware, errorHandler } = require("../../framework/express");
-const { default: NormalisedURLPath } = require("../../lib/build/normalisedURLPath");
-const { verifySession } = require("../../recipe/session/framework/express");
+const { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
+const SuperTokens = require("supertokens-node");
+const Session = require("supertokens-node/recipe/session");
+const EmailPassword = require("supertokens-node/recipe/emailpassword");
+const { parseJWTWithoutSignatureVerification } = require("supertokens-node/lib/build/recipe/session/jwt");
+const { middleware, errorHandler } = require("supertokens-node/framework/express");
+const { default: NormalisedURLPath } = require("supertokens-node/lib/build/normalisedURLPath");
+const { verifySession } = require("supertokens-node/recipe/session/framework/express");
 const { json } = require("body-parser");
-const { validateAccessTokenStructure } = require("../../lib/build/recipe/session/accessToken");
+const { validateAccessTokenStructure } = require("supertokens-node/lib/build/recipe/session/accessToken");
 
 describe(`AccessToken versions: ${printPath("[test/session/accessTokenVersions.test.js]")}`, function () {
     beforeEach(async function () {
@@ -1184,7 +1184,10 @@ function getTestExpressApp() {
     });
 
     app.get("/revoke-session", verifySession(), async (req, res) => {
-        res.status(200).json({ message: await req.session.revokeSession(), sessionHandle: req.session.getHandle() });
+        res.status(200).json({
+            message: await req.session.revokeSession(),
+            sessionHandle: req.session.getHandle(),
+        });
     });
 
     app.use(errorHandler());

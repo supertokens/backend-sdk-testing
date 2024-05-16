@@ -23,17 +23,17 @@ const {
     signUPRequest,
     assertJSONEquals,
 } = require("../utils");
-let STExpress = require("../../");
-let Session = require("../../recipe/session");
-let SessionRecipe = require("../../lib/build/recipe/session/recipe").default;
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let SessionRecipe = require("supertokens-node/lib/build/recipe/session/recipe").default;
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-const { Querier } = require("../../lib/build/querier");
-let ThirdPartyEmailPassword = require("../../recipe/thirdpartyemailpassword");
-let AccountLinking = require("../../recipe/accountlinking");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+const { Querier } = require("supertokens-node/lib/build/querier");
+let ThirdPartyEmailPassword = require("supertokens-node/recipe/thirdpartyemailpassword");
+let AccountLinking = require("supertokens-node/recipe/accountlinking");
 const express = require("express");
 const request = require("supertest");
-let { middleware, errorHandler } = require("../../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 describe(`overrideTest: ${printPath("[test/thirdpartyemailpassword/override.test.js]")}`, function () {
     beforeEach(async function () {
@@ -454,7 +454,10 @@ describe(`overrideTest: ${printPath("[test/thirdpartyemailpassword/override.test
         let signUpResponse = await signUPRequest(app, "user@test.com", "test123!");
 
         assert.notStrictEqual(user, undefined);
-        assert.deepStrictEqual(signUpResponse.body, { error: "signup error", customError: true });
+        assert.deepStrictEqual(signUpResponse.body, {
+            error: "signup error",
+            customError: true,
+        });
 
         let signInResponse = await new Promise((resolve) =>
             request(app)
@@ -481,7 +484,10 @@ describe(`overrideTest: ${printPath("[test/thirdpartyemailpassword/override.test
                 })
         );
 
-        assert.deepStrictEqual(signInResponse, { error: "signin error", customError: true });
+        assert.deepStrictEqual(signInResponse, {
+            error: "signin error",
+            customError: true,
+        });
 
         let userByIdResponse = await new Promise((resolve) =>
             request(app)
@@ -499,7 +505,10 @@ describe(`overrideTest: ${printPath("[test/thirdpartyemailpassword/override.test
                 })
         );
 
-        assert.deepStrictEqual(userByIdResponse, { error: "get user error", customError: true });
+        assert.deepStrictEqual(userByIdResponse, {
+            error: "get user error",
+            customError: true,
+        });
     });
 
     it("overriding api tests, throws error", async () => {
@@ -599,14 +608,20 @@ describe(`overrideTest: ${printPath("[test/thirdpartyemailpassword/override.test
                     }
                 })
         );
-        assert.deepStrictEqual(emailExistsResponse, { error: "email exists error", customError: true });
+        assert.deepStrictEqual(emailExistsResponse, {
+            error: "email exists error",
+            customError: true,
+        });
         assert.strictEqual(emailExists, false);
         let signUpResponse = await signUPRequest(app, "user@test.com", "test123!");
 
         assert.notStrictEqual(user, undefined);
         assert.strictEqual(newUser, true);
         assert.strictEqual(type, "emailpassword");
-        assert.deepStrictEqual(signUpResponse.body, { error: "signup error", customError: true });
+        assert.deepStrictEqual(signUpResponse.body, {
+            error: "signup error",
+            customError: true,
+        });
 
         emailExistsResponse = await new Promise((resolve) =>
             request(app)
@@ -623,7 +638,10 @@ describe(`overrideTest: ${printPath("[test/thirdpartyemailpassword/override.test
                     }
                 })
         );
-        assert.deepStrictEqual(emailExistsResponse, { error: "email exists error", customError: true });
+        assert.deepStrictEqual(emailExistsResponse, {
+            error: "email exists error",
+            customError: true,
+        });
         assert.strictEqual(emailExists, true);
 
         let signInResponse = await new Promise((resolve) =>
@@ -652,6 +670,9 @@ describe(`overrideTest: ${printPath("[test/thirdpartyemailpassword/override.test
         );
 
         assert.strictEqual(newUser, false);
-        assert.deepStrictEqual(signInResponse, { error: "signin error", customError: true });
+        assert.deepStrictEqual(signInResponse, {
+            error: "signin error",
+            customError: true,
+        });
     });
 });

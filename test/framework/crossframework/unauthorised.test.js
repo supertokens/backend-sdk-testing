@@ -1,8 +1,8 @@
 const { addCrossFrameworkTests } = require("../crossFramework.testgen");
-let Session = require("../../../recipe/session");
+let Session = require("supertokens-node/recipe/session");
 const { extractInfoFromResponse } = require("../../utils");
 let assert = require("assert");
-const SuperTokens = require("../../..");
+const SuperTokens = require("supertokens-node");
 
 addCrossFrameworkTests(
     (setup, callServer, tokenTransferMethod) => {

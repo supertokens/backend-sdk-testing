@@ -23,20 +23,20 @@ const {
 } = require("../utils");
 let assert = require("assert");
 const express = require("express");
-let { ProcessState } = require("../../lib/build/processState");
-let SuperTokens = require("../../");
-let { middleware, errorHandler } = require("../../framework/express");
-let MultiFactorAuth = require("../../lib/build/recipe/multifactorauth");
-let MultiFactorAuthRecipe = require("../../lib/build/recipe/multifactorauth/recipe").default;
-let UserMetadata = require("../../lib/build/recipe/usermetadata");
-let Session = require("../../lib/build/recipe/session");
-let Totp = require("../../lib/build/recipe/totp");
-let EmailPassword = require("../../lib/build/recipe/emailpassword");
-let EmailVerification = require("../../lib/build/recipe/emailverification");
-let Passwordless = require("../../lib/build/recipe/passwordless");
-let ThirdParty = require("../../lib/build/recipe/thirdparty");
-let Multitenancy = require("../../lib/build/recipe/multitenancy");
-let AccountLinking = require("../../lib/build/recipe/accountlinking");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
+let MultiFactorAuth = require("supertokens-node/lib/build/recipe/multifactorauth");
+let MultiFactorAuthRecipe = require("supertokens-node/lib/build/recipe/multifactorauth/recipe").default;
+let UserMetadata = require("supertokens-node/lib/build/recipe/usermetadata");
+let Session = require("supertokens-node/lib/build/recipe/session");
+let Totp = require("supertokens-node/lib/build/recipe/totp");
+let EmailPassword = require("supertokens-node/lib/build/recipe/emailpassword");
+let EmailVerification = require("supertokens-node/lib/build/recipe/emailverification");
+let Passwordless = require("supertokens-node/lib/build/recipe/passwordless");
+let ThirdParty = require("supertokens-node/lib/build/recipe/thirdparty");
+let Multitenancy = require("supertokens-node/lib/build/recipe/multitenancy");
+let AccountLinking = require("supertokens-node/lib/build/recipe/accountlinking");
 const OTPAuth = require("otpauth");
 const { json } = require("body-parser");
 const request = require("supertest");
@@ -50,7 +50,7 @@ const {
     getTestExpressApp,
     validateUserEmail,
 } = require("./utils");
-const { parseJWTWithoutSignatureVerification } = require("../../lib/build/recipe/session/jwt");
+const { parseJWTWithoutSignatureVerification } = require("supertokens-node/lib/build/recipe/session/jwt");
 
 describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     beforeEach(async function () {

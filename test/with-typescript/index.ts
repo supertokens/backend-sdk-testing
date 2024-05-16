@@ -1,38 +1,38 @@
 import * as express from "express";
 import { NextApiRequest, NextApiResponse } from "next";
-import Supertokens, { RecipeUserId, User, getUser } from "../..";
-import Session, { RecipeInterface, SessionClaimValidator, VerifySessionOptions } from "../../recipe/session";
-import EmailVerification from "../../recipe/emailverification";
-import EmailPassword from "../../recipe/emailpassword";
-import { verifySession } from "../../recipe/session/framework/express";
-import { middleware, errorHandler, SessionRequest } from "../../framework/express";
-import customFramework, { CollectingResponse, PreParsedRequest } from "../../framework/custom";
-import NextJS from "../../nextjs";
-import ThirdPartyEmailPassword from "../../recipe/thirdpartyemailpassword";
-import ThirdParty from "../../recipe/thirdparty";
-import Multitenancy from "../../recipe/multitenancy";
-import Passwordless from "../../recipe/passwordless";
-import ThirdPartyPasswordless from "../../recipe/thirdpartypasswordless";
-import { SMTPService as SMTPServiceTPP } from "../../recipe/thirdpartypasswordless/emaildelivery";
-import { SMTPService as SMTPServiceP } from "../../recipe/passwordless/emaildelivery";
-import { SMTPService as SMTPServiceTPEP } from "../../recipe/thirdpartyemailpassword/emaildelivery";
-import { SMTPService as SMTPServiceEP } from "../../recipe/emailpassword/emaildelivery";
+import Supertokens, { RecipeUserId, User, getUser } from "supertokens-node";
+import Session, { RecipeInterface, SessionClaimValidator, VerifySessionOptions } from "supertokens-node/recipe/session";
+import EmailVerification from "supertokens-node/recipe/emailverification";
+import EmailPassword from "supertokens-node/recipe/emailpassword";
+import { verifySession } from "supertokens-node/recipe/session/framework/express";
+import { middleware, errorHandler, SessionRequest } from "supertokens-node/framework/express";
+import customFramework, { CollectingResponse, PreParsedRequest } from "supertokens-node/framework/custom";
+import NextJS from "supertokens-node/nextjs";
+import ThirdPartyEmailPassword from "supertokens-node/recipe/thirdpartyemailpassword";
+import ThirdParty from "supertokens-node/recipe/thirdparty";
+import Multitenancy from "supertokens-node/recipe/multitenancy";
+import Passwordless from "supertokens-node/recipe/passwordless";
+import ThirdPartyPasswordless from "supertokens-node/recipe/thirdpartypasswordless";
+import { SMTPService as SMTPServiceTPP } from "supertokens-node/recipe/thirdpartypasswordless/emaildelivery";
+import { SMTPService as SMTPServiceP } from "supertokens-node/recipe/passwordless/emaildelivery";
+import { SMTPService as SMTPServiceTPEP } from "supertokens-node/recipe/thirdpartyemailpassword/emaildelivery";
+import { SMTPService as SMTPServiceEP } from "supertokens-node/recipe/emailpassword/emaildelivery";
 import {
     TwilioService as TwilioServiceTPP,
     SupertokensService as SupertokensServiceTPP,
-} from "../../recipe/thirdpartypasswordless/smsdelivery";
+} from "supertokens-node/recipe/thirdpartypasswordless/smsdelivery";
 import {
     TwilioService as TwilioServiceP,
     SupertokensService as SupertokensServiceP,
-} from "../../recipe/thirdpartypasswordless/smsdelivery";
-import UserMetadata from "../../recipe/usermetadata";
-import { BooleanClaim, PrimitiveClaim } from "../../recipe/session/claims";
-import UserRoles from "../../recipe/userroles";
-import Dashboard from "../../recipe/dashboard";
-import JWT from "../../recipe/jwt";
-import AccountLinking from "../../recipe/accountlinking";
-import MultiFactorAuth from "../../recipe/multifactorauth";
-import { verifySession as customVerifySession } from "../../recipe/session/framework/custom";
+} from "supertokens-node/recipe/thirdpartypasswordless/smsdelivery";
+import UserMetadata from "supertokens-node/recipe/usermetadata";
+import { BooleanClaim, PrimitiveClaim } from "supertokens-node/recipe/session/claims";
+import UserRoles from "supertokens-node/recipe/userroles";
+import Dashboard from "supertokens-node/recipe/dashboard";
+import JWT from "supertokens-node/recipe/jwt";
+import AccountLinking from "supertokens-node/recipe/accountlinking";
+import MultiFactorAuth from "supertokens-node/recipe/multifactorauth";
+import { verifySession as customVerifySession } from "supertokens-node/recipe/session/framework/custom";
 import { NextRequest, NextResponse } from "next/server";
 
 UserRoles.init({
@@ -948,21 +948,30 @@ Multitenancy.init({
                 },
 
                 createOrUpdateThirdPartyConfig: async function ({ tenantId, config, skipValidation, userContext }) {
-                    return await oI.createOrUpdateThirdPartyConfig({ tenantId, config, skipValidation, userContext });
+                    return await oI.createOrUpdateThirdPartyConfig({
+                        tenantId,
+                        config,
+                        skipValidation,
+                        userContext,
+                    });
                 },
 
                 deleteThirdPartyConfig: async function ({ tenantId, thirdPartyId, userContext }) {
-                    return await oI.deleteThirdPartyConfig({ tenantId, thirdPartyId, userContext });
+                    return await oI.deleteThirdPartyConfig({
+                        tenantId,
+                        thirdPartyId,
+                        userContext,
+                    });
                 },
             };
         },
     },
 });
 
-import { HTTPMethod, TypeInput, UserContext } from "../../types";
-import { TypeInput as SessionTypeInput } from "../../recipe/session/types";
-import { TypeInput as EPTypeInput } from "../../recipe/emailpassword/types";
-import SuperTokensError from "../../lib/build/error";
+import { HTTPMethod, TypeInput, UserContext } from "supertokens-node/types";
+import { TypeInput as SessionTypeInput } from "supertokens-node/recipe/session/types";
+import { TypeInput as EPTypeInput } from "supertokens-node/recipe/emailpassword/types";
+import SuperTokensError from "supertokens-node/lib/build/error";
 import { serialize } from "cookie";
 import { Response } from "express";
 
@@ -1114,11 +1123,15 @@ app.use(
                 defaultSession.getUserId();
 
                 // Works without null checking when sessions are explicitly required
-                const requiredSession = await Session.getSession(req, res, { sessionRequired: true });
+                const requiredSession = await Session.getSession(req, res, {
+                    sessionRequired: true,
+                });
                 requiredSession.getUserId();
 
                 // REQUIRES null checking when sessions are explicitly NOT required
-                const optionalSession = await Session.getSession(req, res, { sessionRequired: false });
+                const optionalSession = await Session.getSession(req, res, {
+                    sessionRequired: false,
+                });
                 optionalSession?.getUserId();
 
                 return defaultSession;
@@ -1165,7 +1178,11 @@ Supertokens.init({
         websiteDomain: "",
     },
     recipeList: [
-        Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "NONE", cookieDomain: "" }),
+        Session.init({
+            getTokenTransferMethod: () => "cookie",
+            antiCsrf: "NONE",
+            cookieDomain: "",
+        }),
         EmailPassword.init({
             override: {},
         }),
@@ -1575,7 +1592,10 @@ Session.init({
                 if (session !== undefined) {
                     const origPayload = session.getAccessTokenPayload();
                     if (origPayload.appSub === undefined) {
-                        await session.mergeIntoAccessTokenPayload({ appSub: origPayload.sub, sub: null });
+                        await session.mergeIntoAccessTokenPayload({
+                            appSub: origPayload.sub,
+                            sub: null,
+                        });
                     }
                 }
                 return session;
@@ -1701,7 +1721,10 @@ async function getSessionWithoutErrorHandler(req: express.Request, resp: express
                 // Session hijacking attempted. You should revoke the session
                 // using Session.revokeSession fucntion and send a 401
             } else if (err.type === Session.Error.INVALID_CLAIMS) {
-                resp.status(403).json({ status: "CLAIM_VALIDATION_ERROR", claimValidationErrors: err.payload });
+                resp.status(403).json({
+                    status: "CLAIM_VALIDATION_ERROR",
+                    claimValidationErrors: err.payload,
+                });
                 // The user is missing some required claim.
                 // You can pass the missing claims to the frontend and handle it there
             }

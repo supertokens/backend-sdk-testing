@@ -15,14 +15,14 @@
 
 const { printPath, setupST, startST, killAllST, cleanST, extractInfoFromResponse, resetAll } = require("../utils");
 const assert = require("assert");
-const { Querier } = require("../../lib/build/querier");
+const { Querier } = require("supertokens-node/lib/build/querier");
 const express = require("express");
 const request = require("supertest");
-const { ProcessState, PROCESS_STATE } = require("../../lib/build/processState");
-const SuperTokens = require("../../");
-const Session = require("../../recipe/session");
-const EmailPassword = require("../../recipe/emailpassword");
-const { middleware, errorHandler } = require("../../framework/express");
+const { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
+const SuperTokens = require("supertokens-node");
+const Session = require("supertokens-node/recipe/session");
+const EmailPassword = require("supertokens-node/recipe/emailpassword");
+const { middleware, errorHandler } = require("supertokens-node/framework/express");
 const { json } = require("body-parser");
 
 describe(`overwriteSessionDuringSignInUp config: ${printPath(

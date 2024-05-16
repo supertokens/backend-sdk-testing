@@ -13,7 +13,7 @@
  * under the License.
  */
 const { printPath } = require("./utils");
-const { humaniseMilliseconds } = require("../lib/build/utils");
+const { humaniseMilliseconds } = require("supertokens-node/lib/build/utils");
 const assert = require("assert");
 
 describe(`Humanise: ${printPath("[test/humanise.test.js]")}`, function () {

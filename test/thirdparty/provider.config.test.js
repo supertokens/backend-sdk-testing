@@ -13,18 +13,18 @@
  * under the License.
  */
 const { printPath, setupST, startSTWithMultitenancy, killAllST, cleanST, removeAppAndTenants } = require("../utils");
-let STExpress = require("../../");
+let STExpress = require("supertokens-node");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let ThirdPartyRecipe = require("../../lib/build/recipe/thirdparty/recipe").default;
-let Multitenancy = require("../../lib/build/recipe/multitenancy");
-let Session = require("../../lib/build/recipe/session");
-let ThirdParty = require("../../lib/build/recipe/thirdparty");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let ThirdPartyRecipe = require("supertokens-node/lib/build/recipe/thirdparty/recipe").default;
+let Multitenancy = require("supertokens-node/lib/build/recipe/multitenancy");
+let Session = require("supertokens-node/lib/build/recipe/session");
+let ThirdParty = require("supertokens-node/lib/build/recipe/thirdparty");
 let nock = require("nock");
 const express = require("express");
 const request = require("supertest");
 const { default: fetch } = require("cross-fetch");
-let { middleware, errorHandler } = require("../../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 const { configsForVerification, providers } = require("./tpConfigsForVerification");
 
 describe(`providerConfigTest: ${printPath("[test/thirdparty/provider.config.test.js]")}`, function () {
@@ -152,8 +152,16 @@ describe(`providerConfigTest: ${printPath("[test/thirdparty/provider.config.test
                                 config: {
                                     thirdPartyId: "google",
                                     clients: [
-                                        { clientType: "web", clientId: "test1", clientSecret: "secret1" },
-                                        { clientType: "mobile", clientId: "test2", clientSecret: "secret2" },
+                                        {
+                                            clientType: "web",
+                                            clientId: "test1",
+                                            clientSecret: "secret1",
+                                        },
+                                        {
+                                            clientType: "mobile",
+                                            clientId: "test2",
+                                            clientSecret: "secret2",
+                                        },
                                     ],
                                 },
                             },
@@ -250,7 +258,11 @@ describe(`providerConfigTest: ${printPath("[test/thirdparty/provider.config.test
                                     thirdPartyId: "google",
                                     clients: [
                                         { clientType: "web", clientId: "t1", clientSecret: "s1" },
-                                        { clientType: "mobile", clientId: "t2", clientSecret: "s2" },
+                                        {
+                                            clientType: "mobile",
+                                            clientId: "t2",
+                                            clientSecret: "s2",
+                                        },
                                     ],
                                 },
                             },
@@ -296,7 +308,13 @@ describe(`providerConfigTest: ${printPath("[test/thirdparty/provider.config.test
                             {
                                 config: {
                                     thirdPartyId: "google",
-                                    clients: [{ clientType: "web", clientId: "test1", clientSecret: "secret1" }],
+                                    clients: [
+                                        {
+                                            clientType: "web",
+                                            clientId: "test1",
+                                            clientSecret: "secret1",
+                                        },
+                                    ],
                                 },
                             },
                         ],

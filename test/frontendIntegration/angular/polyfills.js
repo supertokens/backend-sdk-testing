@@ -1407,7 +1407,10 @@
                             try {
                                 const handler = Zone[REJECTION_HANDLED_HANDLER];
                                 if (handler && typeof handler === "function") {
-                                    handler.call(this, { rejection: promise[symbolValue], promise: promise });
+                                    handler.call(this, {
+                                        rejection: promise[symbolValue],
+                                        promise: promise,
+                                    });
                                 }
                             } catch (err) {}
                             promise[symbolState] = REJECTED;
@@ -1972,7 +1975,9 @@
                                 return { passive: true };
                             }
                             if (typeof options === "object" && options.passive !== false) {
-                                return Object.assign(Object.assign({}, options), { passive: true });
+                                return Object.assign(Object.assign({}, options), {
+                                    passive: true,
+                                });
                             }
                             return options;
                         }

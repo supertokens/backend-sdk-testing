@@ -24,16 +24,16 @@ const {
     signUPRequest,
     signUPRequestNoBody,
 } = require("../utils");
-let STExpress = require("../../");
-let Session = require("../../recipe/session");
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let ThirdPartyEmailPassword = require("../../recipe/thirdpartyemailpassword");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let ThirdPartyEmailPassword = require("supertokens-node/recipe/thirdpartyemailpassword");
 const express = require("express");
 const request = require("supertest");
 let nock = require("nock");
 const { response } = require("express");
-let { middleware, errorHandler } = require("../../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 let bodyParser = require("body-parser");
 
 describe(`signinFeature: ${printPath("[test/thirdpartyemailpassword/signinFeature.test.js]")}`, function () {
@@ -215,7 +215,10 @@ describe(`signinFeature: ${printPath("[test/thirdpartyemailpassword/signinFeatur
                 websiteDomain: "supertokens.io",
             },
             recipeList: [
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 ThirdPartyEmailPassword.init({
                     providers: [this.customProvider1],
                     override: {

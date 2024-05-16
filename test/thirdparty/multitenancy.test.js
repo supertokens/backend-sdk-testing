@@ -13,11 +13,11 @@
  * under the License.
  */
 const { printPath, setupST, startSTWithMultitenancy, killAllST, cleanST } = require("../utils");
-let SuperTokens = require("../../");
+let SuperTokens = require("supertokens-node");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let ThirdParty = require("../../recipe/thirdparty");
-let Multitenancy = require("../../recipe/multitenancy");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let ThirdParty = require("supertokens-node/recipe/thirdparty");
+let Multitenancy = require("supertokens-node/recipe/multitenancy");
 
 describe(`multitenancy: ${printPath("[test/thirdparty/multitenancy.test.js]")}`, function () {
     beforeEach(async function () {
@@ -230,8 +230,16 @@ describe(`multitenancy: ${printPath("[test/thirdparty/multitenancy.test.js]")}`,
         assert.equal(thirdPartyInfo.config.clients[0].clientSecret, "coresecret");
         assert.deepEqual(
             {
-                fromIdTokenPayload: { userId: "sub", email: "email", emailVerified: "email_verified" },
-                fromUserInfoAPI: { userId: "sub", email: "email", emailVerified: "email_verified" },
+                fromIdTokenPayload: {
+                    userId: "sub",
+                    email: "email",
+                    emailVerified: "email_verified",
+                },
+                fromUserInfoAPI: {
+                    userId: "sub",
+                    email: "email",
+                    emailVerified: "email_verified",
+                },
             },
             thirdPartyInfo.config.userInfoMap
         );

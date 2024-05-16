@@ -14,11 +14,11 @@
  */
 const { printPath, setupST, startST, killAllST, cleanST, extractInfoFromResponse } = require("../utils");
 let assert = require("assert");
-let { ProcessState, PROCESS_STATE } = require("../../lib/build/processState");
-let SuperTokens = require("../..");
-let CustomFramework = require("../../framework/custom");
-let Session = require("../../recipe/session");
-let { verifySession } = require("../../recipe/session/framework/custom");
+let { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node");
+let CustomFramework = require("supertokens-node/framework/custom");
+let Session = require("supertokens-node/recipe/session");
+let { verifySession } = require("supertokens-node/recipe/session/framework/custom");
 let { Headers } = require("cross-fetch");
 const sinon = require("sinon");
 
@@ -52,7 +52,12 @@ describe(`Custom framework: ${printPath("[test/framework/custom.test.js]")}`, fu
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         const req = new CustomFramework.PreParsedRequest({
@@ -86,7 +91,12 @@ describe(`Custom framework: ${printPath("[test/framework/custom.test.js]")}`, fu
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         const middleware = CustomFramework.middleware();

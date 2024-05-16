@@ -24,17 +24,17 @@ const {
     assertJSONEquals,
     startSTWithMultitenancyAndAccountLinking,
 } = require("../utils");
-let supertokens = require("../..");
-let Session = require("../../recipe/session");
+let supertokens = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState, PROCESS_STATE } = require("../../lib/build/processState");
-let EmailPassword = require("../../recipe/emailpassword");
-let Passwordless = require("../../recipe/passwordless");
-let ThirdParty = require("../../recipe/thirdparty");
-let AccountLinking = require("../../recipe/accountlinking");
-let EmailVerification = require("../../recipe/emailverification");
+let { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let Passwordless = require("supertokens-node/recipe/passwordless");
+let ThirdParty = require("supertokens-node/recipe/thirdparty");
+let AccountLinking = require("supertokens-node/recipe/accountlinking");
+let EmailVerification = require("supertokens-node/recipe/emailverification");
 const express = require("express");
-let { middleware, errorHandler } = require("../../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 const request = require("supertest");
 
 // phoneNumber based accounts can't exist in other recipes now,
@@ -542,7 +542,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
 
             const email = "test@example.com";
             let tpUser = await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "abc", email, false);
-            await Passwordless.signInUp({ email, tenantId: "public", userContext: { doNotLink: true } });
+            await Passwordless.signInUp({
+                email,
+                tenantId: "public",
+                userContext: { doNotLink: true },
+            });
 
             // createCodeAPI with email
             let createCodeResponse = await new Promise((resolve) =>
@@ -701,7 +705,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
 
                 let tpUser;
 
-                const code = await Passwordless.createCode({ tenantId: "public", email });
+                const code = await Passwordless.createCode({
+                    tenantId: "public",
+                    email,
+                });
 
                 tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
                     "public",
@@ -794,7 +801,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
 
                 let tpUser;
 
-                const code = await Passwordless.createCode({ tenantId: "public", email });
+                const code = await Passwordless.createCode({
+                    tenantId: "public",
+                    email,
+                });
 
                 tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
                     "public",

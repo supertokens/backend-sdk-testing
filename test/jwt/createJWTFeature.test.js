@@ -2,11 +2,11 @@ let assert = require("assert");
 const e = require("cors");
 
 const { printPath, setupST, startST, killAllST, cleanST } = require("../utils");
-let STExpress = require("../../");
-let JWTRecipe = require("../../lib/build/recipe/jwt");
-let { ProcessState } = require("../../lib/build/processState");
-let { Querier } = require("../../lib/build/querier");
-const { maxVersion } = require("../../lib/build/utils");
+let STExpress = require("supertokens-node");
+let JWTRecipe = require("supertokens-node/lib/build/recipe/jwt");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
 
 describe(`createJWTFeature: ${printPath("[test/jwt/createJWTFeature.test.js]")}`, function () {
     beforeEach(async function () {

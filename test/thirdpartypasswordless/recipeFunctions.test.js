@@ -13,14 +13,14 @@
  * under the License.
  */
 const { printPath, setupST, startST, killAllST, cleanST, setKeyValueInConfig } = require("../utils");
-let STExpress = require("../../");
-let Session = require("../../recipe/session");
-let ThirdPartyPasswordless = require("../../recipe/thirdpartypasswordless");
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let ThirdPartyPasswordless = require("supertokens-node/recipe/thirdpartypasswordless");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-const EmailVerification = require("../../recipe/emailverification");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+const EmailVerification = require("supertokens-node/recipe/emailverification");
 let { isCDIVersionCompatible } = require("../utils");
-const { default: RecipeUserId } = require("../../lib/build/recipeUserId");
+const { default: RecipeUserId } = require("supertokens-node/lib/build/recipeUserId");
 
 describe(`recipeFunctions: ${printPath("[test/thirdpartypasswordless/recipeFunctions.test.js]")}`, function () {
     beforeEach(async function () {

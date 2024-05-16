@@ -25,13 +25,13 @@ const {
 let assert = require("assert");
 const express = require("express");
 const request = require("supertest");
-let { Querier } = require("../lib/build/querier");
-let { ProcessState } = require("../lib/build/processState");
-let SuperTokens = require("../");
-let Session = require("../recipe/session");
-let SessionRecipe = require("../lib/build/recipe/session/recipe").default;
-let { middleware, errorHandler } = require("../framework/express");
-let { verifySession } = require("../recipe/session/framework/express");
+let { Querier } = require("supertokens-node/lib/build/querier");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let SessionRecipe = require("supertokens-node/lib/build/recipe/session/recipe").default;
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
+let { verifySession } = require("supertokens-node/recipe/session/framework/express");
 
 /**
  * TODO: (Later) check that disabling default API actually disables it (for emailpassword)
@@ -1264,7 +1264,9 @@ describe(`middleware: ${printPath("[test/middleware.test.js]")}`, function () {
     // https://github.com/supertokens/supertokens-node/pull/108
     // An expired access token is used and we see that try refresh token error is thrown
     it("test session verify middleware with expired access token and session required false", async function () {
-        const connectionURI = await startST({ coreConfig: { access_token_validity: 2 } });
+        const connectionURI = await startST({
+            coreConfig: { access_token_validity: 2 },
+        });
 
         SuperTokens.init({
             supertokens: {
@@ -1688,7 +1690,9 @@ describe(`middleware: ${printPath("[test/middleware.test.js]")}`, function () {
     });
 
     it("test session verify middleware without error handler added", async function () {
-        const connectionURI = await startST({ coreConfig: { access_token_validity: 5 } });
+        const connectionURI = await startST({
+            coreConfig: { access_token_validity: 5 },
+        });
         SuperTokens.init({
             supertokens: {
                 connectionURI,

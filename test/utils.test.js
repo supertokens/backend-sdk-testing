@@ -1,5 +1,5 @@
 const assert = require("assert");
-const { getFromObjectCaseInsensitive } = require("../lib/build/utils");
+const { getFromObjectCaseInsensitive } = require("supertokens-node/lib/build/utils");
 
 describe("SuperTokens utils test", () => {
     it("Test getFromObjectCaseInsensitive", () => {

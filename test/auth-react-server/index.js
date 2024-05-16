@@ -13,46 +13,50 @@
  * under the License.
  */
 require("dotenv").config();
-let SuperTokens = require("../../");
-let Session = require("../../recipe/session");
-let EmailPassword = require("../../recipe/emailpassword");
-let ThirdParty = require("../../recipe/thirdparty");
-let ThirdPartyEmailPassword = require("../../recipe/thirdpartyemailpassword");
-let { verifySession } = require("../../recipe/session/framework/express");
-let { middleware, errorHandler } = require("../../framework/express");
+let SuperTokens = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let ThirdParty = require("supertokens-node/recipe/thirdparty");
+let ThirdPartyEmailPassword = require("supertokens-node/recipe/thirdpartyemailpassword");
+let { verifySession } = require("supertokens-node/recipe/session/framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 let express = require("express");
 let cookieParser = require("cookie-parser");
 let bodyParser = require("body-parser");
 let http = require("http");
 let cors = require("cors");
-let EmailVerificationRaw = require("../../lib/build/recipe/emailverification/recipe").default;
-let EmailVerification = require("../../recipe/emailverification");
-let UserRolesRaw = require("../../lib/build/recipe/userroles/recipe").default;
-let UserRoles = require("../../recipe/userroles");
-let PasswordlessRaw = require("../../lib/build/recipe/passwordless/recipe").default;
-let Passwordless = require("../../recipe/passwordless");
-let ThirdPartyPasswordless = require("../../recipe/thirdpartypasswordless");
-let { default: SuperTokensRaw } = require("../../lib/build/supertokens");
-const { default: EmailPasswordRaw } = require("../../lib/build/recipe/emailpassword/recipe");
-const { default: ThirdPartyRaw } = require("../../lib/build/recipe/thirdparty/recipe");
-const { default: ThirdPartyEmailPasswordRaw } = require("../../lib/build/recipe/thirdpartyemailpassword/recipe");
-const { default: DashboardRaw } = require("../../lib/build/recipe/dashboard/recipe");
-const { default: MultitenancyRaw } = require("../../lib/build/recipe/multitenancy/recipe");
-const Multitenancy = require("../../lib/build/recipe/multitenancy");
-const AccountLinking = require("../../lib/build/recipe/accountlinking");
-const { default: AccountLinkingRaw } = require("../../lib/build/recipe/accountlinking/recipe");
+let EmailVerificationRaw = require("supertokens-node/lib/build/recipe/emailverification/recipe").default;
+let EmailVerification = require("supertokens-node/recipe/emailverification");
+let UserRolesRaw = require("supertokens-node/lib/build/recipe/userroles/recipe").default;
+let UserRoles = require("supertokens-node/recipe/userroles");
+let PasswordlessRaw = require("supertokens-node/lib/build/recipe/passwordless/recipe").default;
+let Passwordless = require("supertokens-node/recipe/passwordless");
+let ThirdPartyPasswordless = require("supertokens-node/recipe/thirdpartypasswordless");
+let { default: SuperTokensRaw } = require("supertokens-node/lib/build/supertokens");
+const { default: EmailPasswordRaw } = require("supertokens-node/lib/build/recipe/emailpassword/recipe");
+const { default: ThirdPartyRaw } = require("supertokens-node/lib/build/recipe/thirdparty/recipe");
+const {
+    default: ThirdPartyEmailPasswordRaw,
+} = require("supertokens-node/lib/build/recipe/thirdpartyemailpassword/recipe");
+const { default: DashboardRaw } = require("supertokens-node/lib/build/recipe/dashboard/recipe");
+const { default: MultitenancyRaw } = require("supertokens-node/lib/build/recipe/multitenancy/recipe");
+const Multitenancy = require("supertokens-node/lib/build/recipe/multitenancy");
+const AccountLinking = require("supertokens-node/lib/build/recipe/accountlinking");
+const { default: AccountLinkingRaw } = require("supertokens-node/lib/build/recipe/accountlinking/recipe");
 
-const { default: ThirdPartyPasswordlessRaw } = require("../../lib/build/recipe/thirdpartypasswordless/recipe");
-const { default: SessionRaw } = require("../../lib/build/recipe/session/recipe");
+const {
+    default: ThirdPartyPasswordlessRaw,
+} = require("supertokens-node/lib/build/recipe/thirdpartypasswordless/recipe");
+const { default: SessionRaw } = require("supertokens-node/lib/build/recipe/session/recipe");
 
-const UserMetadataRaw = require("../../lib/build/recipe/usermetadata/recipe").default;
-const UserMetadata = require("../../recipe/usermetadata");
+const UserMetadataRaw = require("supertokens-node/lib/build/recipe/usermetadata/recipe").default;
+const UserMetadata = require("supertokens-node/recipe/usermetadata");
 
-const MultiFactorAuthRaw = require("../../lib/build/recipe/multifactorauth/recipe").default;
-const MultiFactorAuth = require("../../recipe/multifactorauth");
+const MultiFactorAuthRaw = require("supertokens-node/lib/build/recipe/multifactorauth/recipe").default;
+const MultiFactorAuth = require("supertokens-node/recipe/multifactorauth");
 
-const TOTPRaw = require("../../lib/build/recipe/totp/recipe").default;
-const TOTP = require("../../recipe/totp");
+const TOTPRaw = require("supertokens-node/lib/build/recipe/totp/recipe").default;
+const TOTP = require("supertokens-node/recipe/totp");
 const OTPAuth = require("otpauth");
 
 let {
@@ -66,7 +70,11 @@ let {
     mockThirdPartyProvider,
 } = require("./utils");
 
-let urlencodedParser = bodyParser.urlencoded({ limit: "20mb", extended: true, parameterLimit: 20000 });
+let urlencodedParser = bodyParser.urlencoded({
+    limit: "20mb",
+    extended: true,
+    parameterLimit: 20000,
+});
 let jsonParser = bodyParser.json({ limit: "20mb" });
 
 let app = express();
@@ -488,7 +496,15 @@ app.get("/test/getDevice", (req, res) => {
 });
 
 app.post("/test/getTOTPCode", (req, res) => {
-    res.send(JSON.stringify({ totp: new OTPAuth.TOTP({ secret: req.body.secret, digits: 6, period: 1 }).generate() }));
+    res.send(
+        JSON.stringify({
+            totp: new OTPAuth.TOTP({
+                secret: req.body.secret,
+                digits: 6,
+                period: 1,
+            }).generate(),
+        })
+    );
 });
 
 app.get("/test/featureFlags", (req, res) => {

@@ -14,11 +14,11 @@
  */
 const { printPath, setupST, startST, killAllST, cleanST, extractInfoFromResponse } = require("../utils");
 const assert = require("assert");
-const SuperTokens = require("../..");
-const Session = require("../../recipe/session");
-const JWT = require("../../recipe/jwt");
-const { maxVersion } = require("../../lib/build/utils");
-let { Querier } = require("../../lib/build/querier");
+const SuperTokens = require("supertokens-node");
+const Session = require("supertokens-node/recipe/session");
+const JWT = require("supertokens-node/recipe/jwt");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
+let { Querier } = require("supertokens-node/lib/build/querier");
 
 describe(`Session handling functions without modifying response: ${printPath(
     "[test/session/sessionHandlingFuncsWithoutReq.test.js]"
@@ -64,7 +64,9 @@ describe(`Session handling functions without modifying response: ${printPath(
             assert.strictEqual(payload.tokenProp, true);
             assert.strictEqual(payload.iss, "https://api.supertokens.io/auth");
 
-            assert.deepStrictEqual(await res.getSessionDataFromDatabase(), { dbProp: true });
+            assert.deepStrictEqual(await res.getSessionDataFromDatabase(), {
+                dbProp: true,
+            });
         });
 
         it("should create a new session w/ anti-csrf", async () => {
@@ -100,7 +102,9 @@ describe(`Session handling functions without modifying response: ${printPath(
             assert.strictEqual(payload.sub, "test-user-id");
             assert.strictEqual(payload.tokenProp, true);
 
-            assert.deepStrictEqual(await session.getSessionDataFromDatabase(), { dbProp: true });
+            assert.deepStrictEqual(await session.getSessionDataFromDatabase(), {
+                dbProp: true,
+            });
         });
     });
 
@@ -126,7 +130,7 @@ describe(`Session handling functions without modifying response: ${printPath(
             const tokens = createRes.getAllSessionTokensDangerously();
             const session = await Session.getSessionWithoutRequestResponse(tokens.accessToken, tokens.antiCsrfToken);
             assert.ok(session);
-            /** @type {import("../../recipe/session").SessionContainer} */
+            /** @type {import("supertokens-node/recipe/session").SessionContainer} */
             const getSessionTokenInfo = session.getAllSessionTokensDangerously();
             assert.deepStrictEqual(getSessionTokenInfo, {
                 accessToken: tokens.accessToken,
@@ -344,7 +348,10 @@ describe(`Session handling functions without modifying response: ${printPath(
             try {
                 await Session.getSessionWithoutRequestResponse(tokens.accessToken, undefined, {
                     overrideGlobalClaimValidators: () => [
-                        { id: "test", validate: () => ({ isValid: false, reason: "test" }) },
+                        {
+                            id: "test",
+                            validate: () => ({ isValid: false, reason: "test" }),
+                        },
                     ],
                 });
             } catch (ex) {
@@ -393,7 +400,9 @@ describe(`Session handling functions without modifying response: ${printPath(
             assert.strictEqual(payload.sub, "test-user-id");
             assert.strictEqual(payload.tokenProp, true);
 
-            assert.deepStrictEqual(await session.getSessionDataFromDatabase(), { dbProp: true });
+            assert.deepStrictEqual(await session.getSessionDataFromDatabase(), {
+                dbProp: true,
+            });
         });
 
         it("should work with anti-csrf", async () => {

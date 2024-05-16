@@ -1,13 +1,13 @@
 const assert = require("assert");
 
 const { printPath, setupST, startST, killAllST, cleanST, areArraysEqual } = require("../utils");
-const STExpress = require("../..");
-const { ProcessState } = require("../../lib/build/processState");
-const EmailPasswordRecipe = require("../../lib/build/recipe/emailpassword").default;
-const SessionRecipe = require("../../lib/build/recipe/session").default;
-const UserMetadataRecipe = require("../../lib/build/recipe/usermetadata").default;
-const { Querier } = require("../../lib/build/querier");
-const { maxVersion } = require("../../lib/build/utils");
+const STExpress = require("supertokens-node");
+const { ProcessState } = require("supertokens-node/lib/build/processState");
+const EmailPasswordRecipe = require("supertokens-node/lib/build/recipe/emailpassword").default;
+const SessionRecipe = require("supertokens-node/lib/build/recipe/session").default;
+const UserMetadataRecipe = require("supertokens-node/lib/build/recipe/usermetadata").default;
+const { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
 
 describe(`deleteUserIdMappingTest: ${printPath("[test/useridmapping/deleteUserIdMapping.test.js]")}`, function () {
     beforeEach(async function () {
@@ -45,21 +45,30 @@ describe(`deleteUserIdMappingTest: ${printPath("[test/useridmapping/deleteUserId
             }
 
             {
-                let response = await STExpress.deleteUserIdMapping({ userId: "unknown", userIdType: "SUPERTOKENS" });
+                let response = await STExpress.deleteUserIdMapping({
+                    userId: "unknown",
+                    userIdType: "SUPERTOKENS",
+                });
                 assert.strictEqual(Object.keys(response).length, 2);
                 assert.strictEqual(response.status, "OK");
                 assert.strictEqual(response.didMappingExist, false);
             }
 
             {
-                let response = await STExpress.deleteUserIdMapping({ userId: "unknown", userIdType: "EXTERNAL" });
+                let response = await STExpress.deleteUserIdMapping({
+                    userId: "unknown",
+                    userIdType: "EXTERNAL",
+                });
                 assert.strictEqual(Object.keys(response).length, 2);
                 assert.strictEqual(response.status, "OK");
                 assert.strictEqual(response.didMappingExist, false);
             }
 
             {
-                let response = await STExpress.deleteUserIdMapping({ userId: "unknown", userIdType: "ANY" });
+                let response = await STExpress.deleteUserIdMapping({
+                    userId: "unknown",
+                    userIdType: "ANY",
+                });
                 assert.strictEqual(Object.keys(response).length, 2);
                 assert.strictEqual(response.status, "OK");
                 assert.strictEqual(response.didMappingExist, false);
@@ -345,7 +354,10 @@ describe(`deleteUserIdMappingTest: ${printPath("[test/useridmapping/deleteUserId
         }
 
         {
-            let response = await STExpress.getUserIdMapping({ userId: superTokensUserId, userIdType: "SUPERTOKENS" });
+            let response = await STExpress.getUserIdMapping({
+                userId: superTokensUserId,
+                userIdType: "SUPERTOKENS",
+            });
             assert.strictEqual(response.status, "OK");
             assert.strictEqual(response.superTokensUserId, superTokensUserId);
             assert.strictEqual(response.externalUserId, externalUserId);

@@ -14,10 +14,10 @@
  */
 
 const express = require("express");
-const { middleware, errorHandler } = require("../../framework/express");
-const SuperTokens = require("../../");
-const Passwordless = require("../../lib/build/recipe/passwordless");
-const EmailVerification = require("../../lib/build/recipe/emailverification");
+const { middleware, errorHandler } = require("supertokens-node/framework/express");
+const SuperTokens = require("supertokens-node");
+const Passwordless = require("supertokens-node/lib/build/recipe/passwordless");
+const EmailVerification = require("supertokens-node/lib/build/recipe/emailverification");
 const { json } = require("body-parser");
 const request = require("supertest");
 

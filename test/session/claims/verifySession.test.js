@@ -14,19 +14,19 @@
  */
 const { printPath, setupST, startST, killAllST, cleanST, extractInfoFromResponse } = require("../../utils");
 const assert = require("assert");
-const { ProcessState } = require("../../../lib/build/processState");
-const SuperTokens = require("../../../");
-const Session = require("../../../recipe/session");
-const { default: SessionClass } = require("../../../lib/build/recipe/session/sessionClass");
-const { verifySession } = require("../../../recipe/session/framework/express");
-const { middleware, errorHandler } = require("../../../framework/express");
-const { PrimitiveClaim } = require("../../../lib/build/recipe/session/claimBaseClasses/primitiveClaim");
+const { ProcessState } = require("supertokens-node/lib/build/processState");
+const SuperTokens = require("supertokens-node");
+const Session = require("supertokens-node/recipe/session");
+const { default: SessionClass } = require("supertokens-node/lib/build/recipe/session/sessionClass");
+const { verifySession } = require("supertokens-node/recipe/session/framework/express");
+const { middleware, errorHandler } = require("supertokens-node/framework/express");
+const { PrimitiveClaim } = require("supertokens-node/lib/build/recipe/session/claimBaseClasses/primitiveClaim");
 const express = require("express");
 const request = require("supertest");
 const { TrueClaim, UndefinedClaim } = require("./testClaims");
 const sinon = require("sinon");
-const { default: SessionError } = require("../../../lib/build/recipe/session/error");
-const { default: RecipeUserId } = require("../../../lib/build/recipeUserId");
+const { default: SessionError } = require("supertokens-node/lib/build/recipe/session/error");
+const { default: RecipeUserId } = require("supertokens-node/lib/build/recipeUserId");
 
 describe(`sessionClaims/verifySession: ${printPath("[test/session/claims/verifySession.test.js]")}`, function () {
     beforeEach(async function () {
@@ -57,7 +57,12 @@ describe(`sessionClaims/verifySession: ${printPath("[test/session/claims/verifyS
                         appName: "SuperTokens",
                         websiteDomain: "supertokens.io",
                     },
-                    recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+                    recipeList: [
+                        Session.init({
+                            getTokenTransferMethod: () => "cookie",
+                            antiCsrf: "VIA_TOKEN",
+                        }),
+                    ],
                 });
 
                 const app = getTestApp();
@@ -494,7 +499,14 @@ describe(`sessionClaims/verifySession: ${printPath("[test/session/claims/verifyS
                 const session = await createSession(app);
                 const res = await testGet(app, session, "/refetched-claim", 403);
                 validateErrorResp(res, [
-                    { id: "st-true", reason: { message: "wrong value", expectedValue: false, actualValue: true } },
+                    {
+                        id: "st-true",
+                        reason: {
+                            message: "wrong value",
+                            expectedValue: false,
+                            actualValue: true,
+                        },
+                    },
                 ]);
             });
 

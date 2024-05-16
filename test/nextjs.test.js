@@ -18,22 +18,22 @@ const [major, minor, patch] = process.versions.node.split(".").map(Number);
 if (major >= 18) {
     const { printPath, setupST, startST, killAllST, cleanST, delay } = require("./utils");
     let assert = require("assert");
-    let { ProcessState } = require("../lib/build/processState");
-    let SuperTokens = require("../lib/build/").default;
-    let { middleware } = require("../framework/express");
-    const Session = require("../lib/build/recipe/session");
-    const EmailPassword = require("../lib/build/recipe/emailpassword");
-    const EmailVerification = require("../lib/build/recipe/emailverification");
-    const ThirdPartyEmailPassword = require("../lib/build/recipe/thirdpartyemailpassword");
+    let { ProcessState } = require("supertokens-node/lib/build/processState");
+    let SuperTokens = require("supertokens-node/lib/build/").default;
+    let { middleware } = require("supertokens-node/framework/express");
+    const Session = require("supertokens-node/lib/build/recipe/session");
+    const EmailPassword = require("supertokens-node/lib/build/recipe/emailpassword");
+    const EmailVerification = require("supertokens-node/lib/build/recipe/emailverification");
+    const ThirdPartyEmailPassword = require("supertokens-node/lib/build/recipe/thirdpartyemailpassword");
     const {
         superTokensNextWrapper,
         withSession,
         getSSRSession,
         getAppDirRequestHandler,
         withPreParsedRequestResponse,
-    } = require("../lib/build/nextjs");
-    const { verifySession } = require("../recipe/session/framework/express");
-    const SessionError = require("../lib/build/recipe/session/error").default;
+    } = require("supertokens-node/lib/build/nextjs");
+    const { verifySession } = require("supertokens-node/recipe/session/framework/express");
+    const SessionError = require("supertokens-node/lib/build/recipe/session/error").default;
     const { testApiHandler } = require("next-test-api-route-handler");
     const { NextRequest, NextResponse } = require("next/server");
 
@@ -512,7 +512,9 @@ if (major >= 18) {
                     url: "/api/auth/callback/apple",
                     test: async ({ fetch }) => {
                         let state = Buffer.from(
-                            JSON.stringify({ frontendRedirectURI: "http://localhost:3000/redirect" })
+                            JSON.stringify({
+                                frontendRedirectURI: "http://localhost:3000/redirect",
+                            })
                         ).toString("base64");
                         let formData = { state, code: "testing" };
                         var encodedData = Object.keys(formData)
@@ -623,7 +625,9 @@ if (major >= 18) {
             process.env.user = undefined;
             await killAllST();
             await setupST();
-            const connectionURI = await startST({ coreConfig: { access_token_validity: 2 } });
+            const connectionURI = await startST({
+                coreConfig: { access_token_validity: 2 },
+            });
             ProcessState.getInstance().reset();
             SuperTokens.init({
                 supertokens: {
@@ -723,7 +727,9 @@ if (major >= 18) {
         });
 
         it("getSSRSession", async function () {
-            const tokens = await getValidTokensAfterSignup({ tokenTransferMethod: "header" });
+            const tokens = await getValidTokensAfterSignup({
+                tokenTransferMethod: "header",
+            });
 
             const authenticatedRequest = new NextRequest("http://localhost:3000/api/get-user", {
                 headers: {
@@ -784,7 +790,9 @@ if (major >= 18) {
         });
 
         it("withSession", async function () {
-            const tokens = await getValidTokensAfterSignup({ tokenTransferMethod: "header" });
+            const tokens = await getValidTokensAfterSignup({
+                tokenTransferMethod: "header",
+            });
 
             const authenticatedRequest = new NextRequest("http://localhost:3000/api/get-user", {
                 headers: {
@@ -809,7 +817,10 @@ if (major >= 18) {
             const responseWhereHandlerThrowsSTError = await withSession(
                 requestWhereHandlerThrowsSTError,
                 async (err, session) => {
-                    throw new SessionError({ message: "Authentication Required!", type: "UNAUTHORISED" });
+                    throw new SessionError({
+                        message: "Authentication Required!",
+                        type: "UNAUTHORISED",
+                    });
                 }
             );
             assert.equal(responseWhereHandlerThrowsSTError.status, 401);
@@ -892,7 +903,9 @@ if (major >= 18) {
         });
 
         it("withPreParsedRequestResponse", async function () {
-            const tokens = await getValidTokensAfterSignup({ tokenTransferMethod: "header" });
+            const tokens = await getValidTokensAfterSignup({
+                tokenTransferMethod: "header",
+            });
 
             const authenticatedRequest = new NextRequest("http://localhost:3000/api/get-user", {
                 headers: {
@@ -917,7 +930,10 @@ if (major >= 18) {
             const responseWhereHandlerThrowsSTError = await withPreParsedRequestResponse(
                 requestWhereHandlerThrowsSTError,
                 async (baseRequest, baseResponse) => {
-                    throw new SessionError({ message: "Authentication Required!", type: "UNAUTHORISED" });
+                    throw new SessionError({
+                        message: "Authentication Required!",
+                        type: "UNAUTHORISED",
+                    });
                 }
             );
             assert.equal(responseWhereHandlerThrowsSTError.status, 401);
@@ -971,7 +987,9 @@ if (major >= 18) {
             });
 
             it("should return hasToken value correctly", async function () {
-                const tokens = await getValidTokensAfterSignup({ tokenTransferMethod: "header" });
+                const tokens = await getValidTokensAfterSignup({
+                    tokenTransferMethod: "header",
+                });
 
                 const requestWithNoToken = new NextRequest("http://localhost:3000/api/get-user");
 
@@ -1049,7 +1067,9 @@ if (major >= 18) {
             });
 
             it("should return hasToken value correctly", async function () {
-                const tokens = await getValidTokensAfterSignup({ tokenTransferMethod: "cookie" });
+                const tokens = await getValidTokensAfterSignup({
+                    tokenTransferMethod: "cookie",
+                });
 
                 const requestWithNoToken = new NextRequest("http://localhost:3000/api/get-user");
 
@@ -1127,7 +1147,9 @@ if (major >= 18) {
             });
 
             it("should return hasToken value correctly", async function () {
-                const tokens = await getValidTokensAfterSignup({ tokenTransferMethod: "header" });
+                const tokens = await getValidTokensAfterSignup({
+                    tokenTransferMethod: "header",
+                });
 
                 const requestWithNoToken = new NextRequest("http://localhost:3000/api/get-user");
 

@@ -16,14 +16,14 @@
 const { printPath, setupST, startSTWithMultitenancy, killAllST, cleanST } = require("../utils");
 let assert = require("assert");
 const express = require("express");
-let { ProcessState } = require("../../lib/build/processState");
-let SuperTokens = require("../../");
-let { middleware, errorHandler } = require("../../framework/express");
-let MultiFactorAuth = require("../../lib/build/recipe/multifactorauth");
-let UserMetadata = require("../../lib/build/recipe/usermetadata");
-let Session = require("../../lib/build/recipe/session");
-let Totp = require("../../lib/build/recipe/totp");
-let EmailPassword = require("../../lib/build/recipe/emailpassword");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
+let MultiFactorAuth = require("supertokens-node/lib/build/recipe/multifactorauth");
+let UserMetadata = require("supertokens-node/lib/build/recipe/usermetadata");
+let Session = require("supertokens-node/lib/build/recipe/session");
+let Totp = require("supertokens-node/lib/build/recipe/totp");
+let EmailPassword = require("supertokens-node/lib/build/recipe/emailpassword");
 
 describe(`mfa-autoinit: ${printPath("[test/mfa/mfa.autoInit.test.js]")}`, function () {
     beforeEach(async function () {

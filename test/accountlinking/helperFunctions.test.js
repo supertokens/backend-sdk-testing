@@ -22,16 +22,16 @@ const {
     cleanST,
     resetAll,
 } = require("../utils");
-let supertokens = require("../../");
-let Session = require("../../recipe/session");
+let supertokens = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState, PROCESS_STATE } = require("../../lib/build/processState");
-let EmailPassword = require("../../recipe/emailpassword");
-let EmailVerification = require("../../recipe/emailverification");
-let ThirdParty = require("../../recipe/thirdparty");
-let Multitenancy = require("../../recipe/multitenancy");
-let AccountLinking = require("../../recipe/accountlinking");
-let AccountLinkingRecipe = require("../../lib/build/recipe/accountlinking/recipe").default;
+let { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let EmailVerification = require("supertokens-node/recipe/emailverification");
+let ThirdParty = require("supertokens-node/recipe/thirdparty");
+let Multitenancy = require("supertokens-node/recipe/multitenancy");
+let AccountLinking = require("supertokens-node/recipe/accountlinking");
+let AccountLinkingRecipe = require("supertokens-node/lib/build/recipe/accountlinking/recipe").default;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions.test.js]")}`, function () {
     beforeEach(async function () {
@@ -1398,11 +1398,15 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
                 false
             );
 
-            let { users: t1UserList } = await supertokens.getUsersNewestFirst({ tenantId: "tenant1" });
+            let { users: t1UserList } = await supertokens.getUsersNewestFirst({
+                tenantId: "tenant1",
+            });
             assert.strictEqual(t1UserList.length, 1);
             assert.strictEqual(t1UserList[0].id, t1User.id);
 
-            let { users: pubUserList } = await supertokens.getUsersNewestFirst({ tenantId: "public" });
+            let { users: pubUserList } = await supertokens.getUsersNewestFirst({
+                tenantId: "public",
+            });
             assert.strictEqual(pubUserList.length, 1);
             assert.strictEqual(pubUserList[0].id, pubUser.id);
         });

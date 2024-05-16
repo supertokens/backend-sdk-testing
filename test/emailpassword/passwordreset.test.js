@@ -14,27 +14,29 @@
  */
 
 const { printPath, setupST, startST, stopST, killAllST, cleanST, resetAll, signUPRequest } = require("../utils");
-let STExpress = require("../../");
-let Session = require("../../recipe/session");
-let SessionRecipe = require("../../lib/build/recipe/session/recipe").default;
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let SessionRecipe = require("supertokens-node/lib/build/recipe/session/recipe").default;
 let assert = require("assert");
 var url = require("url");
-let { ProcessState } = require("../../lib/build/processState");
-let { normaliseURLPathOrThrowError } = require("../../lib/build/normalisedURLPath");
-let { normaliseURLDomainOrThrowError } = require("../../lib/build/normalisedURLDomain");
-let { normaliseSessionScopeOrThrowError } = require("../../lib/build/recipe/session/utils");
-const { Querier } = require("../../lib/build/querier");
-let EmailPassword = require("../../recipe/emailpassword");
-let ThirdParty = require("../../recipe/thirdparty");
-let EmailPasswordRecipe = require("../../lib/build/recipe/emailpassword/recipe").default;
-let generatePasswordResetToken = require("../../lib/build/recipe/emailpassword/api/generatePasswordResetToken").default;
-let passwordReset = require("../../lib/build/recipe/emailpassword/api/passwordReset").default;
-let createResetPasswordLink = require("../../lib/build/recipe/emailpassword/index.js").createResetPasswordLink;
-let sendResetPasswordEmail = require("../../lib/build/recipe/emailpassword/index.js").sendResetPasswordEmail;
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let { normaliseURLPathOrThrowError } = require("supertokens-node/lib/build/normalisedURLPath");
+let { normaliseURLDomainOrThrowError } = require("supertokens-node/lib/build/normalisedURLDomain");
+let { normaliseSessionScopeOrThrowError } = require("supertokens-node/lib/build/recipe/session/utils");
+const { Querier } = require("supertokens-node/lib/build/querier");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let ThirdParty = require("supertokens-node/recipe/thirdparty");
+let EmailPasswordRecipe = require("supertokens-node/lib/build/recipe/emailpassword/recipe").default;
+let generatePasswordResetToken = require("supertokens-node/lib/build/recipe/emailpassword/api/generatePasswordResetToken")
+    .default;
+let passwordReset = require("supertokens-node/lib/build/recipe/emailpassword/api/passwordReset").default;
+let createResetPasswordLink = require("supertokens-node/lib/build/recipe/emailpassword/index.js")
+    .createResetPasswordLink;
+let sendResetPasswordEmail = require("supertokens-node/lib/build/recipe/emailpassword/index.js").sendResetPasswordEmail;
 const express = require("express");
 const request = require("supertest");
-let { middleware, errorHandler } = require("../../framework/express");
-let { maxVersion } = require("../../lib/build/utils");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
+let { maxVersion } = require("supertokens-node/lib/build/utils");
 
 /**
  * TODO: generate token API:

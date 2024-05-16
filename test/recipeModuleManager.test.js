@@ -13,20 +13,20 @@
  * under the License.
  */
 const { printPath, setupST, startST, killAllST, cleanST, resetAll } = require("./utils");
-let { ProcessState } = require("../lib/build/processState");
-let ST = require("../");
-let Session = require("../recipe/session");
-let { Querier } = require("../lib/build/querier");
-let RecipeModule = require("../lib/build/recipeModule").default;
-let NormalisedURLPath = require("../lib/build/normalisedURLPath").default;
-let STError = require("../lib/build/error").default;
-let SessionRecipe = require("../lib/build/recipe/session/recipe").default;
-let EmailPassword = require("../recipe/emailpassword");
-let EmailPasswordRecipe = require("../lib/build/recipe/emailpassword/recipe").default;
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let ST = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let { Querier } = require("supertokens-node/lib/build/querier");
+let RecipeModule = require("supertokens-node/lib/build/recipeModule").default;
+let NormalisedURLPath = require("supertokens-node/lib/build/normalisedURLPath").default;
+let STError = require("supertokens-node/lib/build/error").default;
+let SessionRecipe = require("supertokens-node/lib/build/recipe/session/recipe").default;
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let EmailPasswordRecipe = require("supertokens-node/lib/build/recipe/emailpassword/recipe").default;
 const express = require("express");
 const assert = require("assert");
 const request = require("supertest");
-let { middleware, errorHandler } = require("../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 /**
  *
@@ -62,7 +62,10 @@ describe(`recipeModuleManagerTest: ${printPath("[test/recipeModuleManager.test.j
                 websiteDomain: "supertokens.io",
             },
             recipeList: [
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 EmailPassword.init(),
             ],
         });
@@ -77,7 +80,10 @@ describe(`recipeModuleManagerTest: ${printPath("[test/recipeModuleManager.test.j
                 websiteDomain: "supertokens.io",
             },
             recipeList: [
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 EmailPassword.init(),
             ],
         });
@@ -106,7 +112,12 @@ describe(`recipeModuleManagerTest: ${printPath("[test/recipeModuleManager.test.j
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         await Querier.getNewInstanceOrThrowError(undefined);
@@ -148,7 +159,10 @@ describe(`recipeModuleManagerTest: ${printPath("[test/recipeModuleManager.test.j
                 websiteDomain: "supertokens.io",
             },
             recipeList: [
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 EmailPassword.init(),
             ],
         });

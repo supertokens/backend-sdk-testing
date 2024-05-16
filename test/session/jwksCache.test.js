@@ -14,8 +14,8 @@
  */
 const { printPath, setupST, startST, killAllST, cleanST, setKeyValueInConfig, resetAll } = require("../utils");
 const assert = require("assert");
-const SuperTokens = require("../..");
-const Session = require("../../recipe/session");
+const SuperTokens = require("supertokens-node");
+const Session = require("supertokens-node/recipe/session");
 const sinon = require("sinon");
 const request = require("http");
 

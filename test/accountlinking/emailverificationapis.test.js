@@ -23,18 +23,18 @@ const {
     extractInfoFromResponse,
     startSTWithMultitenancyAndAccountLinking,
 } = require("../utils");
-let supertokens = require("../../");
-let Session = require("../../recipe/session");
+let supertokens = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let EmailPassword = require("../../recipe/emailpassword");
-let ThirdParty = require("../../recipe/thirdparty");
-let AccountLinking = require("../../recipe/accountlinking");
-let EmailVerification = require("../../recipe/emailverification");
-let EmailVerificationRecipe = require("../../lib/build/recipe/emailverification/recipe").default;
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let ThirdParty = require("supertokens-node/recipe/thirdparty");
+let AccountLinking = require("supertokens-node/recipe/accountlinking");
+let EmailVerification = require("supertokens-node/recipe/emailverification");
+let EmailVerificationRecipe = require("supertokens-node/lib/build/recipe/emailverification/recipe").default;
 const express = require("express");
 const request = require("supertest");
-let { middleware, errorHandler } = require("../../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 let fs = require("fs");
 let path = require("path");
 

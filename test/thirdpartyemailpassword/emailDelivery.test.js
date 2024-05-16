@@ -13,20 +13,21 @@
  * under the License.
  */
 const { printPath, setupST, startST, killAllST, cleanST, extractInfoFromResponse, delay } = require("../utils");
-let STExpress = require("../..");
-let Session = require("../../recipe/session");
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
 var url = require("url");
-let { ProcessState } = require("../../lib/build/processState");
-const EmailVerification = require("../../recipe/emailverification");
-let ThirdPartyEmailPassword = require("../../recipe/thirdpartyemailpassword");
-let createResetPasswordLink = require("../../lib/build/recipe/thirdpartyemailpassword/index.js")
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+const EmailVerification = require("supertokens-node/recipe/emailverification");
+let ThirdPartyEmailPassword = require("supertokens-node/recipe/thirdpartyemailpassword");
+let createResetPasswordLink = require("supertokens-node/lib/build/recipe/thirdpartyemailpassword/index.js")
     .createResetPasswordLink;
-let sendResetPasswordEmail = require("../../lib/build/recipe/thirdpartyemailpassword/index.js").sendResetPasswordEmail;
-let { SMTPService } = require("../../recipe/thirdpartyemailpassword/emaildelivery");
+let sendResetPasswordEmail = require("supertokens-node/lib/build/recipe/thirdpartyemailpassword/index.js")
+    .sendResetPasswordEmail;
+let { SMTPService } = require("supertokens-node/recipe/thirdpartyemailpassword/emaildelivery");
 let nock = require("nock");
 let supertest = require("supertest");
-const { middleware, errorHandler } = require("../../framework/express");
+const { middleware, errorHandler } = require("supertokens-node/framework/express");
 let express = require("express");
 
 describe(`emailDelivery: ${printPath("[test/thirdpartyemailpassword/emailDelivery.test.js]")}`, function () {

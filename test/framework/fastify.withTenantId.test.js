@@ -22,20 +22,20 @@ const {
     extractCookieCountInfo,
 } = require("../utils");
 let assert = require("assert");
-let { ProcessState, PROCESS_STATE } = require("../../lib/build/processState");
-let SuperTokens = require("../../");
-let FastifyFramework = require("../../framework/fastify");
+let { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node");
+let FastifyFramework = require("supertokens-node/framework/fastify");
 const Fastify = require("fastify");
-let EmailPassword = require("../../recipe/emailpassword");
-const EmailVerification = require("../../recipe/emailverification");
-let Session = require("../../recipe/session");
-let { verifySession } = require("../../recipe/session/framework/fastify");
-let Dashboard = require("../../recipe/dashboard");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+const EmailVerification = require("supertokens-node/recipe/emailverification");
+let Session = require("supertokens-node/recipe/session");
+let { verifySession } = require("supertokens-node/recipe/session/framework/fastify");
+let Dashboard = require("supertokens-node/recipe/dashboard");
 let { createUsers } = require("../utils");
-const { Querier } = require("../../lib/build/querier");
-const { maxVersion } = require("../../lib/build/utils");
-const Passwordless = require("../../recipe/passwordless");
-const ThirdParty = require("../../recipe/thirdparty");
+const { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
+const Passwordless = require("supertokens-node/recipe/passwordless");
+const ThirdParty = require("supertokens-node/recipe/thirdparty");
 
 describe(`Fastify: ${printPath("[test/framework/fastify.withTenantId.test.js]")}`, function () {
     beforeEach(async function () {
@@ -274,7 +274,12 @@ describe(`Fastify: ${printPath("[test/framework/fastify.withTenantId.test.js]")}
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         this.server.setErrorHandler(FastifyFramework.errorHandler());
@@ -350,7 +355,12 @@ describe(`Fastify: ${printPath("[test/framework/fastify.withTenantId.test.js]")}
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         this.server.post("/create", async (req, res) => {
@@ -424,7 +434,12 @@ describe(`Fastify: ${printPath("[test/framework/fastify.withTenantId.test.js]")}
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         this.server.post(
@@ -461,7 +476,12 @@ describe(`Fastify: ${printPath("[test/framework/fastify.withTenantId.test.js]")}
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         this.server.post("/create", async (req, res) => {
@@ -574,7 +594,12 @@ describe(`Fastify: ${printPath("[test/framework/fastify.withTenantId.test.js]")}
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         this.server.post("/create", async (req, res) => {
@@ -621,7 +646,12 @@ describe(`Fastify: ${printPath("[test/framework/fastify.withTenantId.test.js]")}
                 websiteDomain: "supertokens.io",
                 apiBasePath: "/",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         this.server.post("/create", async (req, res) => {
@@ -735,7 +765,12 @@ describe(`Fastify: ${printPath("[test/framework/fastify.withTenantId.test.js]")}
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         this.server.post("/create", async (req, res) => {
@@ -796,7 +831,12 @@ describe(`Fastify: ${printPath("[test/framework/fastify.withTenantId.test.js]")}
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         await this.server.register(FastifyFramework.plugin);
@@ -820,7 +860,9 @@ describe(`Fastify: ${printPath("[test/framework/fastify.withTenantId.test.js]")}
         });
 
         this.server.post("/session/verifyAntiCsrfFalse", async (req, res) => {
-            let sessionResponse = await Session.getSession(req, res, { antiCsrfCheck: false });
+            let sessionResponse = await Session.getSession(req, res, {
+                antiCsrfCheck: false,
+            });
             return res.send({ userId: sessionResponse.userId }).code(200);
         });
         let res = extractInfoFromResponse(
@@ -862,7 +904,12 @@ describe(`Fastify: ${printPath("[test/framework/fastify.withTenantId.test.js]")}
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         this.server.post("/create", async (req, res) => {
@@ -958,7 +1005,12 @@ describe(`Fastify: ${printPath("[test/framework/fastify.withTenantId.test.js]")}
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         this.server.post("/create", async (req, res) => {
@@ -1001,7 +1053,9 @@ describe(`Fastify: ${printPath("[test/framework/fastify.withTenantId.test.js]")}
 
         this.server.post("/updateSessionDataInvalidSessionHandle", async (req, res) => {
             return res
-                .send({ success: !(await Session.updateSessionDataInDatabase("InvalidHandle", { key: "value3" })) })
+                .send({
+                    success: !(await Session.updateSessionDataInDatabase("InvalidHandle", { key: "value3" })),
+                })
                 .code(200);
         });
 
@@ -1085,7 +1139,12 @@ describe(`Fastify: ${printPath("[test/framework/fastify.withTenantId.test.js]")}
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         this.server.post("/create", async (req, res) => {
@@ -1132,7 +1191,9 @@ describe(`Fastify: ${printPath("[test/framework/fastify.withTenantId.test.js]")}
 
         this.server.post("/updateAccessTokenPayloadInvalidSessionHandle", async (req, res) => {
             return res
-                .send({ success: !(await Session.updateSessionDataInDatabase("InvalidHandle", { key: "value3" })) })
+                .send({
+                    success: !(await Session.updateSessionDataInDatabase("InvalidHandle", { key: "value3" })),
+                })
                 .code(200);
         });
 
@@ -1371,7 +1432,12 @@ describe(`Fastify: ${printPath("[test/framework/fastify.withTenantId.test.js]")}
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         await this.server.register(FastifyFramework.plugin);

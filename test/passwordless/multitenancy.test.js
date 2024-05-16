@@ -13,19 +13,19 @@
  * under the License.
  */
 const { printPath, setupST, startSTWithMultitenancy, stopST, killAllST, cleanST, resetAll } = require("../utils");
-let SuperTokens = require("../../");
-let Session = require("../../recipe/session");
-let SessionRecipe = require("../../lib/build/recipe/session/recipe").default;
+let SuperTokens = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let SessionRecipe = require("supertokens-node/lib/build/recipe/session/recipe").default;
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let { normaliseURLPathOrThrowError } = require("../../lib/build/normalisedURLPath");
-let { normaliseURLDomainOrThrowError } = require("../../lib/build/normalisedURLDomain");
-let { normaliseSessionScopeOrThrowError } = require("../../lib/build/recipe/session/utils");
-const { Querier } = require("../../lib/build/querier");
-let Passwordless = require("../../recipe/passwordless");
-let utils = require("../../lib/build/recipe/emailpassword/utils");
-let { middleware, errorHandler } = require("../../framework/express");
-let Multitenancy = require("../../recipe/multitenancy");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let { normaliseURLPathOrThrowError } = require("supertokens-node/lib/build/normalisedURLPath");
+let { normaliseURLDomainOrThrowError } = require("supertokens-node/lib/build/normalisedURLDomain");
+let { normaliseSessionScopeOrThrowError } = require("supertokens-node/lib/build/recipe/session/utils");
+const { Querier } = require("supertokens-node/lib/build/querier");
+let Passwordless = require("supertokens-node/recipe/passwordless");
+let utils = require("supertokens-node/lib/build/recipe/emailpassword/utils");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
+let Multitenancy = require("supertokens-node/recipe/multitenancy");
 
 describe(`multitenancy: ${printPath("[test/passwordless/multitenancy.test.js]")}`, function () {
     beforeEach(async function () {
@@ -58,9 +58,15 @@ describe(`multitenancy: ${printPath("[test/passwordless/multitenancy.test.js]")}
             ],
         });
 
-        await Multitenancy.createOrUpdateTenant("t1", { passwordlessEnabled: true });
-        await Multitenancy.createOrUpdateTenant("t2", { passwordlessEnabled: true });
-        await Multitenancy.createOrUpdateTenant("t3", { passwordlessEnabled: true });
+        await Multitenancy.createOrUpdateTenant("t1", {
+            passwordlessEnabled: true,
+        });
+        await Multitenancy.createOrUpdateTenant("t2", {
+            passwordlessEnabled: true,
+        });
+        await Multitenancy.createOrUpdateTenant("t3", {
+            passwordlessEnabled: true,
+        });
 
         let code1 = await Passwordless.createCode({
             email: "test@example.com",

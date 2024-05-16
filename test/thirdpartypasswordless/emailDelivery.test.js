@@ -13,16 +13,16 @@
  * under the License.
  */
 const { printPath, setupST, startST, killAllST, cleanST, extractInfoFromResponse, delay } = require("../utils");
-let STExpress = require("../..");
-const EmailVerification = require("../../recipe/emailverification");
-let Session = require("../../recipe/session");
+let STExpress = require("supertokens-node");
+const EmailVerification = require("supertokens-node/recipe/emailverification");
+let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let ThirdpartyPasswordless = require("../../recipe/thirdpartypasswordless");
-let { SMTPService } = require("../../recipe/thirdpartypasswordless/emaildelivery");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let ThirdpartyPasswordless = require("supertokens-node/recipe/thirdpartypasswordless");
+let { SMTPService } = require("supertokens-node/recipe/thirdpartypasswordless/emaildelivery");
 let nock = require("nock");
 let supertest = require("supertest");
-const { middleware, errorHandler } = require("../../framework/express");
+const { middleware, errorHandler } = require("supertokens-node/framework/express");
 let express = require("express");
 let { isCDIVersionCompatible } = require("../utils");
 

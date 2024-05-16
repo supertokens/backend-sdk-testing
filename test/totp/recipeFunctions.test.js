@@ -14,15 +14,15 @@
  */
 
 const { printPath, setupST, startST, killAllST, cleanST, setKeyValueInConfig } = require("../utils");
-let STExpress = require("../../");
-let Session = require("../../recipe/session");
-let MultiFactorAuth = require("../../recipe/multifactorauth");
-let Totp = require("../../recipe/totp");
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let MultiFactorAuth = require("supertokens-node/recipe/multifactorauth");
+let Totp = require("supertokens-node/recipe/totp");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let SuperTokens = require("../../lib/build/supertokens").default;
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node/lib/build/supertokens").default;
 let { isCDIVersionCompatible } = require("../utils");
-const { default: RecipeUserId } = require("../../lib/build/recipeUserId");
+const { default: RecipeUserId } = require("supertokens-node/lib/build/recipeUserId");
 const OTPAuth = require("otpauth");
 
 describe(`recipeFunctions: ${printPath("[test/totp/recipeFunctions.test.js]")}`, function () {

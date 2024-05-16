@@ -13,19 +13,19 @@
  * under the License.
  */
 const { printPath, setupST, startST, killAllST, cleanST, signUPRequest } = require("../utils");
-let STExpress = require("../../");
+let STExpress = require("supertokens-node");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let ThirdPartyEmailPasswordRecipe = require("../../lib/build/recipe/thirdpartyemailpassword/recipe").default;
-let ThirdPartyEmailPassword = require("../../lib/build/recipe/thirdpartyemailpassword");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let ThirdPartyEmailPasswordRecipe = require("supertokens-node/lib/build/recipe/thirdpartyemailpassword/recipe").default;
+let ThirdPartyEmailPassword = require("supertokens-node/lib/build/recipe/thirdpartyemailpassword");
 let nock = require("nock");
 const express = require("express");
 const request = require("supertest");
-let Session = require("../../recipe/session");
-const EmailVerification = require("../../recipe/emailverification");
-let { Querier } = require("../../lib/build/querier");
-let { maxVersion } = require("../../lib/build/utils");
-let { middleware, errorHandler } = require("../../framework/express");
+let Session = require("supertokens-node/recipe/session");
+const EmailVerification = require("supertokens-node/recipe/emailverification");
+let { Querier } = require("supertokens-node/lib/build/querier");
+let { maxVersion } = require("supertokens-node/lib/build/utils");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 describe(`signupTest: ${printPath("[test/thirdpartyemailpassword/signupFeature.test.js]")}`, function () {
     before(function () {
@@ -240,7 +240,10 @@ describe(`signupTest: ${printPath("[test/thirdpartyemailpassword/signupFeature.t
             },
             recipeList: [
                 EmailVerification.init({ mode: "OPTIONAL" }),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 ThirdPartyEmailPassword.init({
                     providers: [this.customProvider1],
                 }),
@@ -340,7 +343,10 @@ describe(`signupTest: ${printPath("[test/thirdpartyemailpassword/signupFeature.t
                 websiteDomain: "supertokens.io",
             },
             recipeList: [
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 ThirdPartyEmailPassword.init({
                     providers: [this.customProvider1],
                     override: {
@@ -597,7 +603,9 @@ describe(`signupTest: ${printPath("[test/thirdpartyemailpassword/signupFeature.t
                 })
         );
         assert.strictEqual(response1.statusCode, 500);
-        assert.deepStrictEqual(response1.body, { message: "error from getProfileInfo" });
+        assert.deepStrictEqual(response1.body, {
+            message: "error from getProfileInfo",
+        });
     });
 
     it("test getUserCount and pagination works fine", async function () {
@@ -651,7 +659,9 @@ describe(`signupTest: ${printPath("[test/thirdpartyemailpassword/signupFeature.t
 
         await signUPRequest(app, "random1@gmail.com", "validpass123");
 
-        let usersOldest = await STExpress.getUsersOldestFirst({ tenantId: "public" });
+        let usersOldest = await STExpress.getUsersOldestFirst({
+            tenantId: "public",
+        });
         assert(usersOldest.nextPaginationToken === undefined);
         assert(usersOldest.users.length === 3);
         assert(usersOldest.users[0].loginMethods[0].recipeId === "emailpassword");

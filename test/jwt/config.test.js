@@ -1,11 +1,11 @@
 let assert = require("assert");
 
 const { printPath, setupST, startST, killAllST, cleanST } = require("../utils");
-let { ProcessState } = require("../../lib/build/processState");
-let STExpress = require("../../");
-const JWTRecipe = require("../../lib/build/recipe/jwt/recipe").default;
-let { Querier } = require("../../lib/build/querier");
-const { maxVersion } = require("../../lib/build/utils");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let STExpress = require("supertokens-node");
+const JWTRecipe = require("supertokens-node/lib/build/recipe/jwt/recipe").default;
+let { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
 
 describe(`configTest: ${printPath("[test/jwt/config.test.js]")}`, function () {
     beforeEach(async function () {

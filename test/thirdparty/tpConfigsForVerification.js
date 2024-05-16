@@ -12,8 +12,16 @@ const configsForVerification = {
         userInfoEndpoint: "https://graph.microsoft.com/oidc/userinfo",
         jwksURI: "https://login.microsoftonline.com/97f9a564-fcee-4b88-ae34-a1fbc4656593/discovery/v2.0/keys",
         userInfoMap: {
-            fromIdTokenPayload: { userId: "sub", email: "email", emailVerified: "email_verified" },
-            fromUserInfoAPI: { userId: "sub", email: "email", emailVerified: "email_verified" },
+            fromIdTokenPayload: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
+            fromUserInfoAPI: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
         },
     },
     apple: {
@@ -22,8 +30,16 @@ const configsForVerification = {
         tokenEndpoint: "https://appleid.apple.com/auth/token",
         jwksURI: "https://appleid.apple.com/auth/keys",
         userInfoMap: {
-            fromIdTokenPayload: { userId: "sub", email: "email", emailVerified: "email_verified" },
-            fromUserInfoAPI: { userId: "sub", email: "email", emailVerified: "email_verified" },
+            fromIdTokenPayload: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
+            fromUserInfoAPI: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
         },
     },
     bitbucket: {
@@ -32,8 +48,16 @@ const configsForVerification = {
         authorizationEndpointQueryParams: { audience: "api.atlassian.com" },
         scope: ["account", "email"],
         userInfoMap: {
-            fromIdTokenPayload: { userId: "sub", email: "email", emailVerified: "email_verified" },
-            fromUserInfoAPI: { userId: "sub", email: "email", emailVerified: "email_verified" },
+            fromIdTokenPayload: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
+            fromUserInfoAPI: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
         },
     },
     "boxy-saml": {
@@ -42,8 +66,16 @@ const configsForVerification = {
         tokenEndpoint: "https://test.boxy.com:5225/api/oauth/token",
         userInfoEndpoint: "https://test.boxy.com:5225/api/oauth/userinfo",
         userInfoMap: {
-            fromIdTokenPayload: { userId: "sub", email: "email", emailVerified: "email_verified" },
-            fromUserInfoAPI: { userId: "id", email: "email", emailVerified: "email_verified" },
+            fromIdTokenPayload: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
+            fromUserInfoAPI: {
+                userId: "id",
+                email: "email",
+                emailVerified: "email_verified",
+            },
         },
     },
     discord: {
@@ -52,8 +84,16 @@ const configsForVerification = {
         userInfoEndpoint: "https://discord.com/api/users/@me",
         scope: ["identify", "email"],
         userInfoMap: {
-            fromIdTokenPayload: { userId: "sub", email: "email", emailVerified: "email_verified" },
-            fromUserInfoAPI: { userId: "id", email: "email", emailVerified: "verified" },
+            fromIdTokenPayload: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
+            fromUserInfoAPI: {
+                userId: "id",
+                email: "email",
+                emailVerified: "verified",
+            },
         },
     },
     facebook: {
@@ -62,8 +102,16 @@ const configsForVerification = {
         userInfoEndpoint: "https://graph.facebook.com/me",
         scope: ["email"],
         userInfoMap: {
-            fromIdTokenPayload: { userId: "sub", email: "email", emailVerified: "email_verified" },
-            fromUserInfoAPI: { userId: "id", email: "email", emailVerified: "email_verified" },
+            fromIdTokenPayload: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
+            fromUserInfoAPI: {
+                userId: "id",
+                email: "email",
+                emailVerified: "email_verified",
+            },
         },
     },
     github: {
@@ -71,8 +119,16 @@ const configsForVerification = {
         tokenEndpoint: "https://github.com/login/oauth/access_token",
         scope: ["read:user", "user:email"],
         userInfoMap: {
-            fromIdTokenPayload: { userId: "sub", email: "email", emailVerified: "email_verified" },
-            fromUserInfoAPI: { userId: "sub", email: "email", emailVerified: "email_verified" },
+            fromIdTokenPayload: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
+            fromUserInfoAPI: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
         },
     },
     gitlab: {
@@ -82,8 +138,16 @@ const configsForVerification = {
         jwksURI: "https://gitlab.com/oauth/discovery/keys",
         scope: ["openid", "email"],
         userInfoMap: {
-            fromIdTokenPayload: { userId: "sub", email: "email", emailVerified: "email_verified" },
-            fromUserInfoAPI: { userId: "sub", email: "email", emailVerified: "email_verified" },
+            fromIdTokenPayload: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
+            fromUserInfoAPI: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
         },
     },
     google: {
@@ -92,10 +156,21 @@ const configsForVerification = {
         userInfoEndpoint: "https://openidconnect.googleapis.com/v1/userinfo",
         jwksURI: "https://www.googleapis.com/oauth2/v3/certs",
         scope: ["openid", "email"],
-        authorizationEndpointQueryParams: { included_grant_scopes: "true", access_type: "offline" },
+        authorizationEndpointQueryParams: {
+            included_grant_scopes: "true",
+            access_type: "offline",
+        },
         userInfoMap: {
-            fromIdTokenPayload: { userId: "sub", email: "email", emailVerified: "email_verified" },
-            fromUserInfoAPI: { userId: "sub", email: "email", emailVerified: "email_verified" },
+            fromIdTokenPayload: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
+            fromUserInfoAPI: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
         },
     },
     "google-workspaces": {
@@ -104,10 +179,22 @@ const configsForVerification = {
         userInfoEndpoint: "https://openidconnect.googleapis.com/v1/userinfo",
         jwksURI: "https://www.googleapis.com/oauth2/v3/certs",
         scope: ["openid", "email"],
-        authorizationEndpointQueryParams: { included_grant_scopes: "true", access_type: "offline", hd: "*" },
+        authorizationEndpointQueryParams: {
+            included_grant_scopes: "true",
+            access_type: "offline",
+            hd: "*",
+        },
         userInfoMap: {
-            fromIdTokenPayload: { userId: "sub", email: "email", emailVerified: "email_verified" },
-            fromUserInfoAPI: { userId: "sub", email: "email", emailVerified: "email_verified" },
+            fromIdTokenPayload: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
+            fromUserInfoAPI: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
         },
         additionalConfig: { hd: "*" },
     },
@@ -116,8 +203,16 @@ const configsForVerification = {
         tokenEndpoint: "https://www.linkedin.com/oauth/v2/accessToken",
         scope: ["openid", "profile", "email"],
         userInfoMap: {
-            fromIdTokenPayload: { userId: "sub", email: "email", emailVerified: "email_verified" },
-            fromUserInfoAPI: { userId: "sub", email: "email", emailVerified: "email_verified" },
+            fromIdTokenPayload: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
+            fromUserInfoAPI: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
         },
     },
     okta: {
@@ -127,8 +222,16 @@ const configsForVerification = {
         jwksURI: "https://dev-8636097.okta.com/oauth2/v1/keys",
         scope: ["openid", "email"],
         userInfoMap: {
-            fromIdTokenPayload: { userId: "sub", email: "email", emailVerified: "email_verified" },
-            fromUserInfoAPI: { userId: "sub", email: "email", emailVerified: "email_verified" },
+            fromIdTokenPayload: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
+            fromUserInfoAPI: {
+                userId: "sub",
+                email: "email",
+                emailVerified: "email_verified",
+            },
         },
     },
 };

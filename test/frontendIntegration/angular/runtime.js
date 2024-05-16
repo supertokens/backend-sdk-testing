@@ -95,7 +95,10 @@
         /******/ __webpack_require__.d = (exports, definition) => {
             /******/ for (var key in definition) {
                 /******/ if (__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
-                    /******/ Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+                    /******/ Object.defineProperty(exports, key, {
+                        enumerable: true,
+                        get: definition[key],
+                    });
                     /******/
                 }
                 /******/
@@ -116,7 +119,9 @@
         /******/ // define __esModule on exports
         /******/ __webpack_require__.r = (exports) => {
             /******/ if (typeof Symbol !== "undefined" && Symbol.toStringTag) {
-                /******/ Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
+                /******/ Object.defineProperty(exports, Symbol.toStringTag, {
+                    value: "Module",
+                });
                 /******/
             }
             /******/ Object.defineProperty(exports, "__esModule", { value: true });

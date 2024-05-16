@@ -27,10 +27,10 @@ var __importDefault =
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@loopback/core");
 const rest_1 = require("@loopback/rest");
-const loopback_1 = require("../../../framework/loopback");
-const loopback_2 = require("../../../recipe/session/framework/loopback");
-const session_1 = __importDefault(require("../../../recipe/session"));
-const supertokens_1 = __importDefault(require("../../.."));
+const loopback_1 = require("supertokens-node/framework/loopback");
+const loopback_2 = require("supertokens-node/recipe/session/framework/loopback");
+const session_1 = __importDefault(require("supertokens-node/recipe/session"));
+const supertokens_1 = __importDefault(require("supertokens-node"));
 let Create = class Create {
     constructor(ctx) {
         this.ctx = ctx;

@@ -16,11 +16,11 @@ const { printPath, setupST, startST, killAllST, cleanST } = require("../utils");
 let assert = require("assert");
 const express = require("express");
 const request = require("supertest");
-let { ProcessState, PROCESS_STATE } = require("../../lib/build/processState");
-let SuperTokens = require("../../");
-let Session = require("../../recipe/session");
-let { middleware, errorHandler } = require("../../framework/express");
-const { default: SessionError } = require("../../lib/build/recipe/session/error");
+let { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
+const { default: SessionError } = require("supertokens-node/lib/build/recipe/session/error");
 
 describe(`errorHandlers: ${printPath("[test/errorHandlers.test.js]")}`, function () {
     beforeEach(async function () {
@@ -52,19 +52,27 @@ describe(`errorHandlers: ${printPath("[test/errorHandlers.test.js]")}`, function
                     errorHandlers: {
                         onUnauthorised: async (message, req, res, userContext) => {
                             res.setStatusCode(401);
-                            return res.sendJSONResponse({ message: "unauthorised from errorHandler" });
+                            return res.sendJSONResponse({
+                                message: "unauthorised from errorHandler",
+                            });
                         },
                         onTokenTheftDetected: async (sessionHandle, userId, recipeUserId, req, res, userContext) => {
                             res.setStatusCode(403);
-                            return res.sendJSONResponse({ message: "token theft detected from errorHandler" });
+                            return res.sendJSONResponse({
+                                message: "token theft detected from errorHandler",
+                            });
                         },
                         onTryRefreshToken: async (message, req, res, userContext) => {
                             res.setStatusCode(401);
-                            return res.sendJSONResponse({ message: "try refresh session from errorHandler" });
+                            return res.sendJSONResponse({
+                                message: "try refresh session from errorHandler",
+                            });
                         },
                         onInvalidClaim: async (message, req, res, userContext) => {
                             res.setStatusCode(403);
-                            return res.sendJSONResponse({ message: "invalid claim from errorHandler" });
+                            return res.sendJSONResponse({
+                                message: "invalid claim from errorHandler",
+                            });
                         },
                         onClearDuplicateSessionCookies: async (message, req, res, userContext) => {
                             res.setStatusCode(200);
@@ -86,19 +94,33 @@ describe(`errorHandlers: ${printPath("[test/errorHandlers.test.js]")}`, function
         });
 
         app.post("/test/try-refresh", (req, res) => {
-            throw new SessionError({ type: SessionError.TRY_REFRESH_TOKEN, message: "" });
+            throw new SessionError({
+                type: SessionError.TRY_REFRESH_TOKEN,
+                message: "",
+            });
         });
 
         app.post("/test/token-theft", (req, res) => {
-            throw new SessionError({ type: SessionError.TOKEN_THEFT_DETECTED, message: "", payload: {} });
+            throw new SessionError({
+                type: SessionError.TOKEN_THEFT_DETECTED,
+                message: "",
+                payload: {},
+            });
         });
 
         app.post("/test/claim-validation", (req, res) => {
-            throw new SessionError({ type: SessionError.INVALID_CLAIMS, message: "", payload: [] });
+            throw new SessionError({
+                type: SessionError.INVALID_CLAIMS,
+                message: "",
+                payload: [],
+            });
         });
 
         app.post("/test/clear-duplicate-session", (req, res) => {
-            throw new SessionError({ type: SessionError.CLEAR_DUPLICATE_SESSION_COOKIES, message: "" });
+            throw new SessionError({
+                type: SessionError.CLEAR_DUPLICATE_SESSION_COOKIES,
+                message: "",
+            });
         });
 
         app.use(errorHandler());

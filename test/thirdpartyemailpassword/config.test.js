@@ -14,11 +14,11 @@
  */
 
 const { printPath, setupST, startST, stopST, killAllST, cleanST } = require("../utils");
-let STExpress = require("../../");
+let STExpress = require("supertokens-node");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let ThirdPartyEmailPassword = require("../../recipe/thirdpartyemailpassword");
-let ThirdPartyEmailPasswordRecipe = require("../../lib/build/recipe/thirdpartyemailpassword/recipe").default;
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let ThirdPartyEmailPassword = require("supertokens-node/recipe/thirdpartyemailpassword");
+let ThirdPartyEmailPasswordRecipe = require("supertokens-node/lib/build/recipe/thirdpartyemailpassword/recipe").default;
 
 describe(`configTest: ${printPath("[test/thirdpartyemailpassword/config.test.js]")}`, function () {
     before(function () {

@@ -25,9 +25,9 @@ const {
     createPasswordlessUser,
     linkUsers,
 } = require("./utils");
-let supertokens = require("../..");
+let supertokens = require("supertokens-node");
 let assert = require("assert");
-let Passwordless = require("../../recipe/passwordless");
+let Passwordless = require("supertokens-node/recipe/passwordless");
 
 describe(`passwordless accountlinkingTests w/ session: ${printPath(
     "[test/accountlinking-with-session/passwordlessapis.test.js]"
@@ -52,7 +52,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     let sessionUser = await createEmailPasswordUser(email1, true);
                     sessionUser = await makeUserPrimary(sessionUser);
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -71,7 +75,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     let sessionUser = await createEmailPasswordUser(email1, true);
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -94,7 +102,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     let sessionUser = await createEmailPasswordUser(email1, true);
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -115,7 +127,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     let sessionUser = await createEmailPasswordUser(email1, false);
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 403);
                     assert.ok(resp.body);
@@ -147,7 +163,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     let sessionUser = await createEmailPasswordUser(email1, true);
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -171,7 +191,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     let sessionUser = await createEmailPasswordUser(email1, true);
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -203,7 +227,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     let sessionUser = await createEmailPasswordUser(email1, true);
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -233,7 +261,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     let sessionUser = await createEmailPasswordUser(email1, true);
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -267,7 +299,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     sessionUser = await makeUserPrimary(sessionUser);
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -301,7 +337,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     sessionUser = await makeUserPrimary(sessionUser);
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -334,7 +374,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     let sessionUser = await createEmailPasswordUser(email1, true);
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -367,7 +411,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     let sessionUser = await createEmailPasswordUser(email1, true);
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -395,7 +443,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     await createPasswordlessUser({ email: email2 });
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -415,7 +467,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     await createPasswordlessUser({ email: email2 });
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -439,7 +495,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     let sessionUser = await createEmailPasswordUser(email1, true);
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -461,7 +521,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     await createPasswordlessUser({ email: email2 });
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 403);
                     assert.ok(resp.body);
@@ -493,7 +557,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     let sessionUser = await createEmailPasswordUser(email1, true);
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -526,7 +594,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     await createPasswordlessUser({ email: email2 });
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -557,7 +629,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     await createPasswordlessUser({ email: email2 });
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -592,7 +668,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     sessionUser = await makeUserPrimary(sessionUser);
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -628,7 +708,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     await createPasswordlessUser({ email: email2 });
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -662,7 +746,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     let sessionUser = await createEmailPasswordUser(email1, true);
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -696,7 +784,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     await createPasswordlessUser({ email: email2 });
 
                     const session = await getSessionForUser(sessionUser);
-                    const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                    const code = await Passwordless.createCode({
+                        email: email2,
+                        tenantId: "public",
+                        session,
+                    });
                     const resp = await consumeCodePOST(app, code, session);
                     assert.strictEqual(resp.status, 200);
                     assert.ok(resp.body);
@@ -725,7 +817,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                 sessionUser = await linkUsers(sessionUser, otherTenantUser);
 
                 const session = await getSessionForUser(sessionUser);
-                const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                const code = await Passwordless.createCode({
+                    email: email2,
+                    tenantId: "public",
+                    session,
+                });
                 const resp = await consumeCodePOST(app, code, session);
                 assert.strictEqual(resp.status, 200);
                 assert.ok(resp.body);
@@ -755,7 +851,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                 await createPasswordlessUser({ email: email2 }, true, "tenant1");
 
                 const session = await getSessionForUser(sessionUser);
-                const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                const code = await Passwordless.createCode({
+                    email: email2,
+                    tenantId: "public",
+                    session,
+                });
                 const resp = await consumeCodePOST(app, code, session);
                 assert.strictEqual(resp.status, 200);
                 assert.ok(resp.body);
@@ -782,7 +882,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                 sessionUser = await linkUsers(sessionUser, otherTenantUser);
 
                 const session = await getSessionForUser(sessionUser);
-                const code = await Passwordless.createCode({ email: email2, tenantId: "public", session });
+                const code = await Passwordless.createCode({
+                    email: email2,
+                    tenantId: "public",
+                    session,
+                });
                 code.preAuthSessionId += "XXX";
                 const resp = await consumeCodePOST(app, code, session);
                 assert.strictEqual(resp.status, 200);

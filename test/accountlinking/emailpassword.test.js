@@ -22,14 +22,14 @@ const {
     resetAll,
     startSTWithMultitenancyAndAccountLinking,
 } = require("../utils");
-let supertokens = require("../../");
-let Session = require("../../recipe/session");
+let supertokens = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let EmailPassword = require("../../recipe/emailpassword");
-let ThirdParty = require("../../recipe/thirdparty");
-let AccountLinking = require("../../recipe/accountlinking");
-let EmailVerification = require("../../recipe/emailverification");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let ThirdParty = require("supertokens-node/recipe/thirdparty");
+let AccountLinking = require("supertokens-node/recipe/accountlinking");
+let EmailVerification = require("supertokens-node/recipe/emailverification");
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.test.js]")}`, function () {
     beforeEach(async function () {
@@ -548,8 +548,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
             const email1 = `test+${Date.now()}@example.com`;
             let user = (await EmailPassword.signUp("public", email1, "password123")).user;
             const email2 = `test+${Date.now()}@example.com`;
-            let user2 = (await EmailPassword.signUp("public", email2, "password123", undefined, { doNotLink: true }))
-                .user;
+            let user2 = (
+                await EmailPassword.signUp("public", email2, "password123", undefined, {
+                    doNotLink: true,
+                })
+            ).user;
 
             const linkResp = await AccountLinking.linkAccounts(user2.loginMethods[0].recipeUserId, user.id);
             assert.strictEqual(linkResp.status, "OK");

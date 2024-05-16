@@ -1,10 +1,10 @@
-const { ProcessState } = require("../../lib/build/processState");
+const { ProcessState } = require("supertokens-node/lib/build/processState");
 const { printPath, killAllST, setupST, cleanST, startST } = require("../utils");
-let STExpress = require("../../");
-let Dashboard = require("../../recipe/dashboard");
-let EmailPassword = require("../../recipe/emailpassword");
+let STExpress = require("supertokens-node");
+let Dashboard = require("supertokens-node/recipe/dashboard");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
 const express = require("express");
-let { middleware, errorHandler } = require("../../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 const request = require("supertest");
 let assert = require("assert");
 

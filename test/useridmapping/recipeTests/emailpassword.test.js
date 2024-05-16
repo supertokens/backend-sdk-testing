@@ -1,11 +1,11 @@
 const assert = require("assert");
 const { printPath, setupST, startST, killAllST, cleanST } = require("../../utils");
-const { ProcessState } = require("../../../lib/build/processState");
-const STExpress = require("../../..");
-const EmailPasswordRecipe = require("../../../lib/build/recipe/emailpassword").default;
-const SessionRecipe = require("../../../lib/build/recipe/session").default;
-const { Querier } = require("../../../lib/build/querier");
-const { maxVersion } = require("../../../lib/build/utils");
+const { ProcessState } = require("supertokens-node/lib/build/processState");
+const STExpress = require("supertokens-node");
+const EmailPasswordRecipe = require("supertokens-node/lib/build/recipe/emailpassword").default;
+const SessionRecipe = require("supertokens-node/lib/build/recipe/session").default;
+const { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
 
 describe(`userIdMapping with emailpassword: ${printPath(
     "[test/useridmapping/recipeTests/emailpassword.test.js]"
@@ -117,7 +117,9 @@ describe(`userIdMapping with emailpassword: ${printPath(
 
             // retrieve the users info, the id should be the superTokens userId
             {
-                let response = await STExpress.listUsersByAccountInfo("public", { email });
+                let response = await STExpress.listUsersByAccountInfo("public", {
+                    email,
+                });
                 assert.strictEqual(response[0].id, superTokensUserId);
             }
 
@@ -131,7 +133,9 @@ describe(`userIdMapping with emailpassword: ${printPath(
 
             // retrieve the users info using email, the id in the response should be the externalId
             {
-                let response = await STExpress.listUsersByAccountInfo("public", { email });
+                let response = await STExpress.listUsersByAccountInfo("public", {
+                    email,
+                });
                 assert.ok(response !== undefined);
                 assert.strictEqual(response[0].id, externalId);
                 assert.strictEqual(response[0].emails[0], email);
@@ -172,7 +176,9 @@ describe(`userIdMapping with emailpassword: ${printPath(
 
             // retrieve the users info, the id should be the superTokens userId
             {
-                let response = await STExpress.listUsersByAccountInfo("public", { email });
+                let response = await STExpress.listUsersByAccountInfo("public", {
+                    email,
+                });
                 assert.strictEqual(response[0].id, superTokensUserId);
             }
 
@@ -224,7 +230,9 @@ describe(`userIdMapping with emailpassword: ${printPath(
 
             // retrieve the users info, the id should be the superTokens userId
             {
-                let response = await STExpress.listUsersByAccountInfo("public", { email });
+                let response = await STExpress.listUsersByAccountInfo("public", {
+                    email,
+                });
                 assert.strictEqual(response[0].id, superTokensUserId);
             }
 
@@ -297,7 +305,9 @@ describe(`userIdMapping with emailpassword: ${printPath(
 
             // retrieve the users info, the id should be the superTokens userId
             {
-                let response = await STExpress.listUsersByAccountInfo("public", { email });
+                let response = await STExpress.listUsersByAccountInfo("public", {
+                    email,
+                });
                 assert.strictEqual(response[0].id, superTokensUserId);
             }
 

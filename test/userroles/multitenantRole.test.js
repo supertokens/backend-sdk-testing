@@ -16,14 +16,14 @@ const { printPath, setupST, startSTWithMultitenancy, killAllST, cleanST } = requ
 let assert = require("assert");
 const express = require("express");
 const request = require("supertest");
-let { Querier } = require("../../lib/build/querier");
-let { ProcessState } = require("../../lib/build/processState");
-let SuperTokens = require("../../");
-let Multitenancy = require("../../recipe/multitenancy");
-let EmailPassword = require("../../recipe/emailpassword");
-const UserRolesRecipe = require("../../lib/build/recipe/userroles").default;
-let { middleware, errorHandler } = require("../../framework/express");
-const { default: SessionRecipe } = require("../../lib/build/recipe/session/recipe");
+let { Querier } = require("supertokens-node/lib/build/querier");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node");
+let Multitenancy = require("supertokens-node/recipe/multitenancy");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+const UserRolesRecipe = require("supertokens-node/lib/build/recipe/userroles").default;
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
+const { default: SessionRecipe } = require("supertokens-node/lib/build/recipe/session/recipe");
 
 describe(`multitenant role: ${printPath("[test/userroles/multitenantRole.test.js]")}`, function () {
     beforeEach(async function () {
@@ -56,9 +56,15 @@ describe(`multitenant role: ${printPath("[test/userroles/multitenantRole.test.js
         app.use(middleware());
         app.use(errorHandler());
 
-        await Multitenancy.createOrUpdateTenant("t1", { emailPasswordEnabled: true });
-        await Multitenancy.createOrUpdateTenant("t2", { emailPasswordEnabled: true });
-        await Multitenancy.createOrUpdateTenant("t3", { emailPasswordEnabled: true });
+        await Multitenancy.createOrUpdateTenant("t1", {
+            emailPasswordEnabled: true,
+        });
+        await Multitenancy.createOrUpdateTenant("t2", {
+            emailPasswordEnabled: true,
+        });
+        await Multitenancy.createOrUpdateTenant("t3", {
+            emailPasswordEnabled: true,
+        });
 
         const user = await EmailPassword.signUp("public", "test@example.com", "password1");
         const userId = user.user.id;

@@ -12,13 +12,13 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-let SuperTokens = require("../../");
-let Session = require("../../recipe/session");
-let SuperTokensRaw = require("../../lib/build/supertokens").default;
-let SessionRecipeRaw = require("../../lib/build/recipe/session/recipe").default;
-let DashboardRecipeRaw = require("../../lib/build/recipe/dashboard/recipe").default;
-let MultitenancyRecipeRaw = require("../../lib/build/recipe/multitenancy/recipe").default;
-let UserMetaDataRecipeRaw = require("../../lib/build/recipe/usermetadata/recipe").default;
+let SuperTokens = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let SuperTokensRaw = require("supertokens-node/lib/build/supertokens").default;
+let SessionRecipeRaw = require("supertokens-node/lib/build/recipe/session/recipe").default;
+let DashboardRecipeRaw = require("supertokens-node/lib/build/recipe/dashboard/recipe").default;
+let MultitenancyRecipeRaw = require("supertokens-node/lib/build/recipe/multitenancy/recipe").default;
+let UserMetaDataRecipeRaw = require("supertokens-node/lib/build/recipe/usermetadata/recipe").default;
 let express = require("express");
 let cookieParser = require("cookie-parser");
 let bodyParser = require("body-parser");
@@ -26,13 +26,17 @@ let cors = require("cors");
 let noOfTimesRefreshCalledDuringTest = 0;
 let noOfTimesGetSessionCalledDuringTest = 0;
 let noOfTimesRefreshAttemptedDuringTest = 0;
-let { verifySession } = require("../../recipe/session/framework/express");
-let { middleware, errorHandler } = require("../../framework/express");
-const { Querier } = require("../../lib/build/querier");
-const { default: NormalisedURLPath } = require("../../lib/build/normalisedURLPath");
-let supertokens_node_version = require("../../lib/build/version").version;
+let { verifySession } = require("supertokens-node/recipe/session/framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
+const { Querier } = require("supertokens-node/lib/build/querier");
+const { default: NormalisedURLPath } = require("supertokens-node/lib/build/normalisedURLPath");
+let supertokens_node_version = require("supertokens-node/lib/build/version").version;
 
-let urlencodedParser = bodyParser.urlencoded({ limit: "20mb", extended: true, parameterLimit: 20000 });
+let urlencodedParser = bodyParser.urlencoded({
+    limit: "20mb",
+    extended: true,
+    parameterLimit: 20000,
+});
 let jsonParser = bodyParser.json({ limit: "20mb" });
 
 let app = express();
@@ -379,7 +383,10 @@ app.post(
                 {
                     id: "test-claim-failing",
                     shouldRefetch: () => false,
-                    validate: () => ({ isValid: false, reason: { message: "testReason" } }),
+                    validate: () => ({
+                        isValid: false,
+                        reason: { message: "testReason" },
+                    }),
                 },
             ],
         })(req, res, next),
@@ -497,7 +504,10 @@ app.post(
             clearing[key] = null;
         }
 
-        await Session.mergeIntoAccessTokenPayload(req.session.getHandle(), { ...clearing, ...req.body });
+        await Session.mergeIntoAccessTokenPayload(req.session.getHandle(), {
+            ...clearing,
+            ...req.body,
+        });
         res.json(req.session.getAccessTokenPayload());
     }
 );

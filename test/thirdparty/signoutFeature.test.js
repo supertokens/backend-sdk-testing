@@ -21,15 +21,15 @@ const {
     extractInfoFromResponse,
     setKeyValueInConfig,
 } = require("../utils");
-let STExpress = require("../../");
+let STExpress = require("supertokens-node");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let ThirPartyRecipe = require("../../lib/build/recipe/thirdparty/recipe").default;
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let ThirPartyRecipe = require("supertokens-node/lib/build/recipe/thirdparty/recipe").default;
 let nock = require("nock");
 const express = require("express");
 const request = require("supertest");
-let Session = require("../../recipe/session");
-let { middleware, errorHandler } = require("../../framework/express");
+let Session = require("supertokens-node/recipe/session");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 describe(`signoutTest: ${printPath("[test/thirdparty/signoutFeature.test.js]")}`, function () {
     before(function () {
@@ -85,7 +85,10 @@ describe(`signoutTest: ${printPath("[test/thirdparty/signoutFeature.test.js]")}`
                         providers: [this.customProvider1],
                     },
                 }),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -244,7 +247,9 @@ describe(`signoutTest: ${printPath("[test/thirdparty/signoutFeature.test.js]")}`
     });
 
     it("test that signout API reutrns try refresh token, refresh session and signout should return OK", async function () {
-        const connectionURI = await startST({ coreConfig: { access_token_validity: 2 } });
+        const connectionURI = await startST({
+            coreConfig: { access_token_validity: 2 },
+        });
 
         STExpress.init({
             supertokens: {
@@ -261,7 +266,10 @@ describe(`signoutTest: ${printPath("[test/thirdparty/signoutFeature.test.js]")}`
                         providers: [this.customProvider1],
                     },
                 }),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 

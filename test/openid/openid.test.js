@@ -1,12 +1,12 @@
 let assert = require("assert");
 
 const { printPath, setupST, startST, killAllST, cleanST } = require("../utils");
-let { ProcessState } = require("../../lib/build/processState");
-let STExpress = require("../../");
-const OpenIdRecipe = require("../../lib/build/recipe/openid/recipe").default;
-const OpenId = require("../../lib/build/recipe/openid");
-let { Querier } = require("../../lib/build/querier");
-const { maxVersion } = require("../../lib/build/utils");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let STExpress = require("supertokens-node");
+const OpenIdRecipe = require("supertokens-node/lib/build/recipe/openid/recipe").default;
+const OpenId = require("supertokens-node/lib/build/recipe/openid");
+let { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
 
 describe(`openIdTest: ${printPath("[test/openid/openid.test.js]")}`, function () {
     beforeEach(async function () {

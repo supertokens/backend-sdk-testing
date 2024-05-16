@@ -22,18 +22,18 @@ const {
     setKeyValueInConfig,
     stopST,
 } = require("../utils");
-let STExpress = require("../../");
-let Session = require("../../recipe/session");
-let Passwordless = require("../../recipe/passwordless");
-let Multitenancy = require("../../recipe/multitenancy");
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let Passwordless = require("supertokens-node/recipe/passwordless");
+let Multitenancy = require("supertokens-node/recipe/multitenancy");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let SuperTokens = require("../../lib/build/supertokens").default;
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node/lib/build/supertokens").default;
 const request = require("supertest");
 const express = require("express");
-let { middleware, errorHandler } = require("../../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 let { isCDIVersionCompatible } = require("../utils");
-const { default: RecipeUserId } = require("../../lib/build/recipeUserId");
+const { default: RecipeUserId } = require("supertokens-node/lib/build/recipeUserId");
 
 describe(`apisFunctions: ${printPath("[test/passwordless/apis.test.js]")}`, function () {
     beforeEach(async function () {
@@ -1698,9 +1698,15 @@ describe(`apisFunctions: ${printPath("[test/passwordless/apis.test.js]")}`, func
             return;
         }
 
-        await Multitenancy.createOrUpdateTenant("t1", { passwordlessEnabled: true });
-        await Multitenancy.createOrUpdateTenant("t2", { passwordlessEnabled: true });
-        await Multitenancy.createOrUpdateTenant("t3", { passwordlessEnabled: true });
+        await Multitenancy.createOrUpdateTenant("t1", {
+            passwordlessEnabled: true,
+        });
+        await Multitenancy.createOrUpdateTenant("t2", {
+            passwordlessEnabled: true,
+        });
+        await Multitenancy.createOrUpdateTenant("t3", {
+            passwordlessEnabled: true,
+        });
 
         const app = express();
 

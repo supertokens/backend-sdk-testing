@@ -13,12 +13,12 @@
  * under the License.
  */
 const { printPath, setupST, startST, killAllST, cleanST, isCDIVersionCompatible } = require("../utils");
-let STExpress = require("../../");
+let STExpress = require("supertokens-node");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let ThirdPartyPasswordlessRecipe = require("../../lib/build/recipe/thirdpartypasswordless/recipe").default;
-let ThirdPartyPasswordless = require("../../lib/build/recipe/thirdpartypasswordless");
-let { middleware, errorHandler } = require("../../framework/express");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let ThirdPartyPasswordlessRecipe = require("supertokens-node/lib/build/recipe/thirdpartypasswordless/recipe").default;
+let ThirdPartyPasswordless = require("supertokens-node/lib/build/recipe/thirdpartypasswordless");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 let nock = require("nock");
 
 const privateKey =

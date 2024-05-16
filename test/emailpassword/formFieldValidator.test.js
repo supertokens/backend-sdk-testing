@@ -13,10 +13,13 @@
  * under the License.
  */
 
-let { defaultPasswordValidator, defaultEmailValidator } = require("../../lib/build/recipe/emailpassword/utils");
+let {
+    defaultPasswordValidator,
+    defaultEmailValidator,
+} = require("supertokens-node/lib/build/recipe/emailpassword/utils");
 let assert = require("assert");
 const { printPath } = require("../utils");
-let { middleware, errorHandler } = require("../../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 describe(`formFieldValidator: ${printPath("[test/emailpassword/formFieldValidator.test.js]")}`, function () {
     it("checking email validator", async function () {

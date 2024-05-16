@@ -16,16 +16,16 @@ const { printPath, setupST, startSTWithMultitenancy, killAllST, cleanST } = requ
 let assert = require("assert");
 const express = require("express");
 const request = require("supertest");
-let { Querier } = require("../../lib/build/querier");
-let { ProcessState } = require("../../lib/build/processState");
-const SuperTokens = require("../../");
-const Multitenancy = require("../../recipe/multitenancy");
-const EmailPassword = require("../../recipe/emailpassword");
-const ThirdPartyEmailPassword = require("../../recipe/thirdpartyemailpassword");
-const Passwordless = require("../../recipe/passwordless");
-const MultifactorAuth = require("../../recipe/multifactorauth");
-const Session = require("../../recipe/session");
-let { middleware, errorHandler } = require("../../framework/express");
+let { Querier } = require("supertokens-node/lib/build/querier");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+const SuperTokens = require("supertokens-node");
+const Multitenancy = require("supertokens-node/recipe/multitenancy");
+const EmailPassword = require("supertokens-node/recipe/emailpassword");
+const ThirdPartyEmailPassword = require("supertokens-node/recipe/thirdpartyemailpassword");
+const Passwordless = require("supertokens-node/recipe/passwordless");
+const MultifactorAuth = require("supertokens-node/recipe/multifactorauth");
+const Session = require("supertokens-node/recipe/session");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 describe(`loginMethods: ${printPath("[test/multitenancy/loginMethods.test.js]")}`, function () {
     beforeEach(async function () {

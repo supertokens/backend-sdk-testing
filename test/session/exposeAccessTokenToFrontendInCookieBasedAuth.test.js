@@ -16,13 +16,13 @@ const { printPath, setupST, startST, killAllST, cleanST, extractInfoFromResponse
 const assert = require("assert");
 const express = require("express");
 const request = require("supertest");
-const { ProcessState } = require("../../lib/build/processState");
-const SuperTokens = require("../..");
-const Session = require("../../recipe/session");
-const { middleware, errorHandler } = require("../../framework/express");
-const { verifySession } = require("../../recipe/session/framework/express");
+const { ProcessState } = require("supertokens-node/lib/build/processState");
+const SuperTokens = require("supertokens-node");
+const Session = require("supertokens-node/recipe/session");
+const { middleware, errorHandler } = require("supertokens-node/framework/express");
+const { verifySession } = require("supertokens-node/recipe/session/framework/express");
 const { json } = require("body-parser");
-const { default: SessionRecipe } = require("../../lib/build/recipe/session/recipe");
+const { default: SessionRecipe } = require("supertokens-node/lib/build/recipe/session/recipe");
 
 describe(`exposeAccessTokenToFrontendInCookieBasedAuth: ${printPath(
     "[test/session/exposeAccessTokenToFrontendInCookieBasedAuth.test.js]"
@@ -62,7 +62,10 @@ describe(`exposeAccessTokenToFrontendInCookieBasedAuth: ${printPath(
 
 function getTestCases(exposeAccessTokenToFrontendInCookieBasedAuth) {
     describe(`with exposeAccessTokenToFrontendInCookieBasedAuth=${exposeAccessTokenToFrontendInCookieBasedAuth}`, () => {
-        const sessionConfig = { exposeAccessTokenToFrontendInCookieBasedAuth, getTokenTransferMethod: () => "cookie" };
+        const sessionConfig = {
+            exposeAccessTokenToFrontendInCookieBasedAuth,
+            getTokenTransferMethod: () => "cookie",
+        };
         describe("createNewSession", () => {
             it("should attach the appropriate tokens", async function () {
                 const connectionURI = await startST();
@@ -301,11 +304,19 @@ function getTestExpressApp() {
     });
 
     app.get("/verify", verifySession(), async (req, res) => {
-        res.status(200).json({ message: true, sessionHandle: req.session.getHandle(), sessionExists: true });
+        res.status(200).json({
+            message: true,
+            sessionHandle: req.session.getHandle(),
+            sessionExists: true,
+        });
     });
 
     app.get("/verify-checkdb", verifySession({ checkDatabase: true }), async (req, res) => {
-        res.status(200).json({ message: true, sessionHandle: req.session.getHandle(), sessionExists: true });
+        res.status(200).json({
+            message: true,
+            sessionHandle: req.session.getHandle(),
+            sessionExists: true,
+        });
     });
 
     app.get("/verify-optional", verifySession({ sessionRequired: false }), async (req, res) => {
@@ -327,7 +338,10 @@ function getTestExpressApp() {
     });
 
     app.get("/revoke-session", verifySession(), async (req, res) => {
-        res.status(200).json({ message: await req.session.revokeSession(), sessionHandle: req.session.getHandle() });
+        res.status(200).json({
+            message: await req.session.revokeSession(),
+            sessionHandle: req.session.getHandle(),
+        });
     });
 
     app.use(errorHandler());

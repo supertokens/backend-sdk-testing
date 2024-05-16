@@ -24,15 +24,15 @@ const {
     extractInfoFromResponse,
     emailVerifyTokenRequest,
 } = require("../utils");
-let STExpress = require("../..");
-let Session = require("../../recipe/session");
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let ThirdPartyEmailPassword = require("../../recipe/thirdpartyemailpassword");
-const EmailVerification = require("../../recipe/emailverification");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let ThirdPartyEmailPassword = require("supertokens-node/recipe/thirdpartyemailpassword");
+const EmailVerification = require("supertokens-node/recipe/emailverification");
 const express = require("express");
 const request = require("supertest");
-let { middleware, errorHandler } = require("../../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 describe(`emailverify: ${printPath("[test/thirdpartyemailpassword/emailverify.test.js]")}`, function () {
     before(function () {
@@ -85,7 +85,10 @@ describe(`emailverify: ${printPath("[test/thirdpartyemailpassword/emailverify.te
             recipeList: [
                 EmailVerification.init({ mode: "OPTIONAL" }),
                 ThirdPartyEmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -122,7 +125,10 @@ describe(`emailverify: ${printPath("[test/thirdpartyemailpassword/emailverify.te
             recipeList: [
                 EmailVerification.init({ mode: "OPTIONAL" }),
                 ThirdPartyEmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -168,7 +174,10 @@ describe(`emailverify: ${printPath("[test/thirdpartyemailpassword/emailverify.te
             recipeList: [
                 EmailVerification.init({ mode: "OPTIONAL" }),
                 ThirdPartyEmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -223,7 +232,10 @@ describe(`emailverify: ${printPath("[test/thirdpartyemailpassword/emailverify.te
                     },
                 }),
                 ThirdPartyEmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -287,7 +299,10 @@ describe(`emailverify: ${printPath("[test/thirdpartyemailpassword/emailverify.te
                 ThirdPartyEmailPassword.init({
                     providers: [this.customProvider1],
                 }),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -338,7 +353,10 @@ describe(`emailverify: ${printPath("[test/thirdpartyemailpassword/emailverify.te
                     mode: "OPTIONAL",
                 }),
                 ThirdPartyEmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 

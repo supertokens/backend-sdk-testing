@@ -23,18 +23,18 @@ const {
     mockRequest,
 } = require("./utils");
 let assert = require("assert");
-let { Querier } = require("../lib/build/querier");
-let { ProcessState, PROCESS_STATE } = require("../lib/build/processState");
-let SuperTokens = require("../");
-let Session = require("../recipe/session");
-let SessionFunctions = require("../lib/build/recipe/session/sessionFunctions");
-let { parseJWTWithoutSignatureVerification } = require("../lib/build/recipe/session/jwt");
-let SessionRecipe = require("../lib/build/recipe/session/recipe").default;
-const { maxVersion } = require("../lib/build/utils");
+let { Querier } = require("supertokens-node/lib/build/querier");
+let { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let SessionFunctions = require("supertokens-node/lib/build/recipe/session/sessionFunctions");
+let { parseJWTWithoutSignatureVerification } = require("supertokens-node/lib/build/recipe/session/jwt");
+let SessionRecipe = require("supertokens-node/lib/build/recipe/session/recipe").default;
+const { maxVersion } = require("supertokens-node/lib/build/utils");
 const { fail } = require("assert");
 const sinon = require("sinon");
 const request = require("http");
-const { default: RecipeUserId } = require("../lib/build/recipeUserId");
+const { default: RecipeUserId } = require("supertokens-node/lib/build/recipeUserId");
 
 /* TODO:
 - the opposite of the above (check that if signing key changes, things are still fine) condition
@@ -79,7 +79,12 @@ describe(`sessionAccessTokenSigningKeyUpdate: ${printPath(
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         // We create a new token
@@ -221,7 +226,12 @@ describe(`sessionAccessTokenSigningKeyUpdate: ${printPath(
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         const oldSession = await SessionFunctions.createNewSession(
@@ -309,7 +319,12 @@ describe(`sessionAccessTokenSigningKeyUpdate: ${printPath(
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         let response2 = await SessionFunctions.createNewSession(
@@ -395,7 +410,12 @@ describe(`sessionAccessTokenSigningKeyUpdate: ${printPath(
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         const currCDIVersion = await Querier.getNewInstanceOrThrowError(undefined).getAPIVersion();
@@ -487,7 +507,12 @@ describe(`sessionAccessTokenSigningKeyUpdate: ${printPath(
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         let session = await SessionFunctions.createNewSession(
@@ -645,7 +670,12 @@ describe(`sessionAccessTokenSigningKeyUpdate: ${printPath(
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         let q = Querier.getNewInstanceOrThrowError(undefined);

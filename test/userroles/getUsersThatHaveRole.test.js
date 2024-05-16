@@ -1,12 +1,12 @@
 const assert = require("assert");
 
 const { printPath, setupST, startST, killAllST, cleanST, areArraysEqual } = require("../utils");
-const STExpress = require("../..");
-const { ProcessState } = require("../../lib/build/processState");
-const UserRolesRecipe = require("../../lib/build/recipe/userroles").default;
-const { Querier } = require("../../lib/build/querier");
-const { maxVersion } = require("../../lib/build/utils");
-const { default: SessionRecipe } = require("../../lib/build/recipe/session/recipe");
+const STExpress = require("supertokens-node");
+const { ProcessState } = require("supertokens-node/lib/build/processState");
+const UserRolesRecipe = require("supertokens-node/lib/build/recipe/userroles").default;
+const { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
+const { default: SessionRecipe } = require("supertokens-node/lib/build/recipe/session/recipe");
 
 describe(`getUsersThatHaveRole: ${printPath("[test/userroles/getUsersThatHaveRole.test.js]")}`, function () {
     beforeEach(async function () {

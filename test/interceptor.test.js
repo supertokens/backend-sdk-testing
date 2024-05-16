@@ -12,16 +12,16 @@ const {
     signUPRequest,
     assertJSONEquals,
 } = require("./utils");
-let { ProcessState } = require("../lib/build/processState");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
 
-let SuperTokens = require("../");
-let Session = require("../recipe/session");
-let EmailPassword = require("../recipe/emailpassword");
-let UserRoles = require("../recipe/userroles");
+let SuperTokens = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let UserRoles = require("supertokens-node/recipe/userroles");
 
 let assert = require("assert");
 const express = require("express");
-let { middleware, errorHandler } = require("../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 describe(`interceptor: ${printPath("[test/interceptor.test.js]")}`, function () {
     beforeEach(async function () {
@@ -53,7 +53,10 @@ describe(`interceptor: ${printPath("[test/interceptor.test.js]")}`, function () 
             },
             recipeList: [
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -90,7 +93,10 @@ describe(`interceptor: ${printPath("[test/interceptor.test.js]")}`, function () 
             },
             recipeList: [
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -127,7 +133,10 @@ describe(`interceptor: ${printPath("[test/interceptor.test.js]")}`, function () 
             recipeList: [
                 EmailPassword.init(),
                 UserRoles.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -169,7 +178,10 @@ describe(`interceptor: ${printPath("[test/interceptor.test.js]")}`, function () 
             },
             recipeList: [
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 

@@ -22,14 +22,14 @@ const {
     resetAll,
     startSTWithMultitenancyAndAccountLinking,
 } = require("../utils");
-let supertokens = require("../../");
-let Session = require("../../recipe/session");
+let supertokens = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let EmailPassword = require("../../recipe/emailpassword");
-let ThirdParty = require("../../recipe/thirdparty");
-let AccountLinking = require("../../recipe/accountlinking");
-let EmailVerification = require("../../recipe/emailverification");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let ThirdParty = require("supertokens-node/recipe/thirdparty");
+let AccountLinking = require("supertokens-node/recipe/accountlinking");
+let EmailVerification = require("supertokens-node/recipe/emailverification");
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test.js]")}`, function () {
     beforeEach(async function () {

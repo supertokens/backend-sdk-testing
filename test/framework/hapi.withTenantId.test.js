@@ -14,20 +14,20 @@
  */
 const { printPath, setupST, startST, killAllST, cleanST, extractInfoFromResponse } = require("../utils");
 let assert = require("assert");
-let { ProcessState, PROCESS_STATE } = require("../../lib/build/processState");
-let SuperTokens = require("../../");
-let HapiFramework = require("../../framework/hapi");
+let { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node");
+let HapiFramework = require("supertokens-node/framework/hapi");
 const Hapi = require("@hapi/hapi");
-let Session = require("../../recipe/session");
-let ThirdpartyEmailPassword = require("../../recipe/thirdpartyemailpassword");
-let { verifySession } = require("../../recipe/session/framework/hapi");
-let Dashboard = require("../../recipe/dashboard");
-let EmailPassword = require("../../recipe/emailpassword");
+let Session = require("supertokens-node/recipe/session");
+let ThirdpartyEmailPassword = require("supertokens-node/recipe/thirdpartyemailpassword");
+let { verifySession } = require("supertokens-node/recipe/session/framework/hapi");
+let Dashboard = require("supertokens-node/recipe/dashboard");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
 const { createUsers } = require("../utils.js");
-const { Querier } = require("../../lib/build/querier");
-const { maxVersion } = require("../../lib/build/utils");
-const Passwordless = require("../../recipe/passwordless");
-const ThirdParty = require("../../recipe/thirdparty");
+const { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
+const Passwordless = require("supertokens-node/recipe/passwordless");
+const ThirdParty = require("supertokens-node/recipe/thirdparty");
 
 describe(`Hapi: ${printPath("[test/framework/hapi.withTenantId.test.js]")}`, function () {
     beforeEach(async function () {
@@ -292,7 +292,12 @@ describe(`Hapi: ${printPath("[test/framework/hapi.withTenantId.test.js]")}`, fun
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         this.server.route({
@@ -377,7 +382,12 @@ describe(`Hapi: ${printPath("[test/framework/hapi.withTenantId.test.js]")}`, fun
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         this.server.route({
@@ -504,7 +514,12 @@ describe(`Hapi: ${printPath("[test/framework/hapi.withTenantId.test.js]")}`, fun
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
         this.server.route({
             path: "/create",
@@ -556,7 +571,12 @@ describe(`Hapi: ${printPath("[test/framework/hapi.withTenantId.test.js]")}`, fun
                 websiteDomain: "supertokens.io",
                 apiBasePath: "/",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         this.server.route({
@@ -683,7 +703,12 @@ describe(`Hapi: ${printPath("[test/framework/hapi.withTenantId.test.js]")}`, fun
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         this.server.route({
@@ -758,7 +783,12 @@ describe(`Hapi: ${printPath("[test/framework/hapi.withTenantId.test.js]")}`, fun
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         await this.server.register(HapiFramework.plugin);
@@ -793,7 +823,9 @@ describe(`Hapi: ${printPath("[test/framework/hapi.withTenantId.test.js]")}`, fun
             method: "post",
             path: "/session/verifyAntiCsrfFalse",
             handler: async (req, res) => {
-                let sessionResponse = await Session.getSession(req, res, { antiCsrfCheck: false });
+                let sessionResponse = await Session.getSession(req, res, {
+                    antiCsrfCheck: false,
+                });
                 return res.response({ userId: sessionResponse.userId }).code(200);
             },
         });
@@ -839,7 +871,12 @@ describe(`Hapi: ${printPath("[test/framework/hapi.withTenantId.test.js]")}`, fun
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
         this.server.route({
             path: "/create",
@@ -956,7 +993,12 @@ describe(`Hapi: ${printPath("[test/framework/hapi.withTenantId.test.js]")}`, fun
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         this.server.route({
@@ -1098,7 +1140,12 @@ describe(`Hapi: ${printPath("[test/framework/hapi.withTenantId.test.js]")}`, fun
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         this.server.route({
@@ -1397,7 +1444,12 @@ describe(`Hapi: ${printPath("[test/framework/hapi.withTenantId.test.js]")}`, fun
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         this.server.route({

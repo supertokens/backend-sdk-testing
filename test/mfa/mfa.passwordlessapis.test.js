@@ -15,11 +15,11 @@
 
 const { printPath, setupST, startSTWithMultitenancy, killAllST, cleanST } = require("../utils");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let SuperTokens = require("../..");
-let MultiFactorAuth = require("../../lib/build/recipe/multifactorauth");
-let Session = require("../../lib/build/recipe/session");
-let Passwordless = require("../../lib/build/recipe/passwordless");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node");
+let MultiFactorAuth = require("supertokens-node/lib/build/recipe/multifactorauth");
+let Session = require("supertokens-node/lib/build/recipe/session");
+let Passwordless = require("supertokens-node/lib/build/recipe/passwordless");
 const { plessCreateCode, plessResendCode, getTestExpressApp } = require("./utils");
 const { getTestEmail, getTestPhoneNumber } = require("../accountlinking-with-session/utils");
 
@@ -93,7 +93,10 @@ describe(`mfa with passwordless: ${printPath("[test/mfa/mfa.passwordlessapis.tes
 
             res = await plessResendCode(
                 app,
-                { preAuthSessionId: res.body.preAuthSessionId, deviceId: res.body.deviceId },
+                {
+                    preAuthSessionId: res.body.preAuthSessionId,
+                    deviceId: res.body.deviceId,
+                },
                 undefined
             );
             assert.strictEqual(res.body.status, "OK");
@@ -161,7 +164,10 @@ describe(`mfa with passwordless: ${printPath("[test/mfa/mfa.passwordlessapis.tes
 
             res = await plessResendCode(
                 app,
-                { preAuthSessionId: res.body.preAuthSessionId, deviceId: res.body.deviceId },
+                {
+                    preAuthSessionId: res.body.preAuthSessionId,
+                    deviceId: res.body.deviceId,
+                },
                 undefined
             );
             assert.strictEqual(res.body.status, "OK");
@@ -229,7 +235,10 @@ describe(`mfa with passwordless: ${printPath("[test/mfa/mfa.passwordlessapis.tes
 
             res = await plessResendCode(
                 app,
-                { preAuthSessionId: res.body.preAuthSessionId, deviceId: res.body.deviceId },
+                {
+                    preAuthSessionId: res.body.preAuthSessionId,
+                    deviceId: res.body.deviceId,
+                },
                 undefined
             );
             assert.strictEqual(res.body.status, "OK");
@@ -297,7 +306,10 @@ describe(`mfa with passwordless: ${printPath("[test/mfa/mfa.passwordlessapis.tes
 
             res = await plessResendCode(
                 app,
-                { preAuthSessionId: res.body.preAuthSessionId, deviceId: res.body.deviceId },
+                {
+                    preAuthSessionId: res.body.preAuthSessionId,
+                    deviceId: res.body.deviceId,
+                },
                 undefined
             );
             assert.strictEqual(res.body.status, "OK");
@@ -365,7 +377,10 @@ describe(`mfa with passwordless: ${printPath("[test/mfa/mfa.passwordlessapis.tes
 
             res = await plessResendCode(
                 app,
-                { preAuthSessionId: res.body.preAuthSessionId, deviceId: res.body.deviceId },
+                {
+                    preAuthSessionId: res.body.preAuthSessionId,
+                    deviceId: res.body.deviceId,
+                },
                 undefined
             );
             assert.strictEqual(res.body.status, "OK");
@@ -433,7 +448,10 @@ describe(`mfa with passwordless: ${printPath("[test/mfa/mfa.passwordlessapis.tes
 
             res = await plessResendCode(
                 app,
-                { preAuthSessionId: res.body.preAuthSessionId, deviceId: res.body.deviceId },
+                {
+                    preAuthSessionId: res.body.preAuthSessionId,
+                    deviceId: res.body.deviceId,
+                },
                 undefined
             );
             assert.strictEqual(res.body.status, "OK");

@@ -13,17 +13,17 @@
  * under the License.
  */
 const { printPath, setupST, startST, killAllST, cleanST, extractInfoFromResponse } = require("../utils");
-let STExpress = require("../../");
+let STExpress = require("supertokens-node");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let ThirdPartyRecipe = require("../../lib/build/recipe/thirdparty/recipe").default;
-let ThirdParty = require("../../lib/build/recipe/thirdparty");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let ThirdPartyRecipe = require("supertokens-node/lib/build/recipe/thirdparty/recipe").default;
+let ThirdParty = require("supertokens-node/lib/build/recipe/thirdparty");
 let nock = require("nock");
 const express = require("express");
 const request = require("supertest");
-let Session = require("../../recipe/session");
-const EmailVerification = require("../../recipe/emailverification");
-let { middleware, errorHandler } = require("../../framework/express");
+let Session = require("supertokens-node/recipe/session");
+const EmailVerification = require("supertokens-node/recipe/emailverification");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 describe(`signinupTest: ${printPath("[test/thirdparty/signinupFeature.test.js]")}`, function () {
     before(function () {
@@ -228,7 +228,10 @@ describe(`signinupTest: ${printPath("[test/thirdparty/signinupFeature.test.js]")
                 websiteDomain: "supertokens.io",
             },
             recipeList: [
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 ThirdPartyRecipe.init({
                     signInAndUpFeature: {
                         providers: [this.customProvider6],
@@ -331,7 +334,10 @@ describe(`signinupTest: ${printPath("[test/thirdparty/signinupFeature.test.js]")
                 websiteDomain: "supertokens.io",
             },
             recipeList: [
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 ThirdPartyRecipe.init({
                     signInAndUpFeature: {
                         providers: [this.customProvider6],
@@ -376,7 +382,10 @@ describe(`signinupTest: ${printPath("[test/thirdparty/signinupFeature.test.js]")
             },
             recipeList: [
                 EmailVerification.init({ mode: "OPTIONAL" }),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 ThirdPartyRecipe.init({
                     signInAndUpFeature: {
                         providers: [this.customProvider1],
@@ -497,7 +506,10 @@ describe(`signinupTest: ${printPath("[test/thirdparty/signinupFeature.test.js]")
             },
             recipeList: [
                 EmailVerification.init({ mode: "OPTIONAL" }),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 ThirdPartyRecipe.init({
                     signInAndUpFeature: {
                         providers: [this.customProvider5],
@@ -723,7 +735,9 @@ describe(`signinupTest: ${printPath("[test/thirdparty/signinupFeature.test.js]")
                 })
         );
         assert.strictEqual(response1.statusCode, 500);
-        assert.deepStrictEqual(response1.body, { message: "error from getProfileInfo" });
+        assert.deepStrictEqual(response1.body, {
+            message: "error from getProfileInfo",
+        });
     });
 
     it("test invalid POST params for thirdparty module", async function () {

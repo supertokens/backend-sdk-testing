@@ -13,15 +13,15 @@
  * under the License.
  */
 const { printPath, setupST, startST, stopST, killAllST, cleanST, signUPRequest } = require("../utils");
-const { updateEmailOrPassword, signIn } = require("../../lib/build/recipe/emailpassword");
+const { updateEmailOrPassword, signIn } = require("supertokens-node/lib/build/recipe/emailpassword");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let STExpress = require("../..");
-let Session = require("../../recipe/session");
-let EmailPassword = require("../../recipe/emailpassword");
-let { maxVersion } = require("../../lib/build/utils");
-let { Querier } = require("../../lib/build/querier");
-let { middleware, errorHandler } = require("../../framework/express");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let { maxVersion } = require("supertokens-node/lib/build/utils");
+let { Querier } = require("supertokens-node/lib/build/querier");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 const express = require("express");
 
 describe(`updateEmailPassTest: ${printPath("[test/emailpassword/updateEmailPass.test.js]")}`, function () {

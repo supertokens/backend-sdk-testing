@@ -13,16 +13,16 @@
  * under the License.
  */
 const { printPath, setupST, startST, killAllST, cleanST, setKeyValueInConfig } = require("./utils");
-let ST = require("../");
-let { Querier } = require("../lib/build/querier");
+let ST = require("supertokens-node");
+let { Querier } = require("supertokens-node/lib/build/querier");
 let assert = require("assert");
-let { ProcessState, PROCESS_STATE } = require("../lib/build/processState");
-let Session = require("../recipe/session");
-let SessionRecipe = require("../lib/build/recipe/session/recipe").default;
+let { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
+let Session = require("supertokens-node/recipe/session");
+let SessionRecipe = require("supertokens-node/lib/build/recipe/session/recipe").default;
 let nock = require("nock");
-const { default: NormalisedURLPath } = require("../lib/build/normalisedURLPath");
-let EmailPassword = require("../recipe/emailpassword");
-let EmailPasswordRecipe = require("../lib/build/recipe/emailpassword/recipe").default;
+const { default: NormalisedURLPath } = require("supertokens-node/lib/build/normalisedURLPath");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let EmailPasswordRecipe = require("supertokens-node/lib/build/recipe/emailpassword/recipe").default;
 const { fail } = require("assert");
 const { default: fetch } = require("cross-fetch");
 
@@ -50,7 +50,12 @@ describe(`Querier: ${printPath("[test/querier.test.js]")}`, function () {
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
         let q = Querier.getNewInstanceOrThrowError(undefined);
         await q.getAPIVersion();
@@ -83,7 +88,12 @@ describe(`Querier: ${printPath("[test/querier.test.js]")}`, function () {
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         let querier = Querier.getNewInstanceOrThrowError(SessionRecipe.getInstanceOrThrowError().getRecipeId());
@@ -132,7 +142,12 @@ describe(`Querier: ${printPath("[test/querier.test.js]")}`, function () {
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
         try {
             let q = Querier.getNewInstanceOrThrowError(undefined);
@@ -159,7 +174,12 @@ describe(`Querier: ${printPath("[test/querier.test.js]")}`, function () {
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
         let q = Querier.getNewInstanceOrThrowError(undefined);
         assert.equal(await q.sendGetRequest(new NormalisedURLPath("/hello"), {}, {}), "Hello\n");
@@ -186,7 +206,12 @@ describe(`Querier: ${printPath("[test/querier.test.js]")}`, function () {
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
         let q = Querier.getNewInstanceOrThrowError(undefined);
         assert.equal(await q.sendGetRequest(new NormalisedURLPath("/hello"), {}, {}), "Hello\n");
@@ -209,7 +234,12 @@ describe(`Querier: ${printPath("[test/querier.test.js]")}`, function () {
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         try {
@@ -254,7 +284,10 @@ describe(`Querier: ${printPath("[test/querier.test.js]")}`, function () {
 
     it("test with core base path", async function () {
         // first we need to know if the core used supports base_path config
-        const connectionURI = await startST({ port: 8081, coreConfig: { base_path: "/test" } });
+        const connectionURI = await startST({
+            port: 8081,
+            coreConfig: { base_path: "/test" },
+        });
 
         try {
             const res = await fetch(`${connectionURI}/test/hello`);
@@ -284,7 +317,10 @@ describe(`Querier: ${printPath("[test/querier.test.js]")}`, function () {
 
     it("test with incorrect core base path should fail", async function () {
         // first we need to know if the core used supports base_path config
-        const connectionURI = await startST({ port: 8081, coreConfig: { base_path: "/some/path" } });
+        const connectionURI = await startST({
+            port: 8081,
+            coreConfig: { base_path: "/some/path" },
+        });
 
         try {
             const res = await fetch(`${connectionURI}/some/path/hello`);
@@ -324,7 +360,10 @@ describe(`Querier: ${printPath("[test/querier.test.js]")}`, function () {
 
     it("test with multiple core base path", async function () {
         // first we need to know if the core used supports base_path config
-        const connectionURI = await startST({ port: 8081, coreConfig: { base_path: "/some/path" } });
+        const connectionURI = await startST({
+            port: 8081,
+            coreConfig: { base_path: "/some/path" },
+        });
 
         try {
             const res = await fetch(`${connectionURI}/some/path/hello`);
@@ -383,7 +422,12 @@ describe(`Querier: ${printPath("[test/querier.test.js]")}`, function () {
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         let querier = Querier.getNewInstanceOrThrowError(SessionRecipe.getInstanceOrThrowError().getRecipeId());

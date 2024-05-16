@@ -3,12 +3,12 @@ const express = require("express");
 const request = require("supertest");
 
 const { printPath, setupST, startST, killAllST, cleanST } = require("../utils");
-let STExpress = require("../../");
-let { ProcessState } = require("../../lib/build/processState");
-let JWTRecipe = require("../../lib/build/recipe/jwt");
-let { Querier } = require("../../lib/build/querier");
-const { maxVersion } = require("../../lib/build/utils");
-let { middleware, errorHandler } = require("../../framework/express");
+let STExpress = require("supertokens-node");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let JWTRecipe = require("supertokens-node/lib/build/recipe/jwt");
+let { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 describe(`getJWKS: ${printPath("[test/jwt/getJWKS.test.js]")}`, function () {
     beforeEach(async function () {

@@ -23,19 +23,19 @@ const {
     mockLambdaProxyEventV2,
 } = require("../utils");
 let assert = require("assert");
-let { ProcessState, PROCESS_STATE } = require("../../lib/build/processState");
-let SuperTokens = require("../../");
-let { middleware } = require("../../framework/awsLambda");
-let Session = require("../../recipe/session");
-let EmailPassword = require("../../recipe/emailpassword");
-let Passwordless = require("../../recipe/passwordless");
-let ThirdParty = require("../../recipe/thirdparty");
-let { verifySession } = require("../../recipe/session/framework/awsLambda");
-let Dashboard = require("../../recipe/dashboard");
+let { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node");
+let { middleware } = require("supertokens-node/framework/awsLambda");
+let Session = require("supertokens-node/recipe/session");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let Passwordless = require("supertokens-node/recipe/passwordless");
+let ThirdParty = require("supertokens-node/recipe/thirdparty");
+let { verifySession } = require("supertokens-node/recipe/session/framework/awsLambda");
+let Dashboard = require("supertokens-node/recipe/dashboard");
 let { createUsers } = require("../utils");
-const { Querier } = require("../../lib/build/querier");
-const { maxVersion } = require("../../lib/build/utils");
-const { AWSRequest } = require("../../lib/build/framework/awsLambda/framework");
+const { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
+const { AWSRequest } = require("supertokens-node/lib/build/framework/awsLambda/framework");
 const sinon = require("sinon");
 
 describe(`AWS Lambda: ${printPath("[test/framework/awsLambda.test.js]")}`, function () {
@@ -64,7 +64,12 @@ describe(`AWS Lambda: ${printPath("[test/framework/awsLambda.test.js]")}`, funct
                 websiteDomain: "supertokens.io",
                 apiGatewayPath: "/dev",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         let createSession = async (awsEvent, _) => {
@@ -116,7 +121,9 @@ describe(`AWS Lambda: ${printPath("[test/framework/awsLambda.test.js]")}`, funct
 
         let verifySessionEvent = mockLambdaProxyEvent("/session/verify", "POST", null, null, proxy);
         result = await verifySession(verifyLambdaSession)(verifySessionEvent, undefined);
-        assert.deepStrictEqual(JSON.parse(result.body), { message: "unauthorised" });
+        assert.deepStrictEqual(JSON.parse(result.body), {
+            message: "unauthorised",
+        });
 
         verifySessionEvent = mockLambdaProxyEvent(
             "/session/verify",
@@ -128,7 +135,9 @@ describe(`AWS Lambda: ${printPath("[test/framework/awsLambda.test.js]")}`, funct
             proxy
         );
         result = await verifySession(verifyLambdaSession)(verifySessionEvent, undefined);
-        assert.deepStrictEqual(JSON.parse(result.body), { message: "try refresh token" });
+        assert.deepStrictEqual(JSON.parse(result.body), {
+            message: "try refresh token",
+        });
 
         verifySessionEvent = mockLambdaProxyEvent(
             "/session/verify",
@@ -159,7 +168,9 @@ describe(`AWS Lambda: ${printPath("[test/framework/awsLambda.test.js]")}`, funct
 
         let refreshSessionEvent = mockLambdaProxyEvent("/auth/session/refresh", "POST", null, null, proxy);
         result = await middleware()(refreshSessionEvent, undefined);
-        assert.deepStrictEqual(JSON.parse(result.body), { message: "unauthorised" });
+        assert.deepStrictEqual(JSON.parse(result.body), {
+            message: "unauthorised",
+        });
 
         refreshSessionEvent = mockLambdaProxyEvent(
             "/auth/session/refresh",
@@ -239,7 +250,12 @@ describe(`AWS Lambda: ${printPath("[test/framework/awsLambda.test.js]")}`, funct
                 websiteDomain: "supertokens.io",
                 apiGatewayPath: "/dev",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         let createSession = async (awsEvent, _) => {
@@ -291,13 +307,17 @@ describe(`AWS Lambda: ${printPath("[test/framework/awsLambda.test.js]")}`, funct
 
         let verifySessionEvent = mockLambdaProxyEventV2("/session/verify", "POST", null, null, proxy);
         result = await verifySession(verifyLambdaSession)(verifySessionEvent, undefined);
-        assert.deepStrictEqual(JSON.parse(result.body), { message: "unauthorised" });
+        assert.deepStrictEqual(JSON.parse(result.body), {
+            message: "unauthorised",
+        });
 
         verifySessionEvent = mockLambdaProxyEventV2("/session/verify", "POST", null, null, proxy, [
             `sAccessToken=${res.accessToken}`,
         ]);
         result = await verifySession(verifyLambdaSession)(verifySessionEvent, undefined);
-        assert.deepStrictEqual(JSON.parse(result.body), { message: "try refresh token" });
+        assert.deepStrictEqual(JSON.parse(result.body), {
+            message: "try refresh token",
+        });
 
         verifySessionEvent = mockLambdaProxyEventV2(
             "/session/verify",
@@ -322,7 +342,9 @@ describe(`AWS Lambda: ${printPath("[test/framework/awsLambda.test.js]")}`, funct
 
         let refreshSessionEvent = mockLambdaProxyEventV2("/auth/session/refresh", "POST", null, null, proxy, null);
         result = await middleware()(refreshSessionEvent, undefined);
-        assert.deepStrictEqual(JSON.parse(result.body), { message: "unauthorised" });
+        assert.deepStrictEqual(JSON.parse(result.body), {
+            message: "unauthorised",
+        });
 
         refreshSessionEvent = mockLambdaProxyEventV2(
             "/auth/session/refresh",

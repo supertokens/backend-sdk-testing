@@ -13,17 +13,17 @@
  * under the License.
  */
 const { printPath, setupST, startST, killAllST, cleanST, setKeyValueInConfig, stopST, resetAll } = require("../utils");
-let STExpress = require("../../");
-let Session = require("../../recipe/session");
-let ThirdPartyPasswordless = require("../../recipe/thirdpartypasswordless");
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let ThirdPartyPasswordless = require("supertokens-node/recipe/thirdpartypasswordless");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let SuperTokens = require("../../lib/build/supertokens").default;
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node/lib/build/supertokens").default;
 const request = require("supertest");
 const express = require("express");
-let { middleware, errorHandler } = require("../../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 let { isCDIVersionCompatible, generateRandomCode } = require("../utils");
-let ThirdPartyPasswordlessRecipe = require("../../lib/build/recipe/thirdpartypasswordless/recipe").default;
+let ThirdPartyPasswordlessRecipe = require("supertokens-node/lib/build/recipe/thirdpartypasswordless/recipe").default;
 
 describe(`config tests: ${printPath("[test/thirdpartypasswordless/config.test.js]")}`, function () {
     beforeEach(async function () {
@@ -1659,7 +1659,13 @@ describe(`config tests: ${printPath("[test/thirdpartypasswordless/config.test.js
                                 thirdPartyId: "custom",
                                 authorizationEndpoint: "https://test.com/oauth/auth",
                                 tokenEndpoint: "https://test.com/oauth/token",
-                                clients: [{ clientId: "supetokens", clientSecret: "secret", scope: ["test"] }],
+                                clients: [
+                                    {
+                                        clientId: "supetokens",
+                                        clientSecret: "secret",
+                                        scope: ["test"],
+                                    },
+                                ],
                             },
                             override: (oI) => {
                                 return {

@@ -23,18 +23,18 @@ const {
     extractInfoFromResponse,
     startSTWithMultitenancyAndAccountLinking,
 } = require("../utils");
-let supertokens = require("../../");
-let Session = require("../../recipe/session");
+let supertokens = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let AccountLinking = require("../../recipe/accountlinking").default;
-let { ProcessState } = require("../../lib/build/processState");
-let EmailPassword = require("../../recipe/emailpassword");
-let EmailVerification = require("../../recipe/emailverification");
+let AccountLinking = require("supertokens-node/recipe/accountlinking").default;
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let EmailVerification = require("supertokens-node/recipe/emailverification");
 const express = require("express");
 const request = require("supertest");
-let { middleware, errorHandler } = require("../../framework/express");
-let { protectedProps } = require("../../lib/build/recipe/session/constants");
-let { PrimitiveClaim } = require("../../lib/build/recipe/session/claimBaseClasses/primitiveClaim");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
+let { protectedProps } = require("supertokens-node/lib/build/recipe/session/constants");
+let { PrimitiveClaim } = require("supertokens-node/lib/build/recipe/session/claimBaseClasses/primitiveClaim");
 
 describe(`sessionTests: ${printPath("[test/accountlinking/session.test.js]")}`, function () {
     beforeEach(async function () {

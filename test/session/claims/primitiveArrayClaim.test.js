@@ -15,7 +15,9 @@
 const { printPath } = require("../../utils");
 const assert = require("assert");
 const sinon = require("sinon");
-const { PrimitiveArrayClaim } = require("../../../lib/build/recipe/session/claimBaseClasses/primitiveArrayClaim");
+const {
+    PrimitiveArrayClaim,
+} = require("supertokens-node/lib/build/recipe/session/claimBaseClasses/primitiveArrayClaim");
 
 describe(`sessionClaims/primitiveArrayClaim: ${printPath(
     "[test/session/claims/primitiveArrayClaim.test.js]"

@@ -1,11 +1,11 @@
 const assert = require("assert");
 const { printPath, setupST, startST, killAllST, cleanST } = require("../../utils");
-const { ProcessState } = require("../../../lib/build/processState");
-const STExpress = require("../../..");
-const ThirdPartyPasswordlessRecipe = require("../../../lib/build/recipe/thirdpartypasswordless").default;
-const SessionRecipe = require("../../../lib/build/recipe/session").default;
-const { Querier } = require("../../../lib/build/querier");
-const { maxVersion } = require("../../../lib/build/utils");
+const { ProcessState } = require("supertokens-node/lib/build/processState");
+const STExpress = require("supertokens-node");
+const ThirdPartyPasswordlessRecipe = require("supertokens-node/lib/build/recipe/thirdpartypasswordless").default;
+const SessionRecipe = require("supertokens-node/lib/build/recipe/session").default;
+const { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
 
 describe(`userIdMapping with thirdPartyPasswordless: ${printPath(
     "[test/useridmapping/recipeTests/thirdpartypasswordless.test.js]"

@@ -26,17 +26,17 @@ const {
     setKeyValueInConfig,
     emailVerifyTokenRequest,
 } = require("../utils");
-let STExpress = require("../..");
-let Session = require("../../recipe/session");
-const EmailVerification = require("../../recipe/emailverification");
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+const EmailVerification = require("supertokens-node/recipe/emailverification");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let { maxVersion } = require("../../lib/build/utils");
-let { Querier } = require("../../lib/build/querier");
-let EmailPassword = require("../../recipe/emailpassword");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let { maxVersion } = require("supertokens-node/lib/build/utils");
+let { Querier } = require("supertokens-node/lib/build/querier");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
 const express = require("express");
 const request = require("supertest");
-let { middleware, errorHandler } = require("../../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`, function () {
     beforeEach(async function () {
@@ -73,7 +73,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
             },
             recipeList: [
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 EmailVerification.init({ mode: "OPTIONAL" }),
             ],
         });
@@ -111,7 +114,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
             },
             recipeList: [
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 EmailVerification.init({ mode: "OPTIONAL" }),
             ],
         });
@@ -158,7 +164,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
             },
             recipeList: [
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 EmailVerification.init({ mode: "OPTIONAL" }),
             ],
         });
@@ -188,7 +197,9 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
 
     // Call the API with an expired access token and see that try refresh token is returned
     it("test the generate token api with an expired access token and see that try refresh token is returned", async function () {
-        const connectionURI = await startST({ coreConfig: { access_token_validity: 2 } });
+        const connectionURI = await startST({
+            coreConfig: { access_token_validity: 2 },
+        });
 
         STExpress.init({
             supertokens: {
@@ -201,7 +212,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
             },
             recipeList: [
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 EmailVerification.init({ mode: "OPTIONAL" }),
             ],
         });
@@ -291,7 +305,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
                     },
                 }),
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -363,7 +380,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
                     },
                 }),
                 EmailPassword.init({}),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -423,7 +443,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
                     mode: "OPTIONAL",
                 }),
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -471,7 +494,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
                     mode: "OPTIONAL",
                 }),
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -544,7 +570,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
                     },
                 }),
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -619,7 +648,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
                     },
                 }),
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -695,7 +727,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
                     mode: "OPTIONAL",
                 }),
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -724,7 +759,9 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
 
     // Call the API with an expired access token and see that try refresh token is returned
     it("test the email verify with an expired access token, using the get method", async function () {
-        const connectionURI = await startST({ coreConfig: { access_token_validity: 2 } });
+        const connectionURI = await startST({
+            coreConfig: { access_token_validity: 2 },
+        });
 
         let token = null;
 
@@ -750,7 +787,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
                     },
                 }),
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -884,7 +924,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
                     },
                 }),
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -967,7 +1010,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
                     },
                 }),
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -1052,7 +1098,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
                     },
                 }),
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -1097,7 +1146,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
                 })
         );
 
-        assert.deepStrictEqual(response2, { customError: true, error: "verify email error" });
+        assert.deepStrictEqual(response2, {
+            customError: true,
+            error: "verify email error",
+        });
         assert.strictEqual(user.recipeUserId.getAsString(), userId);
         assert.strictEqual(user.email, "test@gmail.com");
     });
@@ -1143,7 +1195,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
                         },
                     },
                 }),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
             ],
         });
 
@@ -1188,7 +1243,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
                 })
         );
 
-        assert.deepStrictEqual(response2, { customError: true, error: "verify email error" });
+        assert.deepStrictEqual(response2, {
+            customError: true,
+            error: "verify email error",
+        });
         assert.strictEqual(user.recipeUserId.getAsString(), userId);
         assert.strictEqual(user.email, "test@gmail.com");
     });
@@ -1206,7 +1264,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
             },
             recipeList: [
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 EmailVerification.init({ mode: "OPTIONAL" }),
             ],
         });
@@ -1252,7 +1313,10 @@ describe(`emailverify: ${printPath("[test/emailpassword/emailverify.test.js]")}`
             },
             recipeList: [
                 EmailPassword.init(),
-                Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" }),
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
                 EmailVerification.init({ mode: "OPTIONAL" }),
             ],
         });

@@ -3,13 +3,13 @@ const express = require("express");
 const request = require("supertest");
 
 const { printPath, setupST, startST, killAllST, cleanST } = require("../utils");
-let { ProcessState } = require("../../lib/build/processState");
-let STExpress = require("../../");
-const OpenIdRecipe = require("../../lib/build/recipe/openid/recipe").default;
-const OpenId = require("../../lib/build/recipe/openid");
-let { Querier } = require("../../lib/build/querier");
-const { maxVersion } = require("../../lib/build/utils");
-let { middleware, errorHandler } = require("../../framework/express");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let STExpress = require("supertokens-node");
+const OpenIdRecipe = require("supertokens-node/lib/build/recipe/openid/recipe").default;
+const OpenId = require("supertokens-node/lib/build/recipe/openid");
+let { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 describe(`overrideTest: ${printPath("[test/openid/override.test.js]")}`, function () {
     beforeEach(async function () {

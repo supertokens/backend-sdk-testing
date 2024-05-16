@@ -13,7 +13,7 @@
  * under the License.
  */
 const assert = require("assert");
-const { normaliseSessionScopeOrThrowError } = require("../../lib/build/recipe/session/utils");
+const { normaliseSessionScopeOrThrowError } = require("supertokens-node/lib/build/recipe/session/utils");
 
 describe("normaliseSessionScopeOrThrowError", () => {
     it("should throw an error when scope is an empty string", () => {

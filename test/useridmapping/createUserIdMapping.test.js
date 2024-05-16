@@ -1,13 +1,13 @@
 const assert = require("assert");
 
 const { printPath, setupST, startST, killAllST, cleanST, areArraysEqual } = require("../utils");
-const STExpress = require("../..");
-const { ProcessState } = require("../../lib/build/processState");
-const EmailPasswordRecipe = require("../../lib/build/recipe/emailpassword").default;
-const SessionRecipe = require("../../lib/build/recipe/session").default;
-const UserMetadataRecipe = require("../../lib/build/recipe/usermetadata").default;
-const { Querier } = require("../../lib/build/querier");
-const { maxVersion } = require("../../lib/build/utils");
+const STExpress = require("supertokens-node");
+const { ProcessState } = require("supertokens-node/lib/build/processState");
+const EmailPasswordRecipe = require("supertokens-node/lib/build/recipe/emailpassword").default;
+const SessionRecipe = require("supertokens-node/lib/build/recipe/session").default;
+const UserMetadataRecipe = require("supertokens-node/lib/build/recipe/usermetadata").default;
+const { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
 
 describe(`createUserIdMappingTest: ${printPath("[test/useridmapping/createUserIdMapping.test.js]")}`, function () {
     beforeEach(async function () {

@@ -14,18 +14,18 @@
  */
 const { printPath, setupST, startST, killAllST, cleanST, extractInfoFromResponse } = require("../utils");
 let assert = require("assert");
-let { ProcessState, PROCESS_STATE } = require("../../lib/build/processState");
-let SuperTokens = require("../..");
-let { middleware } = require("../../framework/awsLambda");
-let Session = require("../../recipe/session");
-let EmailPassword = require("../../recipe/emailpassword");
-let { verifySession } = require("../../recipe/session/framework/awsLambda");
-let Dashboard = require("../../recipe/dashboard");
+let { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
+let SuperTokens = require("supertokens-node");
+let { middleware } = require("supertokens-node/framework/awsLambda");
+let Session = require("supertokens-node/recipe/session");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let { verifySession } = require("supertokens-node/recipe/session/framework/awsLambda");
+let Dashboard = require("supertokens-node/recipe/dashboard");
 const { createUsers } = require("../utils.js");
-const { Querier } = require("../../lib/build/querier");
-const { maxVersion } = require("../../lib/build/utils");
-const Passwordless = require("../../recipe/passwordless");
-const ThirdParty = require("../../recipe/thirdparty");
+const { Querier } = require("supertokens-node/lib/build/querier");
+const { maxVersion } = require("supertokens-node/lib/build/utils");
+const Passwordless = require("supertokens-node/recipe/passwordless");
+const ThirdParty = require("supertokens-node/recipe/thirdparty");
 const { default: fetch } = require("cross-fetch");
 
 describe(`Loopback: ${printPath("[test/framework/loopback.withTenantId.test.js]")}`, function () {
@@ -60,7 +60,12 @@ describe(`Loopback: ${printPath("[test/framework/loopback.withTenantId.test.js]"
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [Session.init({ getTokenTransferMethod: () => "cookie", antiCsrf: "VIA_TOKEN" })],
+            recipeList: [
+                Session.init({
+                    getTokenTransferMethod: () => "cookie",
+                    antiCsrf: "VIA_TOKEN",
+                }),
+            ],
         });
 
         await this.app.start();
@@ -102,7 +107,9 @@ describe(`Loopback: ${printPath("[test/framework/loopback.withTenantId.test.js]"
         } catch (err) {
             if (err !== undefined && err.response !== undefined) {
                 assert.strictEqual(err.response.status, 401);
-                assert.deepStrictEqual(err.response.data, { message: "try refresh token" });
+                assert.deepStrictEqual(err.response.data, {
+                    message: "try refresh token",
+                });
             } else {
                 throw err;
             }

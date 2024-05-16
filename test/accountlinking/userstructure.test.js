@@ -24,16 +24,16 @@ const {
     startSTWithMultitenancyAndAccountLinking,
     extractInfoFromResponse,
 } = require("../utils");
-let supertokens = require("../../");
-let Session = require("../../recipe/session");
+let supertokens = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let EmailPassword = require("../../recipe/emailpassword");
-let ThirdParty = require("../../recipe/thirdparty");
-let Passwordless = require("../../recipe/passwordless");
-let AccountLinking = require("../../recipe/accountlinking");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let ThirdParty = require("supertokens-node/recipe/thirdparty");
+let Passwordless = require("supertokens-node/recipe/passwordless");
+let AccountLinking = require("supertokens-node/recipe/accountlinking");
 const express = require("express");
-let { middleware, errorHandler } = require("../../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 const request = require("supertest");
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.test.js]")}`, function () {
@@ -200,7 +200,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
             ],
         });
 
-        const { status, user } = await Passwordless.signInUp({ tenantId: "public", phoneNumber: "+36701234123" });
+        const { status, user } = await Passwordless.signInUp({
+            tenantId: "public",
+            phoneNumber: "+36701234123",
+        });
 
         assert.strictEqual(status, "OK");
 

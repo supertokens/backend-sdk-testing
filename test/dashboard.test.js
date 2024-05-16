@@ -8,21 +8,21 @@ const {
     resetAll,
     startSTWithMultitenancyAndAccountLinking,
 } = require("./utils");
-let STExpress = require("../");
-let Session = require("../recipe/session");
-let Passwordless = require("../recipe/passwordless");
-let ThirdParty = require("../recipe/thirdparty");
-let EmailPassword = require("../recipe/emailpassword");
-let AccountLinking = require("../recipe/accountlinking");
-let EmailVerification = require("../recipe/emailverification");
-let UserMetadata = require("../recipe/usermetadata");
-let Dashboard = require("../recipe/dashboard");
-let DashboardRecipe = require("../lib/build/recipe/dashboard/recipe").default;
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
+let Passwordless = require("supertokens-node/recipe/passwordless");
+let ThirdParty = require("supertokens-node/recipe/thirdparty");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+let AccountLinking = require("supertokens-node/recipe/accountlinking");
+let EmailVerification = require("supertokens-node/recipe/emailverification");
+let UserMetadata = require("supertokens-node/recipe/usermetadata");
+let Dashboard = require("supertokens-node/recipe/dashboard");
+let DashboardRecipe = require("supertokens-node/lib/build/recipe/dashboard/recipe").default;
 let assert = require("assert");
-let { ProcessState } = require("../lib/build/processState");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
 const express = require("express");
 const request = require("supertest");
-let { middleware, errorHandler } = require("../framework/express");
+let { middleware, errorHandler } = require("supertokens-node/framework/express");
 
 describe(`dashboard: ${printPath("[test/dashboard.test.js]")}`, function () {
     beforeEach(async function () {

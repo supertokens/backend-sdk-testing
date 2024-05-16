@@ -13,16 +13,16 @@
  * under the License.
  */
 const { printPath, setupST, startST, killAllST, cleanST, extractInfoFromResponse, delay } = require("../utils");
-let STExpress = require("../..");
-let Session = require("../../recipe/session");
+let STExpress = require("supertokens-node");
+let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("../../lib/build/processState");
-let EmailPassword = require("../../recipe/emailpassword");
-const EmailVerification = require("../../recipe/emailverification");
-let { SMTPService } = require("../../recipe/emailpassword/emaildelivery");
+let { ProcessState } = require("supertokens-node/lib/build/processState");
+let EmailPassword = require("supertokens-node/recipe/emailpassword");
+const EmailVerification = require("supertokens-node/recipe/emailverification");
+let { SMTPService } = require("supertokens-node/recipe/emailpassword/emaildelivery");
 let nock = require("nock");
 let supertest = require("supertest");
-const { middleware, errorHandler } = require("../../framework/express");
+const { middleware, errorHandler } = require("supertokens-node/framework/express");
 let express = require("express");
 
 describe(`emailDelivery: ${printPath("[test/emailpassword/emailDelivery.test.js]")}`, function () {
