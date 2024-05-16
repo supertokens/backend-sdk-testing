@@ -11,3 +11,13 @@ releasePassword
 .idea
 /test_report
 /.nyc_output
+
+
+pyenv
+__pycache__
+
+mock-python.pid
+mock-python.log
+
+mock-node.pid
+mock-node.log
