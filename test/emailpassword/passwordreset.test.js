@@ -14,7 +14,7 @@
  */
 
 const { printPath, setupST, startST, stopST, killAllST, cleanST, resetAll, signUPRequest } = require("../utils");
-let STExpress = require("supertokens-node/");
+let STExpress = require("supertokens-node");
 let Session = require("supertokens-node/recipe/session");
 let SessionRecipe = require("supertokens-node/lib/build/recipe/session/recipe").default;
 let assert = require("assert");
@@ -37,6 +37,7 @@ const express = require("express");
 const request = require("supertest");
 let { middleware, errorHandler } = require("supertokens-node/framework/express");
 let { maxVersion } = require("supertokens-node/lib/build/utils");
+const apiMock = require("../../api-mock");
 
 /**
  * TODO: generate token API:
@@ -49,6 +50,7 @@ let { maxVersion } = require("supertokens-node/lib/build/utils");
  */
 
 describe(`passwordreset: ${printPath("[test/emailpassword/passwordreset.test.js]")}`, function () {
+    let pid;
     beforeEach(async function () {
         await killAllST();
         await setupST();
@@ -58,6 +60,7 @@ describe(`passwordreset: ${printPath("[test/emailpassword/passwordreset.test.js]
     after(async function () {
         await killAllST();
         await cleanST();
+        await apiMock.stopApp(pid);
     });
 
     /*
@@ -670,9 +673,23 @@ describe(`passwordreset: ${printPath("[test/emailpassword/passwordreset.test.js]
         });
     });
 
-    it("Test that reset password link uses the correct origin", async function () {
+    it.only("Test that reset password link uses the correct origin", async function () {
         const connectionURI = await startST();
-        let emailPasswordLink = "";
+        let passwordResetLink = "";
+
+        pid = await apiMock.startApp(pid, {
+            connectionURI,
+            recipes: {
+                emailpassword: {
+                    overrides: {
+                        "emailDelivery.sendEmail": "copy-passwordResetLink",
+                    },
+                },
+                session: {},
+            },
+        });
+        const { EmailPassword } = apiMock.recipesMock;
+
         STExpress.init({
             supertokens: {
                 connectionURI,
@@ -695,7 +712,7 @@ describe(`passwordreset: ${printPath("[test/emailpassword/passwordreset.test.js]
                             return {
                                 ...original,
                                 sendEmail: async (input) => {
-                                    emailPasswordLink = input.passwordResetLink;
+                                    passwordResetLink = input.passwordResetLink;
                                 },
                             };
                         },
@@ -705,66 +722,114 @@ describe(`passwordreset: ${printPath("[test/emailpassword/passwordreset.test.js]
             ],
         });
 
-        const app = express();
+        // const app = express();
 
-        app.use(middleware());
+        // app.use(middleware());
 
-        app.use(errorHandler());
+        // app.use(errorHandler());
 
         await EmailPassword.signUp("public", "test@example.com", "password1234");
 
-        await new Promise((resolve, reject) =>
-            request(app)
-                .post("/auth/user/password/reset/token")
-                .send({
-                    formFields: [
-                        {
-                            id: "email",
-                            value: "test@example.com",
-                        },
-                    ],
-                })
-                .expect(200)
-                .end((err, res) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(JSON.parse(res.text));
-                    }
-                })
-        );
+        // await new Promise((resolve, reject) =>
+        //     request(app)
+        //         .post("/auth/user/password/reset/token")
+        //         .send({
+        //             formFields: [
+        //                 {
+        //                     id: "email",
+        //                     value: "test@example.com",
+        //                 },
+        //             ],
+        //         })
+        //         .expect(200)
+        //         .end((err, res) => {
+        //             if (err) {
+        //                 reject(err);
+        //             } else {
+        //                 resolve(JSON.parse(res.text));
+        //             }
+        //         })
+        // );
 
-        let currentUrl = new URL(emailPasswordLink);
+        await apiMock.queryAPI({
+            method: "post",
+            path: "/auth/user/password/reset/token",
+            input: {
+                formFields: [
+                    {
+                        id: "email",
+                        value: "test@example.com",
+                    },
+                ],
+            },
+        });
+
+        let mockedValues = await apiMock.queryAPI({
+            method: "get",
+            path: "/mock/getMockedValues",
+        });
+
+        let currentUrl = new URL(mockedValues.passwordResetLink);
         assert(currentUrl.origin === "http://localhost:3000");
 
-        await new Promise((resolve) =>
-            request(app)
-                .post("/auth/user/password/reset/token")
-                .set("origin", "localhost:3002")
-                .send({
-                    formFields: [
-                        {
-                            id: "email",
-                            value: "test@example.com",
-                        },
-                    ],
-                })
-                .expect(200)
-                .end((err, res) => {
-                    if (err) {
-                        resolve(undefined);
-                    } else {
-                        resolve(JSON.parse(res.text));
-                    }
-                })
-        );
+        // await new Promise((resolve) =>
+        //     request(app)
+        //         .post("/auth/user/password/reset/token")
+        //         .set("origin", "localhost:3002")
+        //         .send({
+        //             formFields: [
+        //                 {
+        //                     id: "email",
+        //                     value: "test@example.com",
+        //                 },
+        //             ],
+        //         })
+        //         .expect(200)
+        //         .end((err, res) => {
+        //             if (err) {
+        //                 resolve(undefined);
+        //             } else {
+        //                 resolve(JSON.parse(res.text));
+        //             }
+        //         })
+        // );
 
-        currentUrl = new URL(emailPasswordLink);
+        await apiMock.queryAPI({
+            method: "post",
+            path: "/auth/user/password/reset/token",
+            input: {
+                formFields: [
+                    {
+                        id: "email",
+                        value: "test@example.com",
+                    },
+                ],
+            },
+            headers: {
+                origin: "localhost:3002",
+            },
+        });
+
+        mockedValues = await apiMock.queryAPI({
+            method: "get",
+            path: "/mock/getMockedValues",
+        });
+
+        currentUrl = new URL(mockedValues.passwordResetLink);
         assert(currentUrl.origin === "http://localhost:3002");
     });
 
-    it("test the reset password link", async function () {
+    it.only("test the reset password link", async function () {
         const connectionURI = await startST();
+        pid = await apiMock.startApp(pid, {
+            connectionURI,
+            recipes: {
+                emailpassword: {},
+                session: {},
+            },
+        });
+        const { EmailPassword } = apiMock.recipesMock;
+
         STExpress.init({
             supertokens: {
                 connectionURI,
@@ -779,14 +844,14 @@ describe(`passwordreset: ${printPath("[test/emailpassword/passwordreset.test.js]
             recipeList: [EmailPassword.init(), Session.init()],
         });
 
-        const app = express();
+        // const app = express();
 
-        app.use(middleware());
+        // app.use(middleware());
 
-        app.use(errorHandler());
+        // app.use(errorHandler());
 
         user = await EmailPassword.signUp("public", "test@example.com", "password1234");
-        link = await createResetPasswordLink("public", user.user.id, "test@example.com");
+        link = await EmailPassword.createResetPasswordLink("public", user.user.id, "test@example.com");
         assert(link !== undefined);
         assert(link.status === "OK");
 

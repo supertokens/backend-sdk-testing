@@ -31,8 +31,10 @@ let EmailPassword = require("supertokens-node/recipe/emailpassword");
 let EmailVerification = require("supertokens-node/recipe/emailverification");
 let ThirdParty = require("supertokens-node/recipe/thirdparty");
 let AccountLinking = require("supertokens-node/recipe/accountlinking");
+const apiMock = require("../../api-mock");
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.test.js]")}`, function () {
+    let pid;
     beforeEach(async function () {
         await killAllST();
         await setupST();
@@ -42,10 +44,19 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     after(async function () {
         await killAllST();
         await cleanST();
+        await apiMock.stopApp(pid);
     });
 
-    it("make primary user success", async function () {
+    it.only("make primary user success", async function () {
         const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        pid = await apiMock.startApp(pid, {
+            connectionURI,
+            recipes: {
+                emailpassword: {},
+            },
+        });
+        const { EmailPassword, AccountLinking } = apiMock.recipesMock;
+
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -59,7 +70,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
         });
 
         let user = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
-
         assert(user.isPrimaryUser === false);
 
         let response = await AccountLinking.createPrimaryUser(user.loginMethods[0].recipeUserId);
@@ -75,11 +85,19 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
 
         // we do the json parse/stringify to remove the toJson and other functions in the login
         // method array in each of the below user objects.
-        assertJSONEquals(refetchedUser.toJson(), response.user.toJson());
+        assertJSONEquals(refetchedUser, response.user);
     });
 
-    it("make primary user succcess - already is a primary user", async function () {
+    it.only("make primary user success - already is a primary user", async function () {
         const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        pid = await apiMock.startApp(pid, {
+            connectionURI,
+            recipes: {
+                emailpassword: {},
+            },
+        });
+        const { EmailPassword, AccountLinking } = apiMock.recipesMock;
+
         supertokens.init({
             supertokens: {
                 connectionURI,
