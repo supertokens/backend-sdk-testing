@@ -34,7 +34,6 @@ let AccountLinking = require("supertokens-node/recipe/accountlinking");
 const apiMock = require("../../api-mock");
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.test.js]")}`, function () {
-    let pid;
     beforeEach(async function () {
         await killAllST();
         await setupST();
@@ -44,12 +43,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     after(async function () {
         await killAllST();
         await cleanST();
-        await apiMock.stopApp(pid);
     });
 
     it.only("make primary user success", async function () {
         const connectionURI = await startSTWithMultitenancyAndAccountLinking();
-        pid = await apiMock.startApp(pid, {
+        await apiMock.initApp({
             connectionURI,
             recipes: {
                 emailpassword: {},
@@ -90,7 +88,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
 
     it.only("make primary user success - already is a primary user", async function () {
         const connectionURI = await startSTWithMultitenancyAndAccountLinking();
-        pid = await apiMock.startApp(pid, {
+        await apiMock.initApp({
             connectionURI,
             recipes: {
                 emailpassword: {},

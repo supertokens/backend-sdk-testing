@@ -29,7 +29,7 @@ type MockConfig = {
     };
 };
 
-export type MockStartServer = (pid: number, config: MockConfig) => Promise<number | undefined>;
+export type MockStartServer = (config: MockConfig) => Promise<number | undefined>;
 
 const constrains = {
     tenantId: "public",
@@ -58,11 +58,11 @@ function initST(config: MockConfig) {
 
     const recipeList: RecipeListFunction[] = [];
 
-    if (config?.recipes?.emailpassword) {
-        initEmailPassword(config, recipeList);
-    }
     if (config?.recipes?.session) {
         recipeList.push(Session.init());
+    }
+    if (config?.recipes?.emailpassword) {
+        initEmailPassword(config, recipeList);
     }
 
     STExpress.init({
@@ -114,6 +114,10 @@ app.use(errorHandler());
 app.use((err, req, res, next) => {
     log(err);
     res.status(500).send("error");
+});
+
+app.get("/mock/ping", async (req, res, next) => {
+    res.json({ ok: true });
 });
 
 app.post("/mock/reset", async (req, res, next) => {
@@ -170,11 +174,6 @@ app.post("/mock/AccountLinking/createPrimaryUser", async (req, res, next) => {
     }
 });
 
-app.get("/mock/ping", async (req, res, next) => {
-    res.json({ ok: true });
-});
-
-const port = Number(process.argv[2] || 3030);
-app.listen(port, "0.0.0.0", () => {
-    log(`api-mock-server started on 0.0.0.0:${port}`);
+app.listen(3030, "localhost", () => {
+    log(`api-mock-server started on localhost:3030`);
 });

@@ -50,7 +50,6 @@ const apiMock = require("../../api-mock");
  */
 
 describe(`passwordreset: ${printPath("[test/emailpassword/passwordreset.test.js]")}`, function () {
-    let pid;
     beforeEach(async function () {
         await killAllST();
         await setupST();
@@ -60,7 +59,6 @@ describe(`passwordreset: ${printPath("[test/emailpassword/passwordreset.test.js]
     after(async function () {
         await killAllST();
         await cleanST();
-        await apiMock.stopApp(pid);
     });
 
     /*
@@ -677,7 +675,7 @@ describe(`passwordreset: ${printPath("[test/emailpassword/passwordreset.test.js]
         const connectionURI = await startST();
         let passwordResetLink = "";
 
-        pid = await apiMock.startApp(pid, {
+        await apiMock.initApp({
             connectionURI,
             recipes: {
                 emailpassword: {
@@ -821,7 +819,7 @@ describe(`passwordreset: ${printPath("[test/emailpassword/passwordreset.test.js]
 
     it.only("test the reset password link", async function () {
         const connectionURI = await startST();
-        pid = await apiMock.startApp(pid, {
+        await apiMock.initApp({
             connectionURI,
             recipes: {
                 emailpassword: {},

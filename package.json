@@ -2,7 +2,9 @@
     "name": "backend-sdk-testing",
     "version": "17.1.0",
     "scripts": {
+        "pretest": "./start-mock-server.sh",
         "test": "TEST_MODE=testing npx mocha --node-option no-experimental-fetch -r test/fetch-polyfill.mjs --timeout 500000",
+        "posttest": "./stop-mock-server.sh",
         "build": "cd test/with-typescript && npm run build",
         "pretty": "npx pretty-quick .",
         "build-pretty": "npm run build && npm run pretty && npm run pretty"

@@ -1,11 +1,8 @@
 let EmailPassword = require("supertokens-node/recipe/emailpassword");
 let AccountLinking = require("supertokens-node/recipe/accountlinking");
 const { fetch } = require("cross-fetch");
-const { fork } = require("child_process");
-const { join } = require("path");
-const kill = require("tree-kill");
 
-const apiMockPort = 3030;
+const apiMockPort = process.env.ST_SDK === "golang" ? 3032 : process.env.ST_SDK === "python" ? 3031 : 3030;
 
 async function queryAPI({ method, path, input, headers }) {
     let response = await fetch(`http://localhost:${apiMockPort}${path}`, {
@@ -103,67 +100,34 @@ const recipesMock = {
 };
 
 /** @type {import('./api-mock-server').MockStartServer} */
-async function startApp(pid, config) {
-    config.port = apiMockPort;
-    if (pid) {
-        await queryAPI({
-            method: "post",
-            path: "/mock/reset",
-            input: config,
-        });
-        return pid;
-    }
-    return new Promise(async (resolve, reject) => {
-        const child = fork(join(__dirname, "api-mock-server.ts"), {
-            execArgv: ["node_modules/.bin/tsx"],
-        });
-
-        let tries = 0;
-
-        do {
-            try {
-                const { ok } = await queryAPI({
-                    method: "get",
-                    path: "/mock/ping",
-                });
-                if (ok) {
-                    await queryAPI({
-                        method: "post",
-                        path: "/mock/reset",
-                        input: config,
-                    });
-                    break;
-                }
-            } catch (ignored) {
-                tries++;
-                if (tries === 10) {
-                    reject(new Error("Failed to start app"));
-                    return;
-                }
+async function initApp(config) {
+    let tries = 0;
+    do {
+        try {
+            const { ok } = await queryAPI({
+                method: "get",
+                path: "/mock/ping",
+            });
+            if (ok) {
+                break;
             }
-            await new Promise((r) => setTimeout(r, 200));
-        } while (true);
-
-        resolve(child.pid);
-    });
-}
-
-async function stopApp(pid) {
-    if (pid === undefined) {
-        return;
-    }
-    return new Promise((resolve, reject) => {
-        kill(pid, (err) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve();
+        } catch (ignored) {
+            tries++;
+            console.warn("Failed to start app:", tries);
+            if (tries === 10) {
+                throw "Failed to start app";
             }
-        });
+        }
+        await new Promise((r) => setTimeout(r, 200));
+    } while (true);
+
+    await queryAPI({
+        method: "post",
+        path: "/mock/reset",
+        input: config,
     });
 }
 
 module.exports.recipesMock = recipesMock;
-module.exports.startApp = startApp;
-module.exports.stopApp = stopApp;
+module.exports.initApp = initApp;
 module.exports.queryAPI = queryAPI;
