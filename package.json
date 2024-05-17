@@ -47,7 +47,7 @@
         "react": "^18.2.0",
         "sinon": "^14.0.0",
         "supertest": "4.0.2",
-        "supertokens-node": "^17.1.0",
+        "supertokens-node": "file:../supertokens-node",
         "typescript": "4.2",
         "tree-kill": "^1.2.2",
         "tsx": "^4.10.2"
