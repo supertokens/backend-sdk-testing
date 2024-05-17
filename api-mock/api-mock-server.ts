@@ -1,5 +1,5 @@
 import debug from "debug";
-import express from "express";
+import * as express from "express";
 import { errorHandler, middleware } from "supertokens-node/framework/express";
 import STExpress from "supertokens-node/lib/build";
 import { default as AccountLinkingRecipe } from "supertokens-node/lib/build/recipe/accountlinking/recipe";

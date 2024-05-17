@@ -2,12 +2,17 @@
     "name": "backend-sdk-testing",
     "version": "17.1.0",
     "scripts": {
+        "postinstall": "npm run set-up-hooks",
         "pretest": "./start-mock-server.sh",
         "test": "TEST_MODE=testing npx mocha --node-option no-experimental-fetch -r test/fetch-polyfill.mjs --timeout 500000",
         "posttest": "./stop-mock-server.sh",
+        "build-check": "tsc -p tsconfig.json && npm run build",
         "build": "cd test/with-typescript && npm run build",
+        "pretty-check": "npx pretty-quick --check .",
         "pretty": "npx pretty-quick .",
-        "build-pretty": "npm run build && npm run pretty && npm run pretty"
+        "format": "prettier --write .",
+        "build-pretty": "npm run build && npm run pretty && npm run pretty",
+        "set-up-hooks": "cp hooks/pre-commit.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
     },
     "repository": {
         "type": "git",

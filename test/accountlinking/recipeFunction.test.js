@@ -45,7 +45,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
         await cleanST();
     });
 
-    it.only("make primary user success", async function () {
+    it("make primary user success", async function () {
         const connectionURI = await startSTWithMultitenancyAndAccountLinking();
         await apiMock.initApp({
             connectionURI,
@@ -86,7 +86,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
         assertJSONEquals(refetchedUser, response.user);
     });
 
-    it.only("make primary user success - already is a primary user", async function () {
+    it("make primary user success - already is a primary user", async function () {
         const connectionURI = await startSTWithMultitenancyAndAccountLinking();
         await apiMock.initApp({
             connectionURI,

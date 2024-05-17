@@ -671,7 +671,7 @@ describe(`passwordreset: ${printPath("[test/emailpassword/passwordreset.test.js]
         });
     });
 
-    it.only("Test that reset password link uses the correct origin", async function () {
+    it("Test that reset password link uses the correct origin", async function () {
         const connectionURI = await startST();
         let passwordResetLink = "";
 
@@ -720,34 +720,7 @@ describe(`passwordreset: ${printPath("[test/emailpassword/passwordreset.test.js]
             ],
         });
 
-        // const app = express();
-
-        // app.use(middleware());
-
-        // app.use(errorHandler());
-
         await EmailPassword.signUp("public", "test@example.com", "password1234");
-
-        // await new Promise((resolve, reject) =>
-        //     request(app)
-        //         .post("/auth/user/password/reset/token")
-        //         .send({
-        //             formFields: [
-        //                 {
-        //                     id: "email",
-        //                     value: "test@example.com",
-        //                 },
-        //             ],
-        //         })
-        //         .expect(200)
-        //         .end((err, res) => {
-        //             if (err) {
-        //                 reject(err);
-        //             } else {
-        //                 resolve(JSON.parse(res.text));
-        //             }
-        //         })
-        // );
 
         await apiMock.queryAPI({
             method: "post",
@@ -769,28 +742,6 @@ describe(`passwordreset: ${printPath("[test/emailpassword/passwordreset.test.js]
 
         let currentUrl = new URL(mockedValues.passwordResetLink);
         assert(currentUrl.origin === "http://localhost:3000");
-
-        // await new Promise((resolve) =>
-        //     request(app)
-        //         .post("/auth/user/password/reset/token")
-        //         .set("origin", "localhost:3002")
-        //         .send({
-        //             formFields: [
-        //                 {
-        //                     id: "email",
-        //                     value: "test@example.com",
-        //                 },
-        //             ],
-        //         })
-        //         .expect(200)
-        //         .end((err, res) => {
-        //             if (err) {
-        //                 resolve(undefined);
-        //             } else {
-        //                 resolve(JSON.parse(res.text));
-        //             }
-        //         })
-        // );
 
         await apiMock.queryAPI({
             method: "post",
@@ -817,7 +768,7 @@ describe(`passwordreset: ${printPath("[test/emailpassword/passwordreset.test.js]
         assert(currentUrl.origin === "http://localhost:3002");
     });
 
-    it.only("test the reset password link", async function () {
+    it("test the reset password link", async function () {
         const connectionURI = await startST();
         await apiMock.initApp({
             connectionURI,
@@ -841,12 +792,6 @@ describe(`passwordreset: ${printPath("[test/emailpassword/passwordreset.test.js]
             },
             recipeList: [EmailPassword.init(), Session.init()],
         });
-
-        // const app = express();
-
-        // app.use(middleware());
-
-        // app.use(errorHandler());
 
         user = await EmailPassword.signUp("public", "test@example.com", "password1234");
         link = await EmailPassword.createResetPasswordLink("public", user.user.id, "test@example.com");
