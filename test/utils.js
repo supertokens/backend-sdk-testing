@@ -118,7 +118,7 @@ module.exports.extractInfoFromResponse = function (res) {
         headers = Object.fromEntries(res.headers.entries());
     } else {
         headers = res.headers;
-        let cookies = res.headers["set-cookie"] || res.headers["Set-Cookie"];
+        let cookies = headers.get?.("set-cookie") || res.headers["set-cookie"] || res.headers["Set-Cookie"];
         cookies = cookies === undefined ? [] : cookies;
         if (!Array.isArray(cookies)) {
             cookies = [cookies];
@@ -158,11 +158,11 @@ module.exports.extractInfoFromResponse = function (res) {
             }
         });
     }
-    let antiCsrf = headers["anti-csrf"];
-    let frontToken = headers["front-token"];
+    let antiCsrf = headers.get?.("anti-csrf") || headers["anti-csrf"];
+    let frontToken = headers.get?.("front-token") || headers["front-token"];
 
-    const refreshTokenFromHeader = headers["st-refresh-token"];
-    const accessTokenFromHeader = headers["st-access-token"];
+    const refreshTokenFromHeader = headers.get?.("st-refresh-token") || headers["st-refresh-token"];
+    const accessTokenFromHeader = headers.get?.("st-access-token") || headers["st-access-token"];
 
     const accessTokenFromAny = accessToken === undefined ? accessTokenFromHeader : accessToken;
     const refreshTokenFromAny = refreshToken === undefined ? refreshTokenFromHeader : refreshToken;
