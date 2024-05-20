@@ -63,7 +63,12 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                 recipes: {
                     emailpassword: {},
                     accountlinking: {
-                        shouldDoAutomaticAccountLinking: "true-without-verification",
+                        shouldDoAutomaticAccountLinking: {
+                            default: {
+                                shouldAutomaticallyLink: true,
+                                shouldRequireVerification: false,
+                            },
+                        },
                     },
                 },
             });
@@ -80,7 +85,12 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                 recipes: {
                     emailpassword: {},
                     accountlinking: {
-                        shouldDoAutomaticAccountLinking: "true-with-verification",
+                        shouldDoAutomaticAccountLinking: {
+                            default: {
+                                shouldAutomaticallyLink: true,
+                                shouldRequireVerification: true,
+                            },
+                        },
                     },
                 },
             });
@@ -98,7 +108,12 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                     emailpassword: {},
                     session: {},
                     accountlinking: {
-                        shouldDoAutomaticAccountLinking: "true-with-verification",
+                        shouldDoAutomaticAccountLinking: {
+                            default: {
+                                shouldAutomaticallyLink: true,
+                                shouldRequireVerification: true,
+                            },
+                        },
                     },
                     thirdparty: {
                         signInAndUpFeature: {
@@ -146,7 +161,12 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                     emailpassword: {},
                     session: {},
                     accountlinking: {
-                        shouldDoAutomaticAccountLinking: "true-without-verification",
+                        shouldDoAutomaticAccountLinking: {
+                            default: {
+                                shouldAutomaticallyLink: true,
+                                shouldRequireVerification: false,
+                            },
+                        },
                     },
                     thirdparty: {
                         signInAndUpFeature: {
@@ -194,7 +214,12 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                     emailpassword: {},
                     session: {},
                     accountlinking: {
-                        shouldDoAutomaticAccountLinking: "false",
+                        shouldDoAutomaticAccountLinking: {
+                            default: {
+                                shouldAutomaticallyLink: false,
+                                shouldRequireVerification: false,
+                            },
+                        },
                     },
                     thirdparty: {
                         signInAndUpFeature: {
@@ -240,7 +265,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                     emailpassword: {},
                     session: {},
                     accountlinking: {
-                        shouldDoAutomaticAccountLinking: "doesEmailPasswordUserExist",
+                        shouldDoAutomaticAccountLinking: {
+                            customFn: "doesEmailPasswordUserExist",
+                            default: {
+                                shouldAutomaticallyLink: true,
+                                shouldRequireVerification: true,
+                            },
+                        },
                     },
                     thirdparty: {
                         signInAndUpFeature: {
@@ -289,7 +320,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                 recipes: {
                     emailpassword: {},
                     accountlinking: {
-                        shouldDoAutomaticAccountLinking: "userContextDoNotLink",
+                        shouldDoAutomaticAccountLinking: {
+                            customFn: "userContextDoNotLink",
+                            default: {
+                                shouldAutomaticallyLink: true,
+                                shouldRequireVerification: false,
+                            },
+                        },
                     },
                 },
             });
@@ -314,7 +351,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                     emailpassword: {},
                     session: {},
                     accountlinking: {
-                        shouldDoAutomaticAccountLinking: "userContextDoNotLink",
+                        shouldDoAutomaticAccountLinking: {
+                            customFn: "userContextDoNotLink",
+                            default: {
+                                shouldAutomaticallyLink: true,
+                                shouldRequireVerification: false,
+                            },
+                        },
                     },
                 },
             });
@@ -349,7 +392,12 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                     emailpassword: {},
                     session: {},
                     accountlinking: {
-                        shouldDoAutomaticAccountLinking: "true-with-verification",
+                        shouldDoAutomaticAccountLinking: {
+                            default: {
+                                shouldAutomaticallyLink: true,
+                                shouldRequireVerification: true,
+                            },
+                        },
                     },
                     emailverification: {
                         mode: "OPTIONAL",
@@ -400,7 +448,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                 recipes: {
                     emailpassword: {},
                     accountlinking: {
-                        shouldDoAutomaticAccountLinking: "userContextDoNotLink",
+                        shouldDoAutomaticAccountLinking: {
+                            customFn: "userContextDoNotLink",
+                            default: {
+                                shouldAutomaticallyLink: true,
+                                shouldRequireVerification: false,
+                            },
+                        },
                     },
                 },
             });
@@ -445,7 +499,12 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                     emailpassword: {},
                     session: {},
                     accountlinking: {
-                        shouldDoAutomaticAccountLinking: "true-without-verification",
+                        shouldDoAutomaticAccountLinking: {
+                            default: {
+                                shouldAutomaticallyLink: true,
+                                shouldRequireVerification: false,
+                            },
+                        },
                     },
 
                     thirdparty: {
@@ -509,7 +568,12 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                         mode: "OPTIONAL",
                     },
                     accountlinking: {
-                        shouldDoAutomaticAccountLinking: "false",
+                        shouldDoAutomaticAccountLinking: {
+                            default: {
+                                shouldAutomaticallyLink: false,
+                                shouldRequireVerification: false,
+                            },
+                        },
                     },
                     thirdparty: {
                         signInAndUpFeature: {
@@ -575,7 +639,12 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                         mode: "OPTIONAL",
                     },
                     accountlinking: {
-                        shouldDoAutomaticAccountLinking: "true-with-verification",
+                        shouldDoAutomaticAccountLinking: {
+                            default: {
+                                shouldAutomaticallyLink: true,
+                                shouldRequireVerification: true,
+                            },
+                        },
                     },
                     thirdparty: {
                         signInAndUpFeature: {

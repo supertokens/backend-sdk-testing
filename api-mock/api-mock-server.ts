@@ -32,12 +32,13 @@ type EmailpasswordMockConfig = {
 };
 
 type AccountlinkingMockConfig = {
-    shouldDoAutomaticAccountLinking?:
-        | "doesEmailPasswordUserExist"
-        | "true-with-verification"
-        | "true-without-verification"
-        | "false"
-        | "userContextDoNotLink";
+    shouldDoAutomaticAccountLinking?: {
+        customFn?: "doesEmailPasswordUserExist" | "userContextDoNotLink";
+        default: {
+            shouldAutomaticallyLink: boolean;
+            shouldRequireVerification: boolean;
+        };
+    };
 };
 
 type SessionMockConfig = {};
@@ -134,43 +135,38 @@ function initThirdParty(config: ThirdpartyMockConfig, recipeList: RecipeListFunc
 
 function initAccountLinking(config: AccountlinkingMockConfig, recipeList: RecipeListFunction[]) {
     const accountlinkingInit: AccountLinkingTypeInput = {};
-    if (config.shouldDoAutomaticAccountLinking === "doesEmailPasswordUserExist") {
-        accountlinkingInit.shouldDoAutomaticAccountLinking = async (newAccountInfo, user) => {
-            if (newAccountInfo.recipeId === "emailpassword") {
-                let existingUser = await STExpress.listUsersByAccountInfo("public", {
-                    email: newAccountInfo.email,
-                });
-                let doesEmailPasswordUserExist = existingUser.length > 1;
-                if (!doesEmailPasswordUserExist) {
+    if (config.shouldDoAutomaticAccountLinking) {
+        accountlinkingInit.shouldDoAutomaticAccountLinking = async (
+            newAccountInfo,
+            _user,
+            _session,
+            _tenantId,
+            userContext
+        ) => {
+            if (config.shouldDoAutomaticAccountLinking!.customFn === "doesEmailPasswordUserExist") {
+                if (newAccountInfo.recipeId === "emailpassword") {
+                    let existingUser = await STExpress.listUsersByAccountInfo("public", {
+                        email: newAccountInfo.email,
+                    });
+                    let doesEmailPasswordUserExist = existingUser.length > 1;
+                    if (!doesEmailPasswordUserExist) {
+                        return {
+                            shouldAutomaticallyLink: false,
+                        };
+                    }
+                }
+            }
+            if (config.shouldDoAutomaticAccountLinking!.customFn === "userContextDoNotLink") {
+                if (userContext.doNotLink) {
                     return {
                         shouldAutomaticallyLink: false,
                     };
                 }
             }
+
             return {
-                shouldAutomaticallyLink: true,
-                shouldRequireVerification: true,
-            };
-        };
-    } else if (config.shouldDoAutomaticAccountLinking === "userContextDoNotLink") {
-        accountlinkingInit.shouldDoAutomaticAccountLinking = async (_, __, _session, _tenantId, userContext) => {
-            if (userContext.doNotLink) {
-                return {
-                    shouldAutomaticallyLink: false,
-                };
-            }
-            return {
-                shouldAutomaticallyLink: true,
-                shouldRequireVerification: false,
-            };
-        };
-    } else if (config.shouldDoAutomaticAccountLinking) {
-        accountlinkingInit.shouldDoAutomaticAccountLinking = async () => {
-            const shouldRequireVerification = config.shouldDoAutomaticAccountLinking === "true-with-verification";
-            const shouldAutomaticallyLink = config.shouldDoAutomaticAccountLinking !== "false";
-            return {
-                shouldAutomaticallyLink,
-                shouldRequireVerification,
+                shouldAutomaticallyLink: config.shouldDoAutomaticAccountLinking!.default.shouldAutomaticallyLink,
+                shouldRequireVerification: config.shouldDoAutomaticAccountLinking!.default.shouldRequireVerification,
             };
         };
     }
