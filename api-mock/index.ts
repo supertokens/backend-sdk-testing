@@ -1,5 +1,3 @@
-import EmailPassword from "supertokens-node/recipe/emailpassword";
-import AccountLinking from "supertokens-node/recipe/accountlinking";
 import { fetch } from "cross-fetch";
 
 const apiMockPort = process.env.ST_SDK === "golang" ? 3032 : process.env.ST_SDK === "python" ? 3031 : 3030;
@@ -25,75 +23,128 @@ async function queryAPI({ method, path, input, headers }: any) {
 const recipesMock = {
     /** @type {import("supertokens-node/recipe/emailpassword")} */
     EmailPassword: {
-        ...EmailPassword,
-        init(config) {
-            return EmailPassword.init({
-                ...config,
-                override: {
-                    functions: (originalImplementation) => {
-                        return {
-                            ...originalImplementation,
-                            signUp: async (input) => {
-                                return await queryAPI({
-                                    method: "post",
-                                    path: "/mock/EmailPassword/signup",
-                                    input,
-                                });
-                            },
-                            ...config?.override?.functions(originalImplementation),
-                        };
-                    },
-                    apis: (originalImplementation) => {
-                        return {
-                            ...originalImplementation,
-                            ...config?.override?.apis(originalImplementation),
-                        };
-                    },
-                },
-            });
-        },
         createResetPasswordLink: async (tenantId, userId, email, userContext) => {
             return await queryAPI({
                 method: "post",
-                path: "/mock/EmailPassword/createResetPasswordLink",
+                path: "/mock/emailpassword/createresetpasswordlink",
                 input: { tenantId, userId, email, userContext },
+            });
+        },
+        signUp: async (tenantId, email, password, session, userContext) => {
+            return await queryAPI({
+                method: "post",
+                path: "/mock/emailpassword/signup",
+                input: { tenantId, email, password, session, userContext },
+            });
+        },
+        signIn: async (tenantId, email, password, session, userContext) => {
+            return await queryAPI({
+                method: "post",
+                path: "/mock/emailpassword/signin",
+                input: { tenantId, email, password, session, userContext },
+            });
+        },
+        updateEmailOrPassword: async ({ recipeUserId: { recipeUserId }, ...input }) => {
+            return await queryAPI({
+                method: "post",
+                path: "/mock/emailpassword/updateemailorpassword",
+                input: {
+                    recipeUserId,
+                    ...input,
+                },
             });
         },
     },
     /** @type {import('supertokens-node/recipe/accountlinking')} */
     AccountLinking: {
-        ...AccountLinking,
-        init(config) {
-            return AccountLinking.init({
-                ...config,
-                override: {
-                    functions: (originalImplementation) => {
-                        return {
-                            ...originalImplementation,
-                            // createPrimaryUser: async (input) => {
-                            //     return await queryAPI({
-                            //         method: "post",
-                            //         path: "/mock/AccountLinking/createPrimaryUser",
-                            //         input,
-                            //     });
-                            // },
-                            ...config?.override?.functions(originalImplementation),
-                        };
-                    },
-                    apis: (originalImplementation) => {
-                        return {
-                            ...originalImplementation,
-                            ...config?.override?.apis(originalImplementation),
-                        };
-                    },
+        createPrimaryUser: async ({ recipeUserId }, userContext) => {
+            return await queryAPI({
+                method: "post",
+                path: "/mock/accountlinking/createprimaryuser",
+                input: {
+                    recipeUserId,
+                    userContext,
                 },
             });
         },
-        createPrimaryUser: async (input) => {
+        linkAccounts: async ({ recipeUserId }, primaryUserId, userContext) => {
             return await queryAPI({
                 method: "post",
-                path: "/mock/AccountLinking/createPrimaryUser",
-                input,
+                path: "/mock/accountlinking/linkaccounts",
+                input: {
+                    recipeUserId,
+                    primaryUserId,
+                    userContext,
+                },
+            });
+        },
+        isEmailChangeAllowed: async ({ recipeUserId }, newEmail, isVerified, session, userContext) => {
+            return await queryAPI({
+                method: "post",
+                path: "/mock/accountlinking/isemailchangeallowed",
+                input: {
+                    recipeUserId,
+                    newEmail,
+                    isVerified,
+                    session,
+                    userContext,
+                },
+            });
+        },
+    },
+    /** @type {import('supertokens-node/recipe/thirdparty')} */
+    ThirdParty: {
+        manuallyCreateOrUpdateUser: async (
+            tenantId,
+            thirdPartyId,
+            thirdPartyUserId,
+            email,
+            isVerified,
+            session,
+            userContext
+        ) => {
+            return await queryAPI({
+                method: "post",
+                path: "/mock/thirdparty/manuallycreateorupdateuser",
+                input: { tenantId, thirdPartyId, thirdPartyUserId, email, isVerified, session, userContext },
+            });
+        },
+    },
+    /** @type {import('supertokens-node/recipe/session')} */
+    Session: {
+        createNewSessionWithoutRequestResponse: async (
+            tenantId,
+            { recipeUserId },
+            accessTokenPayload,
+            sessionDataInDatabase,
+            disableAntiCsrf,
+            userContext
+        ) => {
+            return await queryAPI({
+                method: "post",
+                path: "/mock/session/createnewsessionwithoutrequestresponse",
+                input: {
+                    tenantId,
+                    recipeUserId,
+                    accessTokenPayload,
+                    sessionDataInDatabase,
+                    disableAntiCsrf,
+                    userContext,
+                },
+            });
+        },
+    },
+    /** @type {import('supertokens-node/recipe/emailverification')} */
+    EmailVerification: {
+        isEmailVerified: async ({ recipeUserId }, email, userContext) => {
+            return await queryAPI({
+                method: "post",
+                path: "/mock/emailverification/isemailverified",
+                input: {
+                    recipeUserId,
+                    email,
+                    userContext,
+                },
             });
         },
     },
