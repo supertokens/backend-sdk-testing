@@ -1,10 +1,10 @@
-let EmailPassword = require("supertokens-node/recipe/emailpassword");
-let AccountLinking = require("supertokens-node/recipe/accountlinking");
-const { fetch } = require("cross-fetch");
+import EmailPassword from "supertokens-node/recipe/emailpassword";
+import AccountLinking from "supertokens-node/recipe/accountlinking";
+import { fetch } from "cross-fetch";
 
 const apiMockPort = process.env.ST_SDK === "golang" ? 3032 : process.env.ST_SDK === "python" ? 3031 : 3030;
 
-async function queryAPI({ method, path, input, headers }) {
+async function queryAPI({ method, path, input, headers }: any) {
     let response = await fetch(`http://localhost:${apiMockPort}${path}`, {
         method,
         headers: {
@@ -26,7 +26,7 @@ const recipesMock = {
     /** @type {import("supertokens-node/recipe/emailpassword")} */
     EmailPassword: {
         ...EmailPassword,
-        init(config = {}) {
+        init(config) {
             return EmailPassword.init({
                 ...config,
                 override: {
@@ -63,7 +63,7 @@ const recipesMock = {
     /** @type {import('supertokens-node/recipe/accountlinking')} */
     AccountLinking: {
         ...AccountLinking,
-        init(config = {}) {
+        init(config) {
             return AccountLinking.init({
                 ...config,
                 override: {

@@ -9,10 +9,9 @@
         "skipLibCheck": true,
         "noFallthroughCasesInSwitch": true,
         "lib": ["ES2017", "DOM"], // "DOM" is required for Request and Response types
-        "noEmit": true,
         "experimentalDecorators": true
     },
     "include": ["./test/**/*.ts", "./api-mock/**/*.ts"],
-    "exclude": ["build", "node_modules", "test/with-typescript"],
+    "exclude": ["build", "node_modules", "test/with-typescript", "test/framework/loopback-server"],
     "compileOnSave": true
 }

@@ -45,14 +45,16 @@ git clone https://github.com/supertokens/supertokens-python.git
    `npm i -d`
 5. Install the dependencies inside `test/with-typescript`  
    `cd test/with-typescript && npm i && cd ../..`
+6. Build packages
+   `npm run build-pretty`
 
 ##### Python
 
-6. Create a new python virtual environment
+7. Create a new python virtual environment
    `python3 -m venv pyenv`
-7. Activate the new virtual environment
+8. Activate the new virtual environment
    `source pyenv/bin/activate`
-8. Install dependencies
+9. Install dependencies
    `pip install -r requirements.txt`
 
 ## Modifying Code

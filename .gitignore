@@ -21,3 +21,6 @@ mock-python.log
 
 mock-node.pid
 mock-node.log
+
+api-mock/*.d.ts
+api-mock/*.js
