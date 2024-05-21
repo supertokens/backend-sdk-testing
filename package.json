@@ -3,7 +3,6 @@
     "version": "17.1.0",
     "scripts": {
         "postinstall": "npm run set-up-hooks",
-        "pretest": "npm run build",
         "test": "TEST_MODE=testing npx mocha --node-option no-experimental-fetch -r test/fetch-polyfill.mjs --timeout 500000",
         "build-check": "tsc --noEmit -p tsconfig.json && npm run build",
         "build": "tsc -p tsconfig.json && cd test/with-typescript && npm run build",
