@@ -66,9 +66,10 @@ git clone https://github.com/supertokens/supertokens-python.git
 1. Navigate to the `supertokens-root` repository
 2. Start the testing environment  
    `./startTestEnv --wait`
-3. Navigate to the `backend-sdk-testing` repository  
-   `cd ../backend-sdk-testing/`
-4. Run all tests against node-sdk
+3. Navigate to the `backend-sdk-testing` repository
+4. Start the API mock server, and keep it running
+   `npm run start:node`
+5. In another terminal run all tests against node-sdk
    `INSTALL_PATH=../supertokens-root npm test`
 
 ## Python Testing
@@ -76,29 +77,11 @@ git clone https://github.com/supertokens/supertokens-python.git
 1. Navigate to the `supertokens-root` repository
 2. Start the testing environment  
    `./startTestEnv --wait`
-3. Navigate to the `backend-sdk-testing` repository  
-   `cd ../backend-sdk-testing/`
-4. Run all tests against python-sdk
+3. Navigate to the `backend-sdk-testing` repository
+4. Start the API mock server, and keep it running
+   `npm run start:python`
+5. In another terminal run all tests against node-sdk
    `ST_SDK=python INSTALL_PATH=../supertokens-root npm test`
-
-### To be able to run and debug tests from vscode
-
-1. Install the extension - https://marketplace.visualstudio.com/items?itemName=hbenl.vscode-mocha-test-adapter
-2. Add the following to your vscode settings:
-    ```json
-    {
-        // ...,
-        "mochaExplorer.env": {
-            "TEST_MODE": "testing",
-            "INSTALL_PATH": "../supertokens-root",
-            "ST_SDK": "node" // or python
-        }
-    }
-    ```
-3. In `lib/tsconfig.json`, change `"sourceMap"` to `true`
-4. Run `npm run build`
-
-You should now be able to see tests on the VSCode's testing panel and run/debug from there.
 
 ## Pull Request
 

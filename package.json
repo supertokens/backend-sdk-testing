@@ -12,7 +12,9 @@
         "pretty": "npx pretty-quick .",
         "format": "prettier --write .",
         "build-pretty": "npm run build && npm run pretty && npm run pretty",
-        "set-up-hooks": "cp hooks/pre-commit.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
+        "set-up-hooks": "cp hooks/pre-commit.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit",
+        "start:node": "SUPERTOKENS_ENV=testing TEST_MODE=testing tsx api-mock/api-mock-server.ts",
+        "start:python": "SUPERTOKENS_ENV=testing TEST_MODE=testing uvicorn api-mock.api-mock-server:app --host localhost --port 3031"
     },
     "repository": {
         "type": "git",
