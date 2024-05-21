@@ -51,7 +51,7 @@ type EmailVerificationMockConfig = {
     mode: EmailVerificationTypeInput["mode"];
 };
 
-type MockConfig = {
+export type MockConfig = {
     connectionURI: string;
     recipes?: {
         emailpassword?: EmailpasswordMockConfig;
@@ -61,8 +61,6 @@ type MockConfig = {
         emailverification?: EmailVerificationMockConfig;
     };
 };
-
-export type MockStartServer = (config: MockConfig) => Promise<number | undefined>;
 
 const constrains = {
     tenantId: "public",
