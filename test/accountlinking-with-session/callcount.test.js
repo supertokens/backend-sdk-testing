@@ -12,36 +12,44 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { printPath, setupST, killAllST, cleanST, startSTWithMultitenancyAndAccountLinking } = require("../utils");
+const {
+    printPath,
+    setupST,
+    killAllST,
+    cleanST,
+    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    createTenant,
+} = require("../utils");
 const {
     getTestEmail,
     postAPI,
-    getAPI,
-    putAPI,
     createEmailPasswordUser,
     makeUserPrimary,
     getSessionForUser,
-    getUpdatedUserFromDBForRespCompare,
-    getSessionFromResponse,
     createThirdPartyUser,
-    linkUsers,
     testPassword,
 } = require("./utils");
-let supertokens = require("supertokens-node");
-const express = require("express");
-let { middleware, errorHandler } = require("supertokens-node/framework/express");
-let Session = require("supertokens-node/recipe/session");
-let { verifySession } = require("supertokens-node/recipe/session/framework/express");
 let assert = require("assert");
-let EmailPassword = require("supertokens-node/recipe/emailpassword");
-let Passwordless = require("supertokens-node/recipe/passwordless");
-let ThirdParty = require("supertokens-node/recipe/thirdparty");
-let AccountLinking = require("supertokens-node/recipe/accountlinking");
-let EmailVerification = require("supertokens-node/recipe/emailverification");
-let MultiFactorAuth = require("supertokens-node/recipe/multifactorauth");
-let TOTP = require("supertokens-node/recipe/totp");
-let Multitenancy = require("supertokens-node/recipe/multitenancy");
+const { recipesMock, randomString, resetMockedValues, getMockedValues } = require("../../api-mock");
+const {
+    AccountLinking,
+    EmailPassword,
+    Session,
+    supertokens,
+    ThirdParty,
+    Passwordless,
+    Multitenancy,
+    EmailVerification,
+    MultiFactorAuth,
+    TOTP,
+} = recipesMock;
 let { TOTP: TOTPGenerator } = require("otpauth");
+
+let globalConnectionURI;
+
+const startSTWithMultitenancyAndAccountLinking = async () => {
+    return createTenant(globalConnectionURI, randomString());
+};
 
 const setup = async function setup(config = {}) {
     const info = {
@@ -131,20 +139,16 @@ const setup = async function setup(config = {}) {
             config.initMFA && TOTP.init({}),
         ].filter((init) => !!init),
     });
-
-    const app = express();
-    app.use(middleware());
-    app.use(errorHandler());
-    app.get("/verify", verifySession(), (req, res) => res.send({ status: "OK" }));
-    return { app, info };
+    return { info };
 };
 
 describe(`Multi-recipe account linking flows core call counts: ${printPath(
     "[test/accountlinking-with-session/callcount.test.js]"
 )}`, function () {
-    beforeEach(async function () {
+    before(async function () {
         await killAllST();
         await setupST();
+        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
     });
 
     after(async function () {
@@ -154,92 +158,104 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
 
     describe("sign up", function () {
         it("should call the core <=6 times without MFA or AL", async () => {
-            const { app, info } = await setup({
+            await setup({
                 initAccountLinking: false,
                 initMFA: false,
             });
             const email = getTestEmail();
-            const resp = await signUpPOST(app, email);
+            const resp = await signUpPOST(email);
             assert.strictEqual(resp.body.status, "OK");
 
+            let mocked = await getMockedValues();
+            let info = mocked.info;
             assert.strictEqual(info.coreCallCount, 6);
         });
         it("should call the core <=8 times with AL without MFA", async () => {
-            const { app, info } = await setup({
+            await setup({
                 initAccountLinking: true,
                 initMFA: false,
             });
             const email = getTestEmail();
-            const resp = await signUpPOST(app, email);
+            const resp = await signUpPOST(email);
             assert.strictEqual(resp.body.status, "OK");
 
+            let mocked = await getMockedValues();
+            let info = mocked.info;
             assert.strictEqual(info.coreCallCount, 8);
         });
 
         it("should call the core <=12 times with MFA and AL", async () => {
-            const { app, info } = await setup({
+            await setup({
                 initAccountLinking: true,
                 initMFA: true,
             });
             const email = getTestEmail();
-            const resp = await signUpPOST(app, email);
+            const resp = await signUpPOST(email);
             assert.strictEqual(resp.body.status, "OK");
 
+            let mocked = await getMockedValues();
+            let info = mocked.info;
             assert.strictEqual(info.coreCallCount, 12);
         });
     });
 
     describe("sign in", function () {
         it("should call the core <=6 times without MFA or AL", async () => {
-            const { app, info } = await setup({
+            await setup({
                 initAccountLinking: false,
                 initMFA: false,
             });
             const email = getTestEmail();
             await createEmailPasswordUser(email, true);
-            info.coreCallCount = 0;
+            await resetMockedValues();
 
-            const resp = await signInPOST(app, email);
+            const resp = await signInPOST(email);
             assert.strictEqual(resp.body.status, "OK");
 
+            let mocked = await getMockedValues();
+            let info = mocked.info;
             assert.strictEqual(info.coreCallCount, 6);
         });
         it("should call the core <=9 times with AL without MFA", async () => {
-            const { app, info } = await setup({
+            await setup({
                 initAccountLinking: true,
                 initMFA: false,
             });
 
             const email = getTestEmail();
             await createEmailPasswordUser(email);
-            info.coreCallCount = 0;
+            await resetMockedValues();
 
-            const resp = await signInPOST(app, email);
+            const resp = await signInPOST(email);
             assert.strictEqual(resp.body.status, "OK");
 
+            let mocked = await getMockedValues();
+            let info = mocked.info;
             assert.strictEqual(info.coreCallCount, 9);
         });
 
         it("should call the core <=13 times with MFA and AL", async () => {
-            const { app, info } = await setup({
+            await setup({
                 initAccountLinking: true,
                 initMFA: true,
             });
 
             const email = getTestEmail();
             await createEmailPasswordUser(email);
-            info.coreCallCount = 0;
+            await resetMockedValues();
 
-            const resp = await signInPOST(app, email);
+            const resp = await signInPOST(email);
             assert.strictEqual(resp.body.status, "OK");
 
+            let mocked = await getMockedValues();
+            let info = mocked.info;
             assert.strictEqual(info.coreCallCount, 13);
         });
     });
 
     describe("sign up w/ session", function () {
         it("should call the core <=3 times without MFA or AL", async () => {
-            const { app, info } = await setup({
+            await setup({
                 initAccountLinking: false,
                 initMFA: false,
             });
@@ -247,16 +263,18 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             let user = await createThirdPartyUser(email, true);
             user = await makeUserPrimary(user);
             const session = await getSessionForUser(user);
-            info.coreCallCount = 0;
+            await resetMockedValues();
 
-            const resp = await signUpPOST(app, email, session);
+            const resp = await signUpPOST(email, session);
             assert.strictEqual(resp.body.status, "OK");
 
+            let mocked = await getMockedValues();
+            let info = mocked.info;
             assert.strictEqual(info.coreCallCount, 3);
         });
 
         it("should call the core <=9 times with AL without MFA", async () => {
-            const { app, info } = await setup({
+            await setup({
                 initAccountLinking: true,
                 initMFA: false,
             });
@@ -264,15 +282,17 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             const email = getTestEmail();
             const user = await createThirdPartyUser(email, true);
             const session = await getSessionForUser(user);
-            info.coreCallCount = 0;
+            await resetMockedValues();
 
-            const resp = await signUpPOST(app, email, session);
+            const resp = await signUpPOST(email, session);
             assert.strictEqual(resp.body.status, "OK");
+            let mocked = await getMockedValues();
+            let info = mocked.info;
             assert.strictEqual(info.coreCallCount, 9);
         });
 
         it("should call the core <=17 times with MFA and AL while marking the new user verified, migrating the session and make the session user primary", async () => {
-            const { app, info } = await setup({
+            await setup({
                 initAccountLinking: true,
                 initMFA: true,
             });
@@ -280,15 +300,16 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             const email = getTestEmail();
             let user = await createThirdPartyUser(email, true);
             const session = await getSessionForUser(user);
-            info.coreCallCount = 0;
-            // console.log("==========");
-            const resp = await signUpPOST(app, email, session);
+            await resetMockedValues();
+            const resp = await signUpPOST(email, session);
             assert.strictEqual(resp.body.status, "OK");
 
+            let mocked = await getMockedValues();
+            let info = mocked.info;
             assert.strictEqual(info.coreCallCount, 17);
         });
         it("should call the core <=15 times with MFA and AL while migrating the session and making the session user primary", async () => {
-            const { app, info } = await setup({
+            await setup({
                 initAccountLinking: true,
                 initMFA: true,
             });
@@ -296,15 +317,16 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             const email = getTestEmail();
             let user = await createThirdPartyUser(email, false);
             const session = await getSessionForUser(user);
-            info.coreCallCount = 0;
-            // console.log("==========");
-            const resp = await signUpPOST(app, email, session);
+            await resetMockedValues();
+            const resp = await signUpPOST(email, session);
             assert.strictEqual(resp.body.status, "OK");
 
+            let mocked = await getMockedValues();
+            let info = mocked.info;
             assert.strictEqual(info.coreCallCount, 15);
         });
         it("should call the core <=13 times with MFA and AL while migrating the session", async () => {
-            const { app, info } = await setup({
+            await setup({
                 initAccountLinking: true,
                 initMFA: true,
             });
@@ -313,15 +335,16 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             let user = await createThirdPartyUser(email, false);
             user = await makeUserPrimary(user);
             const session = await getSessionForUser(user);
-            info.coreCallCount = 0;
-            // console.log("==========");
-            const resp = await signUpPOST(app, email, session);
+            await resetMockedValues();
+            const resp = await signUpPOST(email, session);
             assert.strictEqual(resp.body.status, "OK");
 
+            let mocked = await getMockedValues();
+            let info = mocked.info;
             assert.strictEqual(info.coreCallCount, 13);
         });
         it("should call the core <=9 times with MFA and AL", async () => {
-            const { app, info } = await setup({
+            await setup({
                 initAccountLinking: true,
                 initMFA: true,
             });
@@ -331,18 +354,19 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             user = await makeUserPrimary(user);
             const session = await getSessionForUser(user);
             await session.fetchAndSetClaim(MultiFactorAuth.MultiFactorAuthClaim);
-            info.coreCallCount = 0;
-            // console.log("==========");
-            const resp = await signUpPOST(app, email, session);
+            await resetMockedValues();
+            const resp = await signUpPOST(email, session);
             assert.strictEqual(resp.body.status, "OK");
 
+            let mocked = await getMockedValues();
+            let info = mocked.info;
             assert.strictEqual(info.coreCallCount, 9);
         });
     });
 
     describe("factor completion", function () {
         it("should call the core <=8 times when completing otp-email", async () => {
-            const { app, info } = await setup({
+            await setup({
                 initAccountLinking: true,
                 initMFA: true,
             });
@@ -356,7 +380,7 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
                 tenantId: "public",
                 session,
             });
-            const resp0 = await consumeCodePOST(app, code0, session);
+            const resp0 = await consumeCodePOST(code0, session);
             assert.strictEqual(resp0.body.status, "OK");
 
             const code = await Passwordless.createCode({
@@ -364,16 +388,17 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
                 tenantId: "public",
                 session,
             });
-            // console.log("=======================");
-            info.coreCallCount = 0;
+            await resetMockedValues();
 
-            const resp = await consumeCodePOST(app, code, session);
+            const resp = await consumeCodePOST(code, session);
             assert.strictEqual(resp.body.status, "OK");
+            let mocked = await getMockedValues();
+            let info = mocked.info;
             assert.strictEqual(info.coreCallCount, 8);
         });
 
         it("should call the core <=5 times when completing totp", async () => {
-            const { app, info } = await setup({
+            await setup({
                 initAccountLinking: true,
                 initMFA: true,
             });
@@ -392,19 +417,19 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             );
             assert.strictEqual(verifyRes.status, "OK");
 
-            // console.log("=======================");
-            info.coreCallCount = 0;
+            await resetMockedValues();
 
-            const resp = await totpVerifyPOST(app, totpGen.generate({ timestamp: Date.now() + 30000 }), session);
+            const resp = await totpVerifyPOST(totpGen.generate({ timestamp: Date.now() + 30000 }), session);
             assert.strictEqual(resp.body.status, "OK");
+            let mocked = await getMockedValues();
+            let info = mocked.info;
             assert.strictEqual(info.coreCallCount, 5);
         });
     });
 });
 
-async function consumeCodePOST(app, code, session) {
+async function consumeCodePOST(code, session) {
     return postAPI(
-        app,
         "/auth/signinup/code/consume",
         code.userInputCode !== undefined
             ? {
@@ -420,9 +445,8 @@ async function consumeCodePOST(app, code, session) {
     );
 }
 
-async function totpVerifyPOST(app, totp, session) {
+async function totpVerifyPOST(totp, session) {
     return postAPI(
-        app,
         "/auth/totp/verify",
         {
             totp,
@@ -431,26 +455,8 @@ async function totpVerifyPOST(app, totp, session) {
     );
 }
 
-async function signInUpPOST(app, email, isVerified, session, userId = email, error = undefined) {
+async function signUpPOST(email, session, password = testPassword) {
     return postAPI(
-        app,
-        "/auth/signinup",
-        {
-            thirdPartyId: "custom",
-            oAuthTokens: {
-                email,
-                isVerified,
-                userId,
-                error,
-            },
-        },
-        session
-    );
-}
-
-async function signUpPOST(app, email, session, password = testPassword) {
-    return postAPI(
-        app,
         "/auth/signup",
         {
             formFields: [
@@ -462,9 +468,8 @@ async function signUpPOST(app, email, session, password = testPassword) {
     );
 }
 
-async function signInPOST(app, email, session, password = testPassword) {
+async function signInPOST(email, session, password = testPassword) {
     return postAPI(
-        app,
         "/auth/signin",
         {
             formFields: [
@@ -474,8 +479,4 @@ async function signInPOST(app, email, session, password = testPassword) {
         },
         session
     );
-}
-
-async function mfaInfoPUT(app, session) {
-    return putAPI(app, "/auth/mfa/info", undefined, session);
 }

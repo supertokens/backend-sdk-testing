@@ -1,20 +1,20 @@
-const { startSTWithMultitenancyAndAccountLinking } = require("../utils");
-let supertokens = require("supertokens-node");
-let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let EmailPassword = require("supertokens-node/recipe/emailpassword");
-let Passwordless = require("supertokens-node/recipe/passwordless");
-let ThirdParty = require("supertokens-node/recipe/thirdparty");
-let AccountLinking = require("supertokens-node/recipe/accountlinking");
-let EmailVerification = require("supertokens-node/recipe/emailverification");
-let MultiFactorAuth = require("supertokens-node/recipe/multifactorauth");
-let Multitenancy = require("supertokens-node/recipe/multitenancy");
-const express = require("express");
-let { middleware, errorHandler } = require("supertokens-node/framework/express");
-const request = require("supertest");
+const { recipesMock, queryAPI, randomString } = require("../../api-mock");
+const {
+    AccountLinking,
+    EmailPassword,
+    Session,
+    supertokens,
+    ThirdParty,
+    Passwordless,
+    Multitenancy,
+    EmailVerification,
+    MultiFactorAuth,
+} = recipesMock;
+const { createTenant } = require("../utils");
 
 exports.setup = async function setup(config = {}) {
-    const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+    const connectionURI = await createTenant(config.globalConnectionURI, randomString());
     supertokens.init({
         // debug: true,
         supertokens: {
@@ -30,26 +30,18 @@ exports.setup = async function setup(config = {}) {
             Passwordless.init({
                 contactMethod: "EMAIL_OR_PHONE",
                 flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
-                emailDelivery: {
-                    service: {
-                        sendEmail: (input) => {
-                            if (config.emailInputs) {
-                                config.emailInputs.push(input);
-                            }
-                            return;
-                        },
-                    },
-                },
-                smsDelivery: {
-                    service: {
-                        sendSms: (input) => {
-                            if (config.smsInputs) {
-                                config.smsInputs.push(input);
-                            }
-                            return;
-                        },
-                    },
-                },
+                ...(config.emailInputs
+                    ? {
+                          emailDelivery: {
+                              service: {
+                                  sendEmail: ({ userContext, ...rest }) => {
+                                      store.emailInputs.push(rest);
+                                      return;
+                                  },
+                              },
+                          },
+                      }
+                    : {}),
             }),
             ThirdParty.init({
                 signInAndUpFeature: {
@@ -89,33 +81,13 @@ exports.setup = async function setup(config = {}) {
                 },
             }),
             AccountLinking.init({
-                shouldDoAutomaticAccountLinking: (_newAccountInfo, _user, _session, _tenantId, userContext) => {
-                    if (userContext.DO_NOT_LINK) {
-                        return { shouldAutomaticallyLink: false };
-                    }
-                    if (config.shouldDoAutomaticAccountLinking) {
-                        return config.shouldDoAutomaticAccountLinking(
-                            _newAccountInfo,
-                            _user,
-                            _session,
-                            _tenantId,
-                            userContext
-                        );
-                    }
-                    return (
-                        config.shouldDoAutomaticAccountLinkingValue ?? {
-                            shouldAutomaticallyLink: true,
-                            shouldRequireVerification: true,
-                        }
-                    );
-                },
+                shouldDoAutomaticAccountLinking:
+                    shouldDoAutomaticAccountLinkingMap[config.shouldDoAutomaticAccountLinking || "default"],
             }),
             EmailVerification.init({
                 mode: "OPTIONAL",
             }),
-            MultiFactorAuth.init({
-                firstFactors: config.firstFactors,
-            }),
+            MultiFactorAuth.init(),
             Multitenancy.init(),
             Session.init(),
         ],
@@ -131,11 +103,87 @@ exports.setup = async function setup(config = {}) {
         thirdPartyEnabled: true,
         emailPasswordEnabled: true,
     });
+};
 
-    const app = express();
-    app.use(middleware());
-    app.use(errorHandler());
-    return app;
+let shouldDoAutomaticAccountLinkingMap = {
+    default: (_newAccountInfo, _user, _session, _tenantId, userContext) => {
+        if (userContext.DO_NOT_LINK) {
+            return { shouldAutomaticallyLink: false };
+        }
+        return {
+            shouldAutomaticallyLink: true,
+            shouldRequireVerification: true,
+        };
+    },
+    linkingWithoutVerification: (_newAccountInfo, _user, _session, _tenantId, userContext) => {
+        if (userContext.DO_NOT_LINK) {
+            return { shouldAutomaticallyLink: false };
+        }
+        return {
+            shouldAutomaticallyLink: true,
+            shouldRequireVerification: false,
+        };
+    },
+    noLinkingWhenUserEqualsSessionUser: (accountInfo, user, session, _tenantId, userContext) => {
+        if (userContext.DO_NOT_LINK) {
+            return { shouldAutomaticallyLink: false };
+        }
+        if (user !== undefined && user.id === session.getUserId()) {
+            return { shouldAutomaticallyLink: false };
+        }
+        return {
+            shouldAutomaticallyLink: true,
+            shouldRequireVerification: false,
+        };
+    },
+    noLinkingWhenUserEqualsSessionUserDefaultRequireVerification: (
+        accountInfo,
+        user,
+        session,
+        _tenantId,
+        userContext
+    ) => {
+        if (userContext.DO_NOT_LINK) {
+            return { shouldAutomaticallyLink: false };
+        }
+        if (user !== undefined && user.id === session.getUserId()) {
+            return { shouldAutomaticallyLink: false };
+        }
+        return {
+            shouldAutomaticallyLink: true,
+            shouldRequireVerification: true,
+        };
+    },
+    noLinkingWhenAccountInfoEmailMatch: (accountInfo, user, _session, _tenantId, userContext) => {
+        if (userContext.DO_NOT_LINK) {
+            return { shouldAutomaticallyLink: false };
+        }
+        if (accountInfo.email === store.email1 && user === undefined) {
+            return { shouldAutomaticallyLink: false };
+        }
+        return {
+            shouldAutomaticallyLink: true,
+            shouldRequireVerification: false,
+        };
+    },
+    noLinkingWhenAccountInfoEmailMatchDefaultRequireVerification: (
+        accountInfo,
+        user,
+        _session,
+        _tenantId,
+        userContext
+    ) => {
+        if (userContext.DO_NOT_LINK) {
+            return { shouldAutomaticallyLink: false };
+        }
+        if (accountInfo.email === store.email1 && user === undefined) {
+            return { shouldAutomaticallyLink: false };
+        }
+        return {
+            shouldAutomaticallyLink: true,
+            shouldRequireVerification: true,
+        };
+    },
 };
 
 exports.createPasswordlessUser = async function createPasswordlessUser(
@@ -215,31 +263,78 @@ exports.getSessionForUser = async function getSessionForUser(user, tenantId = "p
     return Session.createNewSessionWithoutRequestResponse(tenantId, user.loginMethods[0].recipeUserId);
 };
 
-exports.postAPI = async function post(app, path, body, session) {
-    const req = request(app).post(path);
+exports.postAPI = async function post(path, body, session) {
+    let headers = {};
     if (session) {
         const sessionTokens = session.getAllSessionTokensDangerously();
-        req.set("Authorization", `Bearer ${sessionTokens.accessToken}`);
+        headers = {
+            Authorization: `Bearer ${sessionTokens.accessToken}`,
+        };
     }
-    return req.send(body);
+    let response = await queryAPI({
+        method: "post",
+        path,
+        input: body,
+        headers,
+        returnResponse: true,
+    });
+    const responseHeaders = {};
+    response.headers.forEach((_, key) => {
+        responseHeaders[key] = response.headers.get?.(key) || undefined;
+    });
+    return {
+        ...response,
+        status: response.status,
+        body: await response.json(),
+        headers: responseHeaders,
+    };
 };
 
-exports.getAPI = async function getAPI(app, path, session) {
-    const req = request(app).get(path);
+exports.getAPI = async function getAPI(path, session) {
+    let headers = {};
     if (session) {
         const sessionTokens = session.getAllSessionTokensDangerously();
-        req.set("Authorization", `Bearer ${sessionTokens.accessToken}`);
+        headers = {
+            Authorization: `Bearer ${sessionTokens.accessToken}`,
+        };
     }
-    return req.send();
+    let response = await queryAPI({
+        method: "get",
+        path,
+        headers,
+        returnResponse: true,
+    });
+    if (response.ok) {
+        return {
+            ...response,
+            body: await response.json(),
+        };
+    }
+    return response;
 };
 
-exports.putAPI = async function putAPI(app, path, body, session) {
-    const req = request(app).put(path);
+exports.putAPI = async function putAPI(path, body, session) {
+    let headers = {};
     if (session) {
         const sessionTokens = session.getAllSessionTokensDangerously();
-        req.set("Authorization", `Bearer ${sessionTokens.accessToken}`);
+        headers = {
+            Authorization: `Bearer ${sessionTokens.accessToken}`,
+        };
     }
-    return req.send(body);
+    let response = await queryAPI({
+        method: "put",
+        path,
+        input: body,
+        headers,
+        returnResponse: true,
+    });
+    if (response.ok) {
+        return {
+            ...response,
+            body: await response.json(),
+        };
+    }
+    return response;
 };
 
 exports.getTestEmail = function getTestEmail(suffix) {
