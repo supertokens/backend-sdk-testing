@@ -11,3 +11,10 @@ releasePassword
 .idea
 /test_report
 /.nyc_output
+
+
+pyenv
+__pycache__
+
+api-mock/*.d.ts
+api-mock/*.js
