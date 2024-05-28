@@ -2,10 +2,21 @@
     "name": "backend-sdk-testing",
     "version": "17.1.2",
     "scripts": {
+        "postinstall": "npm run set-up-hooks",
+        "pretest": "npm run build",
         "test": "TEST_MODE=testing npx mocha --node-option no-experimental-fetch -r test/fetch-polyfill.mjs --timeout 500000",
-        "build": "cd test/with-typescript && npm run build",
+        "build-check": "tsc --noEmit -p tsconfig.json && npm run build",
+        "build": "tsc -p tsconfig.json && cd test/with-typescript && npm run build",
+        "pretty-check": "npx pretty-quick --check .",
         "pretty": "npx pretty-quick .",
-        "build-pretty": "npm run build && npm run pretty && npm run pretty"
+        "format": "prettier --write .",
+        "build-pretty": "npm run build && npm run pretty && npm run pretty",
+        "set-up-hooks": "cp hooks/pre-commit.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit",
+        "start:node": "SUPERTOKENS_ENV=testing TEST_MODE=testing node api-mock/api-mock-server.js",
+        "start:python": "SUPERTOKENS_ENV=testing TEST_MODE=testing uvicorn api-mock.api-mock-server:app --host localhost --port 3031",
+        "dev:node:build": "tsc -w -p tsconfig.json",
+        "dev:node:mock": "SUPERTOKENS_ENV=testing TEST_MODE=testing tsx watch api-mock/api-mock-server.ts",
+        "dev:node": "run-p dev:node:*"
     },
     "repository": {
         "type": "git",
@@ -39,13 +50,15 @@
         "next": "^14.0.4",
         "next-test-api-route-handler": "^3.1.10",
         "nock": "11.7.0",
+        "npm-run-all": "^4.1.5",
         "otpauth": "9.1.5",
         "prettier": "2.0.5",
         "pretty-quick": "^3.1.1",
         "react": "^18.2.0",
         "sinon": "^14.0.0",
         "supertest": "4.0.2",
-        "supertokens-node": "^17.1.2",
+        "supertokens-node": "file:../supertokens-node",
+        "tsx": "^4.10.2",
         "typescript": "4.2"
     },
     "browser": {
