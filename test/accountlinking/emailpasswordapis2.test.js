@@ -15,31 +15,26 @@
 const {
     printPath,
     setupST,
-    startST,
-    stopST,
     killAllST,
     cleanST,
-    resetAll,
-    extractInfoFromResponse,
-    startSTWithMultitenancyAndAccountLinking,
+    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    createTenant,
 } = require("../utils");
-let supertokens = require("supertokens-node");
-let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("supertokens-node/lib/build/processState");
-let EmailPassword = require("supertokens-node/recipe/emailpassword");
-let ThirdParty = require("supertokens-node/recipe/thirdparty");
-let AccountLinking = require("supertokens-node/recipe/accountlinking");
-let EmailVerification = require("supertokens-node/recipe/emailverification");
-const express = require("express");
-let { middleware, errorHandler } = require("supertokens-node/framework/express");
-const request = require("supertest");
+const { getMockedValues, randomString, recipesMock, request } = require("../../api-mock");
+const { AccountLinking, EmailPassword, EmailVerification, Session, supertokens, ThirdParty } = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordapis2.test.js]")}`, function () {
-    beforeEach(async function () {
+    let globalConnectionURI;
+
+    const startSTWithMultitenancyAndAccountLinking = async () => {
+        return createTenant(globalConnectionURI, randomString());
+    };
+
+    before(async function () {
         await killAllST();
         await setupST();
-        ProcessState.getInstance().reset();
+        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
     });
 
     after(async function () {
@@ -107,10 +102,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -121,7 +112,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(tpUser.isPrimaryUser === false);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -142,6 +133,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailCallbackCalled = mocked.sendEmailCallbackCalled;
+
             assert(sendEmailCallbackCalled === false);
         });
 
@@ -204,14 +199,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -232,6 +223,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+
             assert(sendEmailToUserId === epUser.user.id);
         });
 
@@ -294,10 +289,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -308,7 +299,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.id));
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -329,6 +320,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailCallbackCalled = mocked.sendEmailCallbackCalled;
+
             assert(sendEmailCallbackCalled === false);
         });
 
@@ -391,10 +386,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -405,7 +396,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(tpUser.isPrimaryUser);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -426,6 +417,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+
             assert(sendEmailToUserId === tpUser.id);
         });
 
@@ -491,10 +486,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -505,7 +496,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(tpUser.isPrimaryUser);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -526,6 +517,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+
             assert(sendEmailToUserId === tpUser.id);
         });
 
@@ -575,10 +570,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -589,7 +580,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.id));
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -610,6 +601,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailCallbackCalled = mocked.sendEmailCallbackCalled;
+
             assert(sendEmailCallbackCalled === false);
         });
 
@@ -669,10 +664,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -686,7 +677,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.linkAccounts(epUser.user.loginMethods[0].recipeUserId, tpUser.id);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -707,6 +698,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            sendEmailToUserId = mocked.sendEmailToUserId;
+
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
         });
@@ -766,10 +762,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -784,7 +776,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.linkAccounts(epUser.user.loginMethods[0].recipeUserId, tpUser.id);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -805,6 +797,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
         });
@@ -865,10 +862,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -880,7 +873,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.id));
 
             let res2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signup")
                     .send({
                         formFields: [
@@ -912,7 +905,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             });
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -933,6 +926,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            sendEmailToUserId = mocked.sendEmailToUserId;
+
             assert(sendEmailToUserEmail === undefined);
             assert(sendEmailToUserId === undefined);
         });
@@ -993,10 +991,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -1007,7 +1001,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(tpUser.isPrimaryUser === false);
 
             let res2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signup")
                     .send({
                         formFields: [
@@ -1039,7 +1033,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             });
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -1060,6 +1054,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+
             assert(sendEmailToUserEmail === undefined);
             assert(sendEmailToUserId === undefined);
         });
@@ -1120,10 +1119,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -1134,7 +1129,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(tpUser.isPrimaryUser);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -1155,6 +1150,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+
             assert(sendEmailToUserEmail === "test2@example.com");
             assert(sendEmailToUserId === tpUser.id);
         });
@@ -1220,10 +1220,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -1238,7 +1234,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(tpUser.isPrimaryUser === false);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -1259,6 +1255,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            sendEmailToUserId = mocked.sendEmailToUserId;
+
             assert(sendEmailToUserEmail === undefined);
             assert(sendEmailToUserId === undefined);
         });
@@ -1326,10 +1327,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -1345,7 +1342,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(epUser.user.isPrimaryUser === false);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -1366,6 +1363,12 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            sendEmailToRecipeUserId = mocked.sendEmailToRecipeUserId;
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToRecipeUserId.getAsString() === epUser.user.id);
             assert(sendEmailToUserId === tpUser.id);
@@ -1432,10 +1435,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -1451,7 +1450,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(epUser.user.isPrimaryUser === false);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -1472,6 +1471,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
         });
@@ -1537,10 +1541,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -1557,7 +1557,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(epUser.user.isPrimaryUser === false);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -1578,6 +1578,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
         });
@@ -1646,10 +1651,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -1671,7 +1672,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(epUser.user.isPrimaryUser === false);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -1692,6 +1693,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
         });
@@ -1760,10 +1766,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -1791,7 +1793,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(epUser.user.isPrimaryUser === false);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -1816,6 +1818,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 res.body.reason,
                 "Reset password link was not created because of account take over risk. Please contact support. (ERR_CODE_001)"
             );
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+
             assert.strictEqual(sendEmailToUserId, undefined);
             assert.strictEqual(sendEmailToUserEmail, undefined);
         });
@@ -1884,10 +1891,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -1914,7 +1917,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(epUser.user.isPrimaryUser === false);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -1935,6 +1938,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+
             assert(sendEmailToUserId === tpUser.id);
             assert(sendEmailToUserEmail === "test@example.com");
         });
@@ -2019,14 +2027,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -2047,10 +2051,15 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            token = mocked.token;
+            sendEmailToUserId = mocked.sendEmailToUserId;
+
             assert(sendEmailToUserId === epUser.user.id);
 
             let res2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset")
                     .send({
                         formFields: [
@@ -2075,6 +2084,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert.deepStrictEqual(res2, {
                 status: "OK",
             });
+
+            mocked = await getMockedValues();
+            emailPostPasswordReset = mocked.emailPostPasswordReset;
+            userPostPasswordReset = mocked.userPostPasswordReset;
+
             assert.strictEqual(emailPostPasswordReset, "test@example.com");
             assert(!userPostPasswordReset.isPrimaryUser);
             assert.strictEqual(userPostPasswordReset.loginMethods.length, 1);
@@ -2159,14 +2173,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -2187,10 +2197,15 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            token = mocked.token;
+
             assert(sendEmailToUserId === epUser.user.id);
 
             let res2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset")
                     .send({
                         formFields: [
@@ -2304,10 +2319,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -2318,7 +2329,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(tpUser.isPrimaryUser);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -2339,10 +2350,15 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            token = mocked.token;
+
             assert(sendEmailToUserId === tpUser.id);
 
             let res2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset")
                     .send({
                         formFields: [
@@ -2367,6 +2383,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert.deepStrictEqual(res2, {
                 status: "OK",
             });
+
+            mocked = await getMockedValues();
+            emailPostPasswordReset = mocked.emailPostPasswordReset;
+            userPostPasswordReset = mocked.userPostPasswordReset;
+
             assert(emailPostPasswordReset === "test@example.com");
             assert(userPostPasswordReset.isPrimaryUser);
             assert(userPostPasswordReset.loginMethods.length === 2);
@@ -2469,10 +2490,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -2483,7 +2500,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(tpUser.isPrimaryUser);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -2504,10 +2521,15 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            token = mocked.token;
+
             assert(sendEmailToUserId === tpUser.id);
 
             let res2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset")
                     .send({
                         formFields: [
@@ -2532,6 +2554,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert.deepStrictEqual(res2, {
                 status: "OK",
             });
+
+            mocked = await getMockedValues();
+            emailPostPasswordReset = mocked.emailPostPasswordReset;
+            userPostPasswordReset = mocked.userPostPasswordReset;
+
             assert(emailPostPasswordReset === "test@example.com");
             assert(!userPostPasswordReset.isPrimaryUser);
             assert(userPostPasswordReset.loginMethods.length === 1);
@@ -2624,10 +2651,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -2638,7 +2661,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(tpUser.isPrimaryUser);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -2659,6 +2682,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            token = mocked.token;
+
             assert(sendEmailToUserId === tpUser.id);
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234", undefined, {
@@ -2666,7 +2694,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             });
 
             let res2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset")
                     .send({
                         formFields: [
@@ -2778,10 +2806,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -2792,7 +2816,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(tpUser.isPrimaryUser);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -2813,6 +2837,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            token = mocked.token;
+
             assert(sendEmailToUserId === tpUser.id);
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
@@ -2820,7 +2849,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(epUser.user.id === tpUser.id);
 
             let res2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset")
                     .send({
                         formFields: [
@@ -2928,10 +2957,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -2942,7 +2967,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(tpUser.isPrimaryUser);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -2963,10 +2988,15 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            token = mocked.token;
+
             assert(sendEmailToUserId === tpUser.id);
 
             let res2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset")
                     .send({
                         formFields: [
@@ -2991,6 +3021,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert.deepStrictEqual(res2, {
                 status: "OK",
             });
+
+            mocked = await getMockedValues();
+            emailPostPasswordReset = mocked.emailPostPasswordReset;
+            userPostPasswordReset = mocked.userPostPasswordReset;
+
             assert(emailPostPasswordReset === "test@example.com");
             assert(userPostPasswordReset.isPrimaryUser);
             assert(userPostPasswordReset.loginMethods.length === 2);
@@ -3079,10 +3114,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -3097,7 +3128,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.linkAccounts(epUser.user.loginMethods[0].recipeUserId, tpUser.id);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -3118,11 +3149,17 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            token = mocked.token;
+
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
 
             let res2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset")
                     .send({
                         formFields: [
@@ -3147,6 +3184,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert.deepStrictEqual(res2, {
                 status: "OK",
             });
+
+            mocked = await getMockedValues();
+            emailPostPasswordReset = mocked.emailPostPasswordReset;
+            userPostPasswordReset = mocked.userPostPasswordReset;
+
             assert(emailPostPasswordReset === "test@example.com");
             assert(userPostPasswordReset.isPrimaryUser);
             assert(userPostPasswordReset.loginMethods.length === 2);
@@ -3240,10 +3282,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -3258,7 +3296,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.linkAccounts(epUser.user.loginMethods[0].recipeUserId, tpUser.id);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -3279,11 +3317,17 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            token = mocked.token;
+
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
 
             let res2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset")
                     .send({
                         formFields: [
@@ -3308,6 +3352,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert.deepStrictEqual(res2, {
                 status: "OK",
             });
+
+            mocked = await getMockedValues();
+            emailPostPasswordReset = mocked.emailPostPasswordReset;
+            userPostPasswordReset = mocked.userPostPasswordReset;
+
             assert(emailPostPasswordReset === "test@example.com");
             assert(userPostPasswordReset.isPrimaryUser);
             assert(userPostPasswordReset.loginMethods.length === 2);
@@ -3402,10 +3451,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -3426,7 +3471,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(pUser.loginMethods.length === 3);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -3447,11 +3492,17 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            token = mocked.token;
+
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
 
             let res2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset")
                     .send({
                         formFields: [
@@ -3476,6 +3527,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert.deepStrictEqual(res2, {
                 status: "OK",
             });
+
+            mocked = await getMockedValues();
+            emailPostPasswordReset = mocked.emailPostPasswordReset;
+            userPostPasswordReset = mocked.userPostPasswordReset;
+
             assert(emailPostPasswordReset === "test@example.com");
             assert(userPostPasswordReset.isPrimaryUser);
             assert(userPostPasswordReset.loginMethods.length === 3);
@@ -3580,10 +3636,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -3598,7 +3650,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.linkAccounts(epUser.user.loginMethods[0].recipeUserId, tpUser.id);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -3619,6 +3671,12 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            token = mocked.token;
+
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
 
@@ -3630,7 +3688,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             }
 
             let res2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset")
                     .send({
                         formFields: [
@@ -3746,10 +3804,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let tpUser = (await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "abcd" + date, email, true))
                 .user;
             await AccountLinking.createPrimaryUser(tpUser.loginMethods[0].recipeUserId);
@@ -3766,7 +3820,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             const primUser = await supertokens.getUser(linkRes.user.id);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -3787,11 +3841,17 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            token = mocked.token;
+
             assert(sendEmailToUserEmail === email);
             assert(sendEmailToUserId === primUser.id);
 
             let res2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset")
                     .send({
                         formFields: [
@@ -3907,10 +3967,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let epUser = (await EmailPassword.signUp("public", email, "differentvalidpass123")).user;
             await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
 
@@ -3933,7 +3989,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             const primUser = await supertokens.getUser(linkRes.user.id);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -3954,11 +4010,17 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            token = mocked.token;
+
             assert(sendEmailToUserEmail === email);
             assert(sendEmailToUserId === primUser.id);
 
             let res2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset")
                     .send({
                         formFields: [
@@ -4074,10 +4136,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let epUser = (await EmailPassword.signUp("public", email, "differentvalidpass123")).user;
             await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
 
@@ -4092,7 +4150,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             const primUser = await supertokens.getUser(linkRes.user.id);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -4113,11 +4171,17 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            token = mocked.token;
+
             assert(sendEmailToUserEmail === email);
             assert(sendEmailToUserId === primUser.id);
 
             let res2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset")
                     .send({
                         formFields: [
@@ -4233,10 +4297,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let epUser = (await EmailPassword.signUp("public", email, "differentvalidpass123")).user;
             await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
 
@@ -4254,7 +4314,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert.strictEqual(primUser.loginMethods.length, 1);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset/token")
                     .send({
                         formFields: [
@@ -4275,11 +4335,17 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(res !== undefined);
             assert(res.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            sendEmailToUserId = mocked.sendEmailToUserId;
+            token = mocked.token;
+
             assert(sendEmailToUserEmail === email);
             assert(sendEmailToUserId === primUser.id);
 
             let res2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/password/reset")
                     .send({
                         formFields: [

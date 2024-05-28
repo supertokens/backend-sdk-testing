@@ -15,29 +15,37 @@
 const {
     printPath,
     setupST,
-    startSTWithMultitenancyAndAccountLinking,
-    stopS,
-    startSTWithMultitenancyAndAccountLinkingT,
     killAllST,
     cleanST,
-    resetAll,
+    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    createTenant,
 } = require("../utils");
-let supertokens = require("supertokens-node");
-let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
-let EmailPassword = require("supertokens-node/recipe/emailpassword");
-let EmailVerification = require("supertokens-node/recipe/emailverification");
-let ThirdParty = require("supertokens-node/recipe/thirdparty");
-let Multitenancy = require("supertokens-node/recipe/multitenancy");
-let AccountLinking = require("supertokens-node/recipe/accountlinking");
-let AccountLinkingRecipe = require("supertokens-node/lib/build/recipe/accountlinking/recipe").default;
+let { PROCESS_STATE } = require("supertokens-node/lib/build/processState");
+const { recipesMock, randomString } = require("../../api-mock");
+const {
+    AccountLinking,
+    EmailPassword,
+    EmailVerification,
+    Session,
+    supertokens,
+    ThirdParty,
+    Multitenancy,
+    AccountLinkingRecipe,
+    ProcessState,
+} = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions.test.js]")}`, function () {
-    beforeEach(async function () {
+    let globalConnectionURI;
+
+    const startSTWithMultitenancyAndAccountLinking = async () => {
+        return createTenant(globalConnectionURI, randomString());
+    };
+
+    before(async function () {
         await killAllST();
         await setupST();
-        ProcessState.getInstance().reset();
+        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
     });
 
     after(async function () {
@@ -3019,7 +3027,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
             await AccountLinking.linkAccounts(tpUser.user.loginMethods[0].recipeUserId, user.user.id);
 
             await AccountLinkingRecipe.getInstance().verifyEmailForRecipeUserIfLinkedAccountsAreVerified({
-                user,
+                user: user.user,
                 recipeUserId: tpUser.user.loginMethods[0].recipeUserId,
             });
 

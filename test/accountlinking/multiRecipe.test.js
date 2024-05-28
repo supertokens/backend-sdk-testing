@@ -17,27 +17,32 @@ const {
     setupST,
     killAllST,
     cleanST,
-    extractInfoFromResponse,
-    startSTWithMultitenancyAndAccountLinking,
+    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    createTenant,
 } = require("../utils");
-let supertokens = require("supertokens-node");
-let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
-let EmailPassword = require("supertokens-node/recipe/emailpassword");
-let ThirdParty = require("supertokens-node/recipe/thirdparty");
-let AccountLinking = require("supertokens-node/recipe/accountlinking");
-let Passwordless = require("supertokens-node/recipe/passwordless");
-let EmailVerification = require("supertokens-node/recipe/emailverification");
-const express = require("express");
-let { middleware, errorHandler } = require("supertokens-node/framework/express");
-const request = require("supertest");
+const { recipesMock, randomString, request } = require("../../api-mock");
+const {
+    AccountLinking,
+    EmailPassword,
+    EmailVerification,
+    Session,
+    supertokens,
+    ThirdParty,
+    Passwordless,
+} = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/multiRecipe.test.js]")}`, function () {
-    beforeEach(async function () {
+    let globalConnectionURI;
+
+    const startSTWithMultitenancyAndAccountLinking = async () => {
+        return createTenant(globalConnectionURI, randomString());
+    };
+
+    before(async function () {
         await killAllST();
         await setupST();
-        ProcessState.getInstance().reset();
+        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
     });
 
     after(async function () {
@@ -48,11 +53,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multiRecipe.tes
     describe("migration tests", function () {
         it("allows sign in with verified recipe user even if there is an unverified one w/ the same email", async function () {
             const connectionURI = await startSTWithMultitenancyAndAccountLinking();
-            const shouldDoLinking = {
-                shouldAutomaticallyLink: true,
-                shouldRequireVerification: true,
-            };
-            const app = initST(connectionURI, shouldDoLinking);
+            initST(connectionURI);
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
             assert.strictEqual(epUser.user.isPrimaryUser, false);
@@ -69,22 +70,29 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multiRecipe.tes
                 email: "test@example.com",
             });
 
-            let consumeCodeResponse = await request(app).post("/auth/signinup/code/consume").send({
-                preAuthSessionId: code.preAuthSessionId,
-                deviceId: code.deviceId,
-                userInputCode: code.userInputCode,
-            });
+            let consumeCodeResponse = await new Promise((resolve) =>
+                request()
+                    .post("/auth/signinup/code/consume")
+                    .send({
+                        preAuthSessionId: code.preAuthSessionId,
+                        deviceId: code.deviceId,
+                        userInputCode: code.userInputCode,
+                    })
+                    .end((err, res) => {
+                        if (err) {
+                            resolve(undefined);
+                        } else {
+                            resolve(res);
+                        }
+                    })
+            );
 
             assert.strictEqual(consumeCodeResponse.body.status, "OK");
         });
 
         it("should not allow sign in with unverified recipe user when there is a verified one w/ the same email", async function () {
             const connectionURI = await startSTWithMultitenancyAndAccountLinking();
-            const shouldDoLinking = {
-                shouldAutomaticallyLink: true,
-                shouldRequireVerification: true,
-            };
-            const app = initST(connectionURI, shouldDoLinking);
+            initST(connectionURI);
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
             assert.strictEqual(epUser.user.isPrimaryUser, false);
@@ -97,7 +105,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multiRecipe.tes
             assert.strictEqual(pwlessUser.user.isPrimaryUser, false);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signin")
                     .send({
                         formFields: [
@@ -126,7 +134,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multiRecipe.tes
     });
 });
 
-function initST(connectionURI, shouldDoLinking) {
+function initST(connectionURI) {
     supertokens.init({
         supertokens: {
             connectionURI,
@@ -170,15 +178,12 @@ function initST(connectionURI, shouldDoLinking) {
                             shouldAutomaticallyLink: false,
                         };
                     }
-                    return shouldDoLinking;
+                    return {
+                        shouldAutomaticallyLink: true,
+                        shouldRequireVerification: true,
+                    };
                 },
             }),
         ],
     });
-
-    const app = express();
-    app.use(middleware());
-    app.use(errorHandler());
-
-    return app;
 }

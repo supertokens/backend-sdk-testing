@@ -15,34 +15,37 @@
 const {
     printPath,
     setupST,
-    startST,
-    stopST,
     killAllST,
     cleanST,
-    resetAll,
     extractInfoFromResponse,
-    startSTWithMultitenancyAndAccountLinking,
+    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    createTenant,
 } = require("../utils");
-let supertokens = require("supertokens-node");
-let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("supertokens-node/lib/build/processState");
-let EmailPassword = require("supertokens-node/recipe/emailpassword");
-let ThirdParty = require("supertokens-node/recipe/thirdparty");
-let AccountLinking = require("supertokens-node/recipe/accountlinking");
-let EmailVerification = require("supertokens-node/recipe/emailverification");
-let EmailVerificationRecipe = require("supertokens-node/lib/build/recipe/emailverification/recipe").default;
-const express = require("express");
-const request = require("supertest");
-let { middleware, errorHandler } = require("supertokens-node/framework/express");
 let fs = require("fs");
 let path = require("path");
+const { recipesMock, randomString, getMockedValues, request } = require("../../api-mock");
+const {
+    AccountLinking,
+    EmailPassword,
+    EmailVerification,
+    Session,
+    supertokens,
+    ThirdParty,
+    EmailVerificationRecipe,
+} = recipesMock;
 
 describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailverificationapi.test.js]")}`, function () {
-    beforeEach(async function () {
+    let globalConnectionURI;
+
+    const startSTWithMultitenancyAndAccountLinking = async () => {
+        return createTenant(globalConnectionURI, randomString());
+    };
+
+    before(async function () {
         await killAllST();
         await setupST();
-        ProcessState.getInstance().reset();
+        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
     });
 
     after(async function () {
@@ -86,7 +89,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
+                        shouldDoAutomaticAccountLinking: async (input) => {
                             return {
                                 shouldAutomaticallyLink: true,
                                 shouldRequireVerification: true,
@@ -158,7 +161,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
+                        shouldDoAutomaticAccountLinking: async (input) => {
                             return {
                                 shouldAutomaticallyLink: true,
                                 shouldRequireVerification: true,
@@ -226,7 +229,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
+                        shouldDoAutomaticAccountLinking: async (input) => {
                             return {
                                 shouldAutomaticallyLink: true,
                                 shouldRequireVerification: true,
@@ -251,14 +254,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             let payloadBefore = session.getAccessTokenPayload();
             assert(payloadBefore["st-ev"]["v"] === false);
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.use(errorHandler());
-
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/email/verify")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .send({
@@ -319,7 +316,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
+                        shouldDoAutomaticAccountLinking: async (input) => {
                             return {
                                 shouldAutomaticallyLink: true,
                                 shouldRequireVerification: true,
@@ -355,14 +352,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.user.id));
             await AccountLinking.linkAccounts(epUser.loginMethods[0].recipeUserId, tpUser.user.id);
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.use(errorHandler());
-
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/email/verify")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .send({
@@ -428,7 +419,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
+                        shouldDoAutomaticAccountLinking: async (input) => {
                             return {
                                 shouldAutomaticallyLink: true,
                                 shouldRequireVerification: true,
@@ -445,14 +436,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                 await EmailVerification.createEmailVerificationToken("public", epUser.loginMethods[0].recipeUserId)
             ).token;
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.use(errorHandler());
-
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/email/verify")
                     .send({
                         method: "token",
@@ -513,7 +498,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
+                        shouldDoAutomaticAccountLinking: async (input) => {
                             return {
                                 shouldAutomaticallyLink: true,
                                 shouldRequireVerification: true,
@@ -531,14 +516,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                 epUser.loginMethods[0].recipeUserId
             );
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.use(errorHandler());
-
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .get("/auth/user/email/verify")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .expect(200)
@@ -593,7 +572,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
+                        shouldDoAutomaticAccountLinking: async (input) => {
                             return {
                                 shouldAutomaticallyLink: true,
                                 shouldRequireVerification: true,
@@ -617,14 +596,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                 epUser.loginMethods[0].recipeUserId
             );
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.use(errorHandler());
-
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .get("/auth/user/email/verify")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .expect(200)
@@ -679,7 +652,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
+                        shouldDoAutomaticAccountLinking: async (input) => {
                             return {
                                 shouldAutomaticallyLink: true,
                                 shouldRequireVerification: true,
@@ -705,14 +678,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
             await EmailVerification.unverifyEmail(epUser.loginMethods[0].recipeUserId);
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.use(errorHandler());
-
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .get("/auth/user/email/verify")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .expect(200)
@@ -771,7 +738,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
+                        shouldDoAutomaticAccountLinking: async (input) => {
                             return {
                                 shouldAutomaticallyLink: true,
                                 shouldRequireVerification: true,
@@ -795,14 +762,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             );
             await EmailVerification.verifyEmailUsingToken("public", token.token);
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.use(errorHandler());
-
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .get("/auth/user/email/verify")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .expect(200)
@@ -874,7 +835,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
+                        shouldDoAutomaticAccountLinking: async (input) => {
                             return {
                                 shouldAutomaticallyLink: true,
                                 shouldRequireVerification: true,
@@ -892,14 +853,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                 epUser.loginMethods[0].recipeUserId
             );
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.use(errorHandler());
-
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/email/verify/token")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .expect(200)
@@ -918,6 +873,9 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             assert(tokens.accessToken === undefined);
             assert(tokens.accessTokenFromAny === undefined);
             assert(tokens.accessTokenFromHeader === undefined);
+
+            let mocked = await getMockedValues();
+            userInCallback = mocked.userInCallback;
 
             assert(userInCallback.id === epUser.id);
             assert(userInCallback.email === "test@example.com");
@@ -970,7 +928,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
+                        shouldDoAutomaticAccountLinking: async (input) => {
                             return {
                                 shouldAutomaticallyLink: true,
                                 shouldRequireVerification: true,
@@ -994,14 +952,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                 epUser.loginMethods[0].recipeUserId
             );
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.use(errorHandler());
-
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/email/verify/token")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .expect(200)
@@ -1018,6 +970,9 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
             let tokens = extractInfoFromResponse(response);
             assert.notStrictEqual(tokens.accessTokenFromAny, undefined);
+
+            let mocked = await getMockedValues();
+            userInCallback = mocked.userInCallback;
 
             assert(userInCallback === undefined);
         });
@@ -1068,7 +1023,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
+                        shouldDoAutomaticAccountLinking: async (input) => {
                             return {
                                 shouldAutomaticallyLink: true,
                                 shouldRequireVerification: true,
@@ -1094,14 +1049,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
             await EmailVerification.unverifyEmail(epUser.loginMethods[0].recipeUserId);
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.use(errorHandler());
-
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/email/verify/token")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .expect(200)
@@ -1122,6 +1071,9 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             let newSession = await Session.getSessionWithoutRequestResponse(tokens.accessTokenFromAny);
             let claimValue = await newSession.getClaimValue(EmailVerification.EmailVerificationClaim);
             assert(claimValue === false);
+
+            let mocked = await getMockedValues();
+            userInCallback = mocked.userInCallback;
 
             assert(userInCallback.id === epUser.id);
             assert(userInCallback.email === "test@example.com");
@@ -1174,7 +1126,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
+                        shouldDoAutomaticAccountLinking: async (input) => {
                             return {
                                 shouldAutomaticallyLink: true,
                                 shouldRequireVerification: true,
@@ -1198,14 +1150,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             );
             await EmailVerification.verifyEmailUsingToken("public", token.token);
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.use(errorHandler());
-
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/email/verify/token")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .expect(200)
@@ -1226,6 +1172,9 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             let newSession = await Session.getSessionWithoutRequestResponse(tokens.accessTokenFromAny);
             let claimValue = await newSession.getClaimValue(EmailVerification.EmailVerificationClaim);
             assert(claimValue === true);
+
+            let mocked = await getMockedValues();
+            userInCallback = mocked.userInCallback;
 
             assert(userInCallback === undefined);
         });
@@ -1248,7 +1197,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                     EmailPassword.init(),
                     EmailVerification.init({
                         mode: "OPTIONAL",
-                        getEmailForRecipeUserId: async function (recipeUserId) {
+                        getEmailForRecipeUserId: async (recipeUserId) => {
                             return {
                                 status: "OK",
                                 email: "random@example.com",
@@ -1266,7 +1215,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                     }),
                     Session.init(),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (_, __, _tenantId, userContext) {
+                        shouldDoAutomaticAccountLinking: async (_, __, _tenantId, userContext) => {
                             if (userContext.doNotLink) {
                                 return {
                                     shouldAutomaticallyLink: false,
@@ -1284,6 +1233,9 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             let epUser = await EmailPassword.signUp("public", "random2@example.com", "password1234");
 
             await EmailVerification.isEmailVerified(epUser.user.loginMethods[0].recipeUserId);
+
+            let mocked = await getMockedValues();
+            email = mocked.email;
 
             assert.strictEqual(email, "random@example.com");
         });
@@ -1304,7 +1256,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                     EmailPassword.init(),
                     EmailVerification.init({
                         mode: "OPTIONAL",
-                        getEmailForRecipeUserId: async function (recipeUserId) {
+                        getEmailForRecipeUserId: async (recipeUserId) => {
                             return {
                                 status: "UNKNOWN_USER_ID_ERROR",
                             };
@@ -1321,7 +1273,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                     }),
                     Session.init(),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (_, __, _tenantId, userContext) {
+                        shouldDoAutomaticAccountLinking: async (_, __, _tenantId, userContext) => {
                             if (userContext.doNotLink) {
                                 return {
                                     shouldAutomaticallyLink: false,
@@ -1339,10 +1291,15 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             let epUser = await EmailPassword.signUp("public", "random@example.com", "password1234");
 
             await EmailVerification.isEmailVerified(epUser.user.loginMethods[0].recipeUserId);
+
+            let mocked = await getMockedValues();
+            email = mocked.email;
+
             assert.strictEqual(email, "random@example.com");
         });
 
         it("calling getEmailForRecipeUserId with recipe user id that has many other linked recipe user ids returns the right email", async function () {
+            let email;
             const connectionURI = await startSTWithMultitenancyAndAccountLinking();
             supertokens.init({
                 supertokens: {
@@ -1357,7 +1314,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                     EmailPassword.init(),
                     EmailVerification.init({
                         mode: "OPTIONAL",
-                        getEmailForRecipeUserId: async function (recipeUserId) {
+                        getEmailForRecipeUserId: async (recipeUserId) => {
                             return {
                                 status: "UNKNOWN_USER_ID_ERROR",
                             };
@@ -1374,7 +1331,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                     }),
                     Session.init(),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (_, __, _tenantId, userContext) {
+                        shouldDoAutomaticAccountLinking: async (_, __, _tenantId, userContext) => {
                             if (userContext.doNotLink) {
                                 return {
                                     shouldAutomaticallyLink: false,
@@ -1401,6 +1358,10 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             assert(pUser.id === epUser.user.id);
 
             await EmailVerification.isEmailVerified(epUser2.user.loginMethods[0].recipeUserId);
+
+            let mocked = await getMockedValues();
+            email = mocked.email;
+
             assert.strictEqual(email, "random2@example.com");
         });
     });
@@ -1408,7 +1369,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
     it("email verification recipe uses getUser function only in getEmailForRecipeUserId", async function () {
         // search through all files in directory for a string
         let files = await new Promise((resolve, reject) => {
-            recursive("./lib/ts/recipe/emailverification", (err, files) => {
+            recursive(path.resolve("node_modules/supertokens-node/lib/ts/recipe/emailverification"), (err, files) => {
                 if (err) {
                     reject(err);
                 }
@@ -1478,13 +1439,13 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         override: (oI) => {
                             return {
                                 ...oI,
-                                sendEmail: async function (input) {
+                                sendEmail: async (input) => {
                                     token = input.emailVerifyLink.split("?token=")[1].split("&rid=")[0];
                                 },
                             };
                         },
                     },
-                    getEmailForRecipeUserId: async function (recipeUserId) {
+                    getEmailForRecipeUserId: async (recipeUserId) => {
                         if (recipeUserId.getAsString() === "random") {
                             return {
                                 status: "OK",
@@ -1499,7 +1460,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                 }),
                 Session.init(),
                 AccountLinking.init({
-                    shouldDoAutomaticAccountLinking: async function (_, __, _tenantId, userContext) {
+                    shouldDoAutomaticAccountLinking: async (_, __, _tenantId, userContext) => {
                         return {
                             shouldAutomaticallyLink: true,
                             shouldRequireVerification: true,
@@ -1509,12 +1470,6 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             ],
         });
 
-        const app = express();
-
-        app.use(middleware());
-
-        app.use(errorHandler());
-
         let session = await Session.createNewSessionWithoutRequestResponse(
             "public",
             supertokens.convertToRecipeUserId("random")
@@ -1523,7 +1478,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
         // now we check if the email is verified or not
         {
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .get("/auth/user/email/verify")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .expect(200)
@@ -1543,7 +1498,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
         // we generate an email verification token
         {
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/email/verify/token")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .expect(200)
@@ -1557,13 +1512,19 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             );
             assert(response !== undefined);
             assert(response.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            token = mocked.token;
+
             assert(token !== undefined);
         }
 
+        let mocked = await getMockedValues();
+        token = mocked.token;
         // now we verify the token
         {
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/email/verify")
                     .send({
                         method: "token",
@@ -1585,7 +1546,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
         // now we check if the email is verified or not
         {
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .get("/auth/user/email/verify")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .expect(200)
@@ -1622,13 +1583,13 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         override: (oI) => {
                             return {
                                 ...oI,
-                                sendEmail: async function (input) {
+                                sendEmail: async (input) => {
                                     token = input.emailVerifyLink.split("?token=")[1].split("&rid=")[0];
                                 },
                             };
                         },
                     },
-                    getEmailForRecipeUserId: async function (recipeUserId) {
+                    getEmailForRecipeUserId: async (recipeUserId) => {
                         if (recipeUserId.getAsString() === "random") {
                             return {
                                 status: "OK",
@@ -1643,7 +1604,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                 }),
                 Session.init(),
                 AccountLinking.init({
-                    shouldDoAutomaticAccountLinking: async function (_, __, _tenantId, userContext) {
+                    shouldDoAutomaticAccountLinking: async (_, __, _tenantId, userContext) => {
                         return {
                             shouldAutomaticallyLink: true,
                             shouldRequireVerification: true,
@@ -1653,12 +1614,6 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             ],
         });
 
-        const app = express();
-
-        app.use(middleware());
-
-        app.use(errorHandler());
-
         let session = await Session.createNewSessionWithoutRequestResponse(
             "public",
             supertokens.convertToRecipeUserId("random")
@@ -1667,7 +1622,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
         // now we check if the email is verified or not
         {
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .get("/auth/user/email/verify")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .expect(200)
@@ -1687,7 +1642,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
         // we generate an email verification token
         {
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/email/verify/token")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .expect(200)
@@ -1701,13 +1656,20 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             );
             assert(response !== undefined);
             assert(response.body.status === "OK");
+
+            let mocked = await getMockedValues();
+            token = mocked.token;
+
             assert(token !== undefined);
         }
+
+        let mocked = await getMockedValues();
+        token = mocked.token;
 
         // now we verify the token
         {
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/email/verify")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .send({
@@ -1730,7 +1692,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
         // now we check if the email is verified or not
         {
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .get("/auth/user/email/verify")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .expect(200)
@@ -1794,10 +1756,6 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let epUser = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
 
             {
@@ -1822,7 +1780,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             ).token;
 
             let response2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/email/verify")
                     .send({
                         method: "token",
@@ -1890,10 +1848,6 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let epUser = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
 
             {
@@ -1915,7 +1869,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             ).token;
 
             let response2 = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/user/email/verify")
                     .send({
                         method: "token",

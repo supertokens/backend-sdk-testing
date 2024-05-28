@@ -18,25 +18,33 @@ const {
     killAllST,
     cleanST,
     extractInfoFromResponse,
-    startSTWithMultitenancyAndAccountLinking,
+    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    createTenant,
 } = require("../utils");
-let supertokens = require("supertokens-node");
-let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
-let EmailPassword = require("supertokens-node/recipe/emailpassword");
-let ThirdParty = require("supertokens-node/recipe/thirdparty");
-let AccountLinking = require("supertokens-node/recipe/accountlinking");
-let EmailVerification = require("supertokens-node/recipe/emailverification");
-const express = require("express");
-let { middleware, errorHandler } = require("supertokens-node/framework/express");
-const request = require("supertest");
+let { PROCESS_STATE } = require("supertokens-node/lib/build/processState");
+const { randomString, recipesMock, request } = require("../../api-mock");
+const {
+    AccountLinking,
+    EmailPassword,
+    EmailVerification,
+    Session,
+    supertokens,
+    ThirdParty,
+    ProcessState,
+} = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordapis.test.js]")}`, function () {
-    beforeEach(async function () {
+    let globalConnectionURI;
+
+    const startSTWithMultitenancyAndAccountLinking = async () => {
+        return createTenant(globalConnectionURI, randomString());
+    };
+
+    before(async function () {
         await killAllST();
         await setupST();
-        ProcessState.getInstance().reset();
+        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
     });
 
     after(async function () {
@@ -87,15 +95,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let tpUser = await EmailPassword.signUp("public", "test@example.com", "password123");
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.user.id));
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signup")
                     .send({
                         formFields: [
@@ -169,10 +173,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -183,7 +183,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.user.id));
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signup")
                     .send({
                         formFields: [
@@ -264,10 +264,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -283,7 +279,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(tpUser.user.loginMethods[0].verified === true);
 
             let res = await new Promise((resolve, reject) =>
-                request(app)
+                request()
                     .post("/auth/signup")
                     .send({
                         formFields: [
@@ -368,10 +364,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -382,7 +374,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(!tpUser.user.isPrimaryUser);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signup")
                     .send({
                         formFields: [
@@ -463,10 +455,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -477,7 +465,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(tpUser.user.isPrimaryUser);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signup")
                     .send({
                         formFields: [
@@ -550,10 +538,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -564,7 +548,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(tpUser.user.isPrimaryUser);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signup")
                     .send({
                         formFields: [
@@ -657,10 +641,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -674,7 +654,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             assert(tpUser.user.isPrimaryUser === false);
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signup")
                     .send({
                         formFields: [
@@ -753,10 +733,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -767,7 +743,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.user.id));
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signup")
                     .send({
                         formFields: [
@@ -843,10 +819,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -856,7 +828,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signup")
                     .send({
                         formFields: [
@@ -933,15 +905,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password123");
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(epUser.user.id));
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signup")
                     .send({
                         formFields: [
@@ -1015,15 +983,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password123");
             assert(!epUser.user.isPrimaryUser);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signup")
                     .send({
                         formFields: [
@@ -1097,15 +1061,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password123");
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(epUser.user.id));
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signup")
                     .send({
                         formFields: [
@@ -1187,17 +1147,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password123", undefined, {
                 doNotLink: true,
             });
             assert(!epUser.user.isPrimaryUser);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signup")
                     .send({
                         formFields: [
@@ -1273,15 +1229,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password123");
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(epUser.user.id));
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signup")
                     .send({
                         formFields: [
@@ -1357,15 +1309,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password123");
             assert(epUser.user.isPrimaryUser === false);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signup")
                     .send({
                         formFields: [
@@ -1449,10 +1397,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -1468,7 +1412,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.linkAccounts(epUser.user.loginMethods[0].recipeUserId, tpUser.user.id);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signin")
                     .send({
                         formFields: [
@@ -1554,10 +1498,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -1576,7 +1516,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             });
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signin")
                     .send({
                         formFields: [
@@ -1659,10 +1599,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -1677,7 +1613,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             });
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signin")
                     .send({
                         formFields: [
@@ -1762,10 +1698,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
                 "public",
                 "google",
@@ -1785,7 +1717,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await EmailVerification.verifyEmailUsingToken("public", token.token);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signin")
                     .send({
                         formFields: [
@@ -1871,15 +1803,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
             assert(epUser.user.isPrimaryUser === false);
 
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signin")
                     .send({
                         formFields: [

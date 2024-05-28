@@ -15,32 +15,28 @@
 const {
     printPath,
     setupST,
-    startST,
-    stopST,
     killAllST,
     cleanST,
-    resetAll,
     assertJSONEquals,
-    startSTWithMultitenancyAndAccountLinking,
+    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    createTenant,
     extractInfoFromResponse,
 } = require("../utils");
-let supertokens = require("supertokens-node");
-let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("supertokens-node/lib/build/processState");
-let EmailPassword = require("supertokens-node/recipe/emailpassword");
-let ThirdParty = require("supertokens-node/recipe/thirdparty");
-let Passwordless = require("supertokens-node/recipe/passwordless");
-let AccountLinking = require("supertokens-node/recipe/accountlinking");
-const express = require("express");
-let { middleware, errorHandler } = require("supertokens-node/framework/express");
-const request = require("supertest");
+const { recipesMock, randomString, request } = require("../../api-mock");
+const { AccountLinking, EmailPassword, Session, supertokens, ThirdParty, Passwordless } = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.test.js]")}`, function () {
-    beforeEach(async function () {
+    let globalConnectionURI;
+
+    const startSTWithMultitenancyAndAccountLinking = async () => {
+        return createTenant(globalConnectionURI, randomString());
+    };
+
+    before(async function () {
         await killAllST();
         await setupST();
-        ProcessState.getInstance().reset();
+        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
     });
 
     after(async function () {
@@ -237,15 +233,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
             ],
         });
 
-        const app = express();
-        app.use(middleware());
-        app.use(errorHandler());
-
         let { user, status } = await EmailPassword.signUp("public", "test@example.com", "password123");
         assert(status === "OK");
 
         let res = await new Promise((resolve) =>
-            request(app)
+            request()
                 .post("/auth/signin")
                 .set("fdi-version", "1.17")
                 .send({
@@ -284,23 +276,32 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
         linkingResult = await AccountLinking.linkAccounts(signUp3.user.loginMethods[0].recipeUserId, signUp2.user.id);
         assert(linkingResult.status === "OK");
 
-        res = await request(app)
-            .post("/auth/signin")
-            .set("fdi-version", "1.17")
-            .set("Authorization", `Bearer ${tokens.accessTokenFromAny}`)
-            .send({
-                formFields: [
-                    {
-                        id: "email",
-                        value: "test3@example.com",
-                    },
-                    {
-                        id: "password",
-                        value: "password123",
-                    },
-                ],
-            })
-            .expect(200);
+        res = await new Promise((resolve) =>
+            request()
+                .post("/auth/signin")
+                .set("fdi-version", "1.17")
+                .set("Authorization", `Bearer ${tokens.accessTokenFromAny}`)
+                .send({
+                    formFields: [
+                        {
+                            id: "email",
+                            value: "test3@example.com",
+                        },
+                        {
+                            id: "password",
+                            value: "password123",
+                        },
+                    ],
+                })
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        resolve(undefined);
+                    } else {
+                        resolve(res);
+                    }
+                })
+        );
 
         assert.strictEqual(res.body.status, "OK");
         assert.strictEqual(res.body.user.email, "test2@example.com");
@@ -331,15 +332,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
             ],
         });
 
-        const app = express();
-        app.use(middleware());
-        app.use(errorHandler());
-
         let { user, status } = await EmailPassword.signUp("public", "test@example.com", "password123");
         assert(status === "OK");
 
         let res = await new Promise((resolve) =>
-            request(app)
+            request()
                 .post("/auth/signin")
                 .set("fdi-version", "1.16,1.17")
                 .send({
@@ -379,23 +376,32 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
         assert(linkingResult.status === "OK");
 
         {
-            res = await request(app)
-                .post("/auth/signin")
-                .set("fdi-version", "1.16,1.17")
-                .set("Authorization", `Bearer ${tokens.accessTokenFromAny}`)
-                .send({
-                    formFields: [
-                        {
-                            id: "email",
-                            value: "test3@example.com",
-                        },
-                        {
-                            id: "password",
-                            value: "password123",
-                        },
-                    ],
-                })
-                .expect(200);
+            res = await new Promise((resolve) =>
+                request()
+                    .post("/auth/signin")
+                    .set("fdi-version", "1.16,1.17")
+                    .set("Authorization", `Bearer ${tokens.accessTokenFromAny}`)
+                    .send({
+                        formFields: [
+                            {
+                                id: "email",
+                                value: "test3@example.com",
+                            },
+                            {
+                                id: "password",
+                                value: "password123",
+                            },
+                        ],
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            resolve(undefined);
+                        } else {
+                            resolve(res);
+                        }
+                    })
+            );
 
             assert.strictEqual(res.body.status, "OK");
             assert.strictEqual(res.body.user.email, "test2@example.com");
@@ -407,23 +413,32 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
             assert.strictEqual(tokens2.accessTokenFromAny, undefined);
         }
         {
-            res = await request(app)
-                .post("/auth/signin")
-                .set("fdi-version", "1.17,1.16")
-                .set("Authorization", `Bearer ${tokens.accessTokenFromAny}`)
-                .send({
-                    formFields: [
-                        {
-                            id: "email",
-                            value: "test3@example.com",
-                        },
-                        {
-                            id: "password",
-                            value: "password123",
-                        },
-                    ],
-                })
-                .expect(200);
+            res = await new Promise((resolve) =>
+                request()
+                    .post("/auth/signin")
+                    .set("fdi-version", "1.17,1.16")
+                    .set("Authorization", `Bearer ${tokens.accessTokenFromAny}`)
+                    .send({
+                        formFields: [
+                            {
+                                id: "email",
+                                value: "test3@example.com",
+                            },
+                            {
+                                id: "password",
+                                value: "password123",
+                            },
+                        ],
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            resolve(undefined);
+                        } else {
+                            resolve(res);
+                        }
+                    })
+            );
 
             assert.strictEqual(res.body.status, "OK");
             assert.strictEqual(res.body.user.email, "test2@example.com");
@@ -455,15 +470,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
             ],
         });
 
-        const app = express();
-        app.use(middleware());
-        app.use(errorHandler());
-
         let { user, status } = await EmailPassword.signUp("public", "test@example.com", "password123");
         assert(status === "OK");
 
         let res = await new Promise((resolve) =>
-            request(app)
+            request()
                 .post("/auth/signin")
                 .set("fdi-version", "1.18,1.17")
                 .send({
@@ -503,45 +514,63 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
         assert(linkingResult.status === "OK");
 
         {
-            res = await request(app)
-                .post("/auth/signin")
-                .set("fdi-version", "1.18,1.17")
-                .set("Authorization", `Bearer ${tokens.accessTokenFromAny}`)
-                .send({
-                    formFields: [
-                        {
-                            id: "email",
-                            value: "test3@example.com",
-                        },
-                        {
-                            id: "password",
-                            value: "password123",
-                        },
-                    ],
-                })
-                .expect(200);
+            res = await new Promise((resolve) =>
+                request()
+                    .post("/auth/signin")
+                    .set("fdi-version", "1.18,1.17")
+                    .set("Authorization", `Bearer ${tokens.accessTokenFromAny}`)
+                    .send({
+                        formFields: [
+                            {
+                                id: "email",
+                                value: "test3@example.com",
+                            },
+                            {
+                                id: "password",
+                                value: "password123",
+                            },
+                        ],
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            resolve(undefined);
+                        } else {
+                            resolve(res);
+                        }
+                    })
+            );
 
             assert.strictEqual(res.body.status, "OK");
             assert.strictEqual(res.body.user.emails[1], "test2@example.com"); // new structure
         }
         {
-            res = await request(app)
-                .post("/auth/signin")
-                .set("fdi-version", "1.17,1.18")
-                .set("Authorization", `Bearer ${tokens.accessTokenFromAny}`)
-                .send({
-                    formFields: [
-                        {
-                            id: "email",
-                            value: "test3@example.com",
-                        },
-                        {
-                            id: "password",
-                            value: "password123",
-                        },
-                    ],
-                })
-                .expect(200);
+            res = await new Promise((resolve) =>
+                request()
+                    .post("/auth/signin")
+                    .set("fdi-version", "1.17,1.18")
+                    .set("Authorization", `Bearer ${tokens.accessTokenFromAny}`)
+                    .send({
+                        formFields: [
+                            {
+                                id: "email",
+                                value: "test3@example.com",
+                            },
+                            {
+                                id: "password",
+                                value: "password123",
+                            },
+                        ],
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            resolve(undefined);
+                        } else {
+                            resolve(res);
+                        }
+                    })
+            );
 
             assert.strictEqual(res.body.status, "OK");
             assert.strictEqual(res.body.user.emails[1], "test2@example.com"); // new structure
@@ -562,10 +591,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
             recipeList: [EmailPassword.init(), Session.init()],
         });
 
-        const app = express();
-        app.use(middleware());
-        app.use(errorHandler());
-
         let signUp2 = await EmailPassword.signUp("public", "test2@example.com", "password123");
         assert(signUp2.status === "OK");
         let linkingResult = await AccountLinking.createPrimaryUser(signUp2.user.loginMethods[0].recipeUserId);
@@ -577,7 +602,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
         assert(linkingResult.status === "OK");
 
         res = await new Promise((resolve) =>
-            request(app)
+            request()
                 .post("/auth/signin")
                 .set("fdi-version", "1.17")
                 .send({
