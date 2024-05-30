@@ -23,6 +23,7 @@ const {
 } = require("../utils");
 let assert = require("assert");
 const { recipesMock, randomString, request } = require("../../api-mock");
+const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const { AccountLinking, EmailVerification, Session, supertokens, ThirdParty, Passwordless } = recipesMock;
 
 // phoneNumber based accounts can't exist in other recipes now,
@@ -256,12 +257,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -336,17 +333,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (_, __, _session, _tenantId, userContext) => {
-                            if (userContext.doNotLink) {
-                                return {
-                                    shouldAutomaticallyLink: false,
-                                };
-                            }
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -360,7 +348,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                 true,
                 undefined,
                 {
-                    doNotLink: true,
+                    DO_NOT_LINK: true,
                 }
             );
 
@@ -426,12 +414,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -505,15 +489,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (_newAccountInfo, _user, _tenantId, userContext) => {
-                            if (userContext?.doNotLink === true) {
-                                return { shouldAutomaticallyLink: false };
-                            }
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -523,7 +500,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
             await Passwordless.signInUp({
                 email,
                 tenantId: "public",
-                userContext: { doNotLink: true },
+                userContext: { DO_NOT_LINK: true },
             });
 
             // createCodeAPI with email
@@ -660,17 +637,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                             mode: "REQUIRED",
                         }),
                         AccountLinking.init({
-                            shouldDoAutomaticAccountLinking: async (userInfo, __, _session, _tenantId, userContext) => {
-                                if (userContext.doNotLink || userInfo.email?.includes("doNotLink") === true) {
-                                    return {
-                                        shouldAutomaticallyLink: false,
-                                    };
-                                }
-                                return {
-                                    shouldAutomaticallyLink: true,
-                                    shouldRequireVerification: true,
-                                };
-                            },
+                            shouldDoAutomaticAccountLinking:
+                                shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                         }),
                     ],
                 });
@@ -692,7 +660,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                     false,
                     undefined,
                     {
-                        doNotLink: true,
+                        DO_NOT_LINK: true,
                     }
                 );
 
@@ -764,17 +732,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                             mode: "REQUIRED",
                         }),
                         AccountLinking.init({
-                            shouldDoAutomaticAccountLinking: async (userInfo, __, _session, _tenantId, userContext) => {
-                                if (userContext.doNotLink || userInfo.email?.includes("doNotLink") === true) {
-                                    return {
-                                        shouldAutomaticallyLink: false,
-                                    };
-                                }
-                                return {
-                                    shouldAutomaticallyLink: true,
-                                    shouldRequireVerification: true,
-                                };
-                            },
+                            shouldDoAutomaticAccountLinking:
+                                shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                         }),
                     ],
                 });
@@ -796,7 +755,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                     false,
                     undefined,
                     {
-                        doNotLink: true,
+                        DO_NOT_LINK: true,
                     }
                 );
 
@@ -882,10 +841,10 @@ async function getCreateCodeTestCase({ pwlessUser, otherRecipeUser, accountLinki
             AccountLinking.init({
                 shouldDoAutomaticAccountLinking:
                     accountLinking.enabled && accountLinking.requiresVerification
-                        ? automaticallyLinkIfVerified
+                        ? shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified
                         : accountLinking.enabled
-                        ? automaticallyLinkNoVerify
-                        : automaticallyLinkDisabled,
+                        ? shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify
+                        : shouldDoAutomaticAccountLinkingOverride.automaticallyLinkDisabled,
             }),
         ],
     });
@@ -902,7 +861,7 @@ async function getCreateCodeTestCase({ pwlessUser, otherRecipeUser, accountLinki
             otherRecipeUser.verified,
             undefined,
             {
-                doNotLink: !otherRecipeUser.primary,
+                DO_NOT_LINK: !otherRecipeUser.primary,
             }
         );
 
@@ -924,7 +883,7 @@ async function getCreateCodeTestCase({ pwlessUser, otherRecipeUser, accountLinki
                 userInputCode: code.userInputCode,
             },
             {
-                doNotLink: pwlessUser.linked !== true,
+                DO_NOT_LINK: pwlessUser.linked !== true,
             }
         );
         assert.strictEqual(consumeResp.status, "OK");
@@ -1003,10 +962,10 @@ async function getConsumeCodeTestCase({ pwlessUser, otherRecipeUser, accountLink
             AccountLinking.init({
                 shouldDoAutomaticAccountLinking:
                     accountLinking.enabled && accountLinking.requiresVerification
-                        ? automaticallyLinkIfVerified
+                        ? shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified
                         : accountLinking.enabled
-                        ? automaticallyLinkNoVerify
-                        : automaticallyLinkDisabled,
+                        ? shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify
+                        : shouldDoAutomaticAccountLinkingOverride.automaticallyLinkDisabled,
             }),
         ],
     });
@@ -1023,7 +982,7 @@ async function getConsumeCodeTestCase({ pwlessUser, otherRecipeUser, accountLink
             otherRecipeUser.verified,
             undefined,
             {
-                doNotLink: !otherRecipeUser.primary,
+                DO_NOT_LINK: !otherRecipeUser.primary,
             }
         );
 
@@ -1045,7 +1004,7 @@ async function getConsumeCodeTestCase({ pwlessUser, otherRecipeUser, accountLink
                 userInputCode: code.userInputCode,
             },
             {
-                doNotLink: pwlessUser.linked !== true,
+                DO_NOT_LINK: pwlessUser.linked !== true,
             }
         );
         assert.strictEqual(consumeResp.status, "OK");
@@ -1097,35 +1056,3 @@ async function getConsumeCodeTestCase({ pwlessUser, otherRecipeUser, accountLink
         }
     }
 }
-
-// accountLinking: { enabled: false },
-const automaticallyLinkDisabled = async (userInfo, __, _session, _tenantId, userContext) => {
-    if (userContext.doNotLink || userInfo.email?.includes("doNotLink") === true) {
-        return { shouldAutomaticallyLink: false };
-    }
-    return {
-        shouldAutomaticallyLink: false,
-    };
-};
-
-// accountLinking: { enabled: true, requiresVerification: false },
-const automaticallyLinkNoVerify = async (userInfo, __, _session, _tenantId, userContext) => {
-    if (userContext.doNotLink || userInfo.email?.includes("doNotLink") === true) {
-        return { shouldAutomaticallyLink: false };
-    }
-    return {
-        shouldAutomaticallyLink: true,
-        shouldRequireVerification: false,
-    };
-};
-
-// accountLinking: { enabled: true, requiresVerification: true },
-const automaticallyLinkIfVerified = async (userInfo, __, _session, _tenantId, userContext) => {
-    if (userContext.doNotLink || userInfo.email?.includes("doNotLink") === true) {
-        return { shouldAutomaticallyLink: false };
-    }
-    return {
-        shouldAutomaticallyLink: true,
-        shouldRequireVerification: true,
-    };
-};

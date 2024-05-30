@@ -34,6 +34,7 @@ const {
     ThirdParty,
     EmailVerificationRecipe,
 } = recipesMock;
+const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 
 describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailverificationapi.test.js]")}`, function () {
     let globalConnectionURI;
@@ -89,12 +90,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (input) => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -161,12 +158,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (input) => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -229,12 +222,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (input) => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -316,12 +305,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (input) => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -419,12 +404,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (input) => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -498,12 +479,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (input) => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -572,12 +549,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (input) => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -652,12 +625,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (input) => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -738,12 +707,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (input) => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -835,12 +800,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (input) => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -928,12 +889,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (input) => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -1023,12 +980,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (input) => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -1126,12 +1079,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (input) => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -1215,17 +1164,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                     }),
                     Session.init(),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (_, __, _tenantId, userContext) => {
-                            if (userContext.doNotLink) {
-                                return {
-                                    shouldAutomaticallyLink: false,
-                                };
-                            }
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -1273,17 +1213,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                     }),
                     Session.init(),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (_, __, _tenantId, userContext) => {
-                            if (userContext.doNotLink) {
-                                return {
-                                    shouldAutomaticallyLink: false,
-                                };
-                            }
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -1331,17 +1262,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                     }),
                     Session.init(),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (_, __, _tenantId, userContext) => {
-                            if (userContext.doNotLink) {
-                                return {
-                                    shouldAutomaticallyLink: false,
-                                };
-                            }
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -1460,12 +1382,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                 }),
                 Session.init(),
                 AccountLinking.init({
-                    shouldDoAutomaticAccountLinking: async (_, __, _tenantId, userContext) => {
-                        return {
-                            shouldAutomaticallyLink: true,
-                            shouldRequireVerification: true,
-                        };
-                    },
+                    shouldDoAutomaticAccountLinking:
+                        shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                 }),
             ],
         });
@@ -1604,12 +1522,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                 }),
                 Session.init(),
                 AccountLinking.init({
-                    shouldDoAutomaticAccountLinking: async (_, __, _tenantId, userContext) => {
-                        return {
-                            shouldAutomaticallyLink: true,
-                            shouldRequireVerification: true,
-                        };
-                    },
+                    shouldDoAutomaticAccountLinking:
+                        shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                 }),
             ],
         });
@@ -1746,12 +1660,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                     }),
                     Session.init(),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -1839,11 +1749,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                     }),
                     Session.init(),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: false,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkDisabled,
                     }),
                 ],
             });

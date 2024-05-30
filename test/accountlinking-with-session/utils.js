@@ -12,6 +12,7 @@ const {
     MultiFactorAuth,
 } = recipesMock;
 const { createTenant } = require("../utils");
+const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 
 exports.setup = async function setup(config = {}) {
     const connectionURI = await createTenant(config.globalConnectionURI, randomString());
@@ -82,7 +83,8 @@ exports.setup = async function setup(config = {}) {
             }),
             AccountLinking.init({
                 shouldDoAutomaticAccountLinking:
-                    shouldDoAutomaticAccountLinkingMap[config.shouldDoAutomaticAccountLinking || "default"],
+                    config.shouldDoAutomaticAccountLinking ||
+                    shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
             }),
             EmailVerification.init({
                 mode: "OPTIONAL",
@@ -103,87 +105,6 @@ exports.setup = async function setup(config = {}) {
         thirdPartyEnabled: true,
         emailPasswordEnabled: true,
     });
-};
-
-let shouldDoAutomaticAccountLinkingMap = {
-    default: (_newAccountInfo, _user, _session, _tenantId, userContext) => {
-        if (userContext.DO_NOT_LINK) {
-            return { shouldAutomaticallyLink: false };
-        }
-        return {
-            shouldAutomaticallyLink: true,
-            shouldRequireVerification: true,
-        };
-    },
-    linkingWithoutVerification: (_newAccountInfo, _user, _session, _tenantId, userContext) => {
-        if (userContext.DO_NOT_LINK) {
-            return { shouldAutomaticallyLink: false };
-        }
-        return {
-            shouldAutomaticallyLink: true,
-            shouldRequireVerification: false,
-        };
-    },
-    noLinkingWhenUserEqualsSessionUser: (accountInfo, user, session, _tenantId, userContext) => {
-        if (userContext.DO_NOT_LINK) {
-            return { shouldAutomaticallyLink: false };
-        }
-        if (user !== undefined && user.id === session.getUserId()) {
-            return { shouldAutomaticallyLink: false };
-        }
-        return {
-            shouldAutomaticallyLink: true,
-            shouldRequireVerification: false,
-        };
-    },
-    noLinkingWhenUserEqualsSessionUserDefaultRequireVerification: (
-        accountInfo,
-        user,
-        session,
-        _tenantId,
-        userContext
-    ) => {
-        if (userContext.DO_NOT_LINK) {
-            return { shouldAutomaticallyLink: false };
-        }
-        if (user !== undefined && user.id === session.getUserId()) {
-            return { shouldAutomaticallyLink: false };
-        }
-        return {
-            shouldAutomaticallyLink: true,
-            shouldRequireVerification: true,
-        };
-    },
-    noLinkingWhenAccountInfoEmailMatch: (accountInfo, user, _session, _tenantId, userContext) => {
-        if (userContext.DO_NOT_LINK) {
-            return { shouldAutomaticallyLink: false };
-        }
-        if (accountInfo.email === store.email1 && user === undefined) {
-            return { shouldAutomaticallyLink: false };
-        }
-        return {
-            shouldAutomaticallyLink: true,
-            shouldRequireVerification: false,
-        };
-    },
-    noLinkingWhenAccountInfoEmailMatchDefaultRequireVerification: (
-        accountInfo,
-        user,
-        _session,
-        _tenantId,
-        userContext
-    ) => {
-        if (userContext.DO_NOT_LINK) {
-            return { shouldAutomaticallyLink: false };
-        }
-        if (accountInfo.email === store.email1 && user === undefined) {
-            return { shouldAutomaticallyLink: false };
-        }
-        return {
-            shouldAutomaticallyLink: true,
-            shouldRequireVerification: true,
-        };
-    },
 };
 
 exports.createPasswordlessUser = async function createPasswordlessUser(

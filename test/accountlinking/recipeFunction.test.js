@@ -23,6 +23,7 @@ const {
 } = require("../utils");
 let assert = require("assert");
 const { recipesMock, randomString, getMockedValues, resetMockedValues } = require("../../api-mock");
+const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const { AccountLinking, EmailPassword, EmailVerification, Session, supertokens, ThirdParty } = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.test.js]")}`, function () {
@@ -633,17 +634,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
                 EmailPassword.init(),
                 Session.init(),
                 AccountLinking.init({
-                    shouldDoAutomaticAccountLinking: async (newAccountInfo, user) => {
-                        if (newAccountInfo.email === "test2@example.com" && user === undefined) {
-                            return {
-                                shouldAutomaticallyLink: false,
-                            };
-                        }
-                        return {
-                            shouldAutomaticallyLink: true,
-                            shouldRequireVerification: false,
-                        };
-                    },
+                    shouldDoAutomaticAccountLinking:
+                        shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                 }),
             ],
         });
@@ -686,17 +678,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
                 EmailPassword.init(),
                 Session.init(),
                 AccountLinking.init({
-                    shouldDoAutomaticAccountLinking: async (newAccountInfo, user) => {
-                        if (newAccountInfo.email === "test2@example.com" && user === undefined) {
-                            return {
-                                shouldAutomaticallyLink: false,
-                            };
-                        }
-                        return {
-                            shouldAutomaticallyLink: true,
-                            shouldRequireVerification: false,
-                        };
-                    },
+                    shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride,
                 }),
             ],
         });
@@ -739,17 +721,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
                 EmailPassword.init(),
                 Session.init(),
                 AccountLinking.init({
-                    shouldDoAutomaticAccountLinking: async (newAccountInfo, user) => {
-                        if (newAccountInfo.email === "test2@example.com" && user === undefined) {
-                            return {
-                                shouldAutomaticallyLink: false,
-                            };
-                        }
-                        return {
-                            shouldAutomaticallyLink: true,
-                            shouldRequireVerification: false,
-                        };
-                    },
+                    shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride,
                 }),
             ],
         });

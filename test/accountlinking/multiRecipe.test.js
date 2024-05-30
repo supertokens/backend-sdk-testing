@@ -22,6 +22,7 @@ const {
 } = require("../utils");
 let assert = require("assert");
 const { recipesMock, randomString, request } = require("../../api-mock");
+const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const {
     AccountLinking,
     EmailPassword,
@@ -61,7 +62,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multiRecipe.tes
             let pwlessUser = await Passwordless.signInUp({
                 tenantId: "public",
                 email: "test@example.com",
-                userContext: { doNotLink: true },
+                userContext: { DO_NOT_LINK: true },
             });
             assert.strictEqual(pwlessUser.user.isPrimaryUser, false);
 
@@ -100,7 +101,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multiRecipe.tes
             let pwlessUser = await Passwordless.signInUp({
                 tenantId: "public",
                 email: "test@example.com",
-                userContext: { doNotLink: true },
+                userContext: { DO_NOT_LINK: true },
             });
             assert.strictEqual(pwlessUser.user.isPrimaryUser, false);
 
@@ -172,17 +173,7 @@ function initST(connectionURI) {
                 },
             }),
             AccountLinking.init({
-                shouldDoAutomaticAccountLinking: async (_, __, _session, _tenantId, userContext) => {
-                    if (userContext.doNotLink) {
-                        return {
-                            shouldAutomaticallyLink: false,
-                        };
-                    }
-                    return {
-                        shouldAutomaticallyLink: true,
-                        shouldRequireVerification: true,
-                    };
-                },
+                shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
             }),
         ],
     });

@@ -44,6 +44,7 @@ const {
     TOTP,
 } = recipesMock;
 let { TOTP: TOTPGenerator } = require("otpauth");
+const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 
 let globalConnectionURI;
 
@@ -117,15 +118,7 @@ const setup = async function setup(config = {}) {
             }),
             config.initAccountLinking &&
                 AccountLinking.init({
-                    shouldDoAutomaticAccountLinking: (_newAccountInfo, _user, _session, _tenantId, userContext) => {
-                        if (_tenantId?.DO_NOT_LINK || userContext?.DO_NOT_LINK) {
-                            return { shouldAutomaticallyLink: false };
-                        }
-                        return {
-                            shouldAutomaticallyLink: true,
-                            shouldRequireVerification: false,
-                        };
-                    },
+                    shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                 }),
             EmailVerification.init({
                 mode: "OPTIONAL",

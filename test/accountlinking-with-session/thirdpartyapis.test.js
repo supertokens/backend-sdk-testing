@@ -32,6 +32,7 @@ const {
 } = require("./utils");
 let assert = require("assert");
 const { recipesMock, setMockedValues } = require("../../api-mock");
+const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const { supertokens } = recipesMock;
 
 let globalConnectionURI;
@@ -164,13 +165,14 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                 });
 
                 it("should link by account info if shouldDoAutomaticAccountLinking returns false while making the session user primary", async () => {
-                    const email1 = getTestEmail("1");
+                    const email1 = "test2@example.com";
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenAccountInfoEmailMatchDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
-                    await setMockedValues({ email1 });
+                    // await setMockedValues({ email1 });
 
                     const otherUser = await createThirdPartyUser(email2, true);
 
@@ -189,13 +191,14 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                 });
 
                 it("should make the authenticating user primary if shouldDoAutomaticAccountLinking returns false while making the session user primary", async () => {
-                    const email1 = getTestEmail("1");
+                    const email1 = "test2@example.com";
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenAccountInfoEmailMatchDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
-                    await setMockedValues({ email1 });
+                    // await setMockedValues({ email1 });
 
                     let sessionUser = await createEmailPasswordUser(email1, true);
 
@@ -217,7 +220,8 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenUserEqualsSessionUserDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
 
                     const otherUser = await createThirdPartyUser(email2, true);
@@ -245,7 +249,8 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenUserEqualsSessionUserDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
 
                     let sessionUser = await createEmailPasswordUser(email1, true);
@@ -269,7 +274,8 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenUserEqualsSessionUserDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
 
                     const otherUser = await createThirdPartyUser(email2, true);
@@ -296,7 +302,8 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenUserEqualsSessionUserDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
 
                     let sessionUser = await createEmailPasswordUser(email1, true);
@@ -423,13 +430,14 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                 });
 
                 it("should link by account info if shouldDoAutomaticAccountLinking returns false while making the session user primary", async () => {
-                    const email1 = getTestEmail("1");
+                    const email1 = "test2@example.com";
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenAccountInfoEmailMatchDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
-                    await setMockedValues({ email1 });
+                    // await setMockedValues({ email1 });
 
                     const otherUser = await createThirdPartyUser(email2, true);
 
@@ -448,13 +456,14 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                 });
 
                 it("should not make the authenticating user primary even if shouldDoAutomaticAccountLinking returns false while making the session user primary", async () => {
-                    const email1 = getTestEmail("1");
+                    const email1 = "test2@example.com";
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenAccountInfoEmailMatchDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
-                    await setMockedValues({ email1 });
+                    // await setMockedValues({ email1 });
 
                     let sessionUser = await createEmailPasswordUser(email1, true);
 
@@ -476,7 +485,8 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenUserEqualsSessionUserDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
 
                     const otherUser = await createThirdPartyUser(email2, true);
@@ -504,7 +514,8 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenUserEqualsSessionUserDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
 
                     let sessionUser = await createEmailPasswordUser(email1, true);
@@ -528,7 +539,8 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenUserEqualsSessionUserDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
 
                     const otherUser = await createThirdPartyUser(email2, true);
@@ -555,7 +567,8 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenUserEqualsSessionUserDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
 
                     let sessionUser = await createEmailPasswordUser(email1, true);
@@ -694,13 +707,14 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                 });
 
                 it("should link by account info if shouldDoAutomaticAccountLinking returns false while making the session user primary", async () => {
-                    const email1 = getTestEmail("1");
+                    const email1 = "test2@example.com";
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenAccountInfoEmailMatchDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
-                    await setMockedValues({ email1 });
+                    // await setMockedValues({ email1 });
 
                     const otherUser = await createThirdPartyUser(email2, true);
 
@@ -720,13 +734,14 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                 });
 
                 it("should make the authenticating user primary if shouldDoAutomaticAccountLinking returns false while making the session user primary", async () => {
-                    const email1 = getTestEmail("1");
+                    const email1 = "test2@example.com";
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenAccountInfoEmailMatchDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
-                    await setMockedValues({ email1 });
+                    // await setMockedValues({ email1 });
 
                     let sessionUser = await createEmailPasswordUser(email1, true);
                     await createThirdPartyUser(email2, true);
@@ -749,7 +764,8 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenUserEqualsSessionUserDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
 
                     const otherUser = await createThirdPartyUser(email2, true);
@@ -778,7 +794,8 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenUserEqualsSessionUserDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
 
                     let sessionUser = await createEmailPasswordUser(email1, true);
@@ -804,7 +821,8 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenUserEqualsSessionUserDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
 
                     const otherUser = await createThirdPartyUser(email2, true);
@@ -832,7 +850,8 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenUserEqualsSessionUserDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
 
                     let sessionUser = await createEmailPasswordUser(email1, true);
@@ -971,13 +990,14 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                 });
 
                 it("should link by account info if shouldDoAutomaticAccountLinking returns false while making the session user primary", async () => {
-                    const email1 = getTestEmail("1");
+                    const email1 = "test2@example.com";
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenAccountInfoEmailMatchDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
-                    await setMockedValues({ email1 });
+                    // await setMockedValues({ email1 });
 
                     const otherUser = await createThirdPartyUser(email2, true);
 
@@ -997,13 +1017,14 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                 });
 
                 it("should make the authenticating user primary if shouldDoAutomaticAccountLinking returns false while making the session user primary", async () => {
-                    const email1 = getTestEmail("1");
+                    const email1 = "test2@example.com";
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenAccountInfoEmailMatchDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
-                    await setMockedValues({ email1 });
+                    // await setMockedValues({ email1 });
 
                     let sessionUser = await createEmailPasswordUser(email1, true);
                     await createThirdPartyUser(email2, false);
@@ -1026,7 +1047,8 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenUserEqualsSessionUserDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
 
                     const otherUser = await createThirdPartyUser(email2, true);
@@ -1055,7 +1077,8 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenUserEqualsSessionUserDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
 
                     let sessionUser = await createEmailPasswordUser(email1, true);
@@ -1081,7 +1104,8 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenUserEqualsSessionUserDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
 
                     const otherUser = await createThirdPartyUser(email2, true);
@@ -1109,7 +1133,8 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
                     const email2 = getTestEmail("2");
                     await setup({
                         globalConnectionURI,
-                        shouldDoAutomaticAccountLinking: "noLinkingWhenUserEqualsSessionUserDefaultRequireVerification",
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
 
                     let sessionUser = await createEmailPasswordUser(email1, true);

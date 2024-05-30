@@ -24,6 +24,7 @@ const {
 let assert = require("assert");
 let { PROCESS_STATE } = require("supertokens-node/lib/build/processState");
 const { recipesMock, randomString, request, mockExternalAPI, getMockedValues } = require("../../api-mock");
+const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const {
     AccountLinking,
     EmailPassword,
@@ -144,12 +145,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -231,12 +228,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -313,12 +306,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -399,12 +388,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -493,17 +478,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (_, __, _session, _tenantId, userContext) => {
-                            if (userContext.doNotLink) {
-                                return {
-                                    shouldAutomaticallyLink: false,
-                                };
-                            }
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -524,7 +500,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                     true,
                     undefined,
                     {
-                        doNotLink: true,
+                        DO_NOT_LINK: true,
                     }
                 )
             ).user;
@@ -626,12 +602,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -717,12 +689,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -808,12 +776,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -902,17 +866,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (_, __, _session, _tenantId, userContext) => {
-                            if (userContext.doNotLink) {
-                                return {
-                                    shouldAutomaticallyLink: false,
-                                };
-                            }
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -928,7 +883,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                     true,
                     undefined,
                     {
-                        doNotLink: true,
+                        DO_NOT_LINK: true,
                     }
                 )
             ).user;
@@ -1012,12 +967,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -1103,17 +1054,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (_, __, _session, _tenantId, userContext) => {
-                            if (userContext.doNotLink) {
-                                return {
-                                    shouldAutomaticallyLink: false,
-                                };
-                            }
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -1129,7 +1071,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                     true,
                     undefined,
                     {
-                        doNotLink: true,
+                        DO_NOT_LINK: true,
                     }
                 )
             ).user;
@@ -1210,12 +1152,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -1301,12 +1239,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -1407,12 +1341,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                             },
                         }),
                         AccountLinking.init({
-                            shouldDoAutomaticAccountLinking: async () => {
-                                return {
-                                    shouldAutomaticallyLink: true,
-                                    shouldRequireVerification: true,
-                                };
-                            },
+                            shouldDoAutomaticAccountLinking:
+                                shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                         }),
                     ],
                 });

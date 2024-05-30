@@ -4,7 +4,7 @@ import SuperTokens from "supertokens-node";
 import { MockedVars } from "./api-mock-server";
 import { User as UserClass } from "supertokens-node/lib/build/user";
 
-const uniqueFn = new Set<string>();
+const uniqueFn = new Map<string, string>();
 
 export function minify(code: string) {
     const result = minify_sync(code, {
@@ -16,9 +16,25 @@ export function minify(code: string) {
     });
 
     // TODO: remove this once we have all functions that we need to handle
-    if (result.code) {
-        uniqueFn.add(result.code);
-        fs.writeFileSync("overridesFn.json", JSON.stringify(Array.from(uniqueFn).sort(), null, 2));
+    if (result.code && !uniqueFn.has(result.code)) {
+        uniqueFn.set(result.code, code);
+        fs.writeFileSync(
+            "overridesFn.txt",
+            Array.from(uniqueFn.entries())
+                .sort()
+                .map(([key, value]) => value)
+                .join("\n\n---------\n\n")
+        );
+        fs.writeFileSync(
+            "overridesFn.json",
+            JSON.stringify(
+                Array.from(uniqueFn.entries())
+                    .sort()
+                    .map(([key, value]) => key),
+                null,
+                2
+            )
+        );
     }
     return result.code;
 }
