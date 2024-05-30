@@ -5,7 +5,7 @@ import { serializeVars } from "./utils";
 
 const API_PORT = Number(process.env.API_PORT || 3030);
 
-let status: "NOT_READY" | "OK" = "NOT_READY";
+let apiStatus: "NOT_READY" | "OK" = "NOT_READY";
 let stConfig: string;
 
 type Callback = (
@@ -38,7 +38,7 @@ export function request(): ChainedRequest {
 
     async function executeRequest(): Promise<void> {
         try {
-            if (status === "NOT_READY") {
+            if (apiStatus === "NOT_READY") {
                 await initApp();
             }
             const response = await fetch(`http://localhost:${API_PORT}${path}`, {
@@ -136,7 +136,7 @@ export async function queryAPI({
     returnResponse?: boolean;
     skipInit?: boolean;
 }) {
-    if (!skipInit && status === "NOT_READY") {
+    if (!skipInit && apiStatus === "NOT_READY") {
         await initApp();
     }
     try {
@@ -164,7 +164,7 @@ export async function queryAPI({
 }
 
 export function setMockStatus(newStatus: "NOT_READY" | "OK") {
-    status = newStatus;
+    apiStatus = newStatus;
 }
 
 export function setMockConfig(config) {
