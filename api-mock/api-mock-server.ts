@@ -50,14 +50,11 @@ import { setupTOTPRoutes } from "./mock-server/totp";
 const log = debug("api-mock");
 log.enabled = true;
 
-const constrains = {
-    tenantId: "public",
-    defaultInit: {
-        appInfo: {
-            apiDomain: "api.supertokens.io",
-            appName: "SuperTokens",
-            origin: (input) => input.request?.getHeaderValue("origin") || "localhost:3000",
-        },
+const defaultConfig = {
+    appInfo: {
+        apiDomain: "api.supertokens.io",
+        appName: "SuperTokens",
+        origin: (input) => input.request?.getHeaderValue("origin") || "localhost:3000",
     },
 };
 
@@ -270,7 +267,7 @@ function initST(config: any) {
 }
 
 supertokens.init({
-    ...constrains.defaultInit,
+    ...defaultConfig,
     supertokens: {
         connectionURI: "http://localhost:8080",
     },
