@@ -49,7 +49,7 @@ export function randomString(length = 30) {
     return result;
 }
 
-export function serializeVars(vars: MockedVars) {
+export function deserializeVars(vars: MockedVars) {
     if (vars.sendEmailToRecipeUserId) {
         vars.sendEmailToRecipeUserId = SuperTokens.convertToRecipeUserId(vars.sendEmailToRecipeUserId.recipeUserId);
     }

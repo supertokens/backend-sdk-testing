@@ -5,7 +5,7 @@ import SuperTokens from "supertokens-node";
 import { RecipeInterface } from "supertokens-node/lib/build/recipe/session/types";
 import SessionClass from "supertokens-node/lib/build/recipe/session/sessionClass";
 
-function serializeSession(session) {
+function deserializeSession(session) {
     if (!session) return session;
     return new SessionClass(
         { ...session.helpers, getRecipeImpl: () => SessionRecipeMock },
@@ -64,7 +64,7 @@ export const SessionMock: Partial<typeof Session> = {
                 userContext,
             },
         });
-        return serializeSession(response);
+        return deserializeSession(response);
     },
     getSessionWithoutRequestResponse: async (
         accessToken: string,
@@ -82,7 +82,7 @@ export const SessionMock: Partial<typeof Session> = {
                 userContext,
             },
         });
-        return serializeSession(response);
+        return deserializeSession(response);
     },
     getSessionInformation: async (sessionHandle, userContext) => {
         const response = await queryAPI({
@@ -93,7 +93,7 @@ export const SessionMock: Partial<typeof Session> = {
                 userContext,
             },
         });
-        return serializeSession(response);
+        return deserializeSession(response);
     },
     getAllSessionHandlesForUser: async (userId, fetchSessionsForAllLinkedAccounts, tenantId, userContext) => {
         const response = await queryAPI({
@@ -120,7 +120,7 @@ export const SessionMock: Partial<typeof Session> = {
                     userContext,
                 },
             });
-            return serializeSession(response);
+            return deserializeSession(response);
         } catch (error) {
             if (error?.payload?.recipeUserId?.recipeUserId) {
                 error.payload.recipeUserId = SuperTokens.convertToRecipeUserId(error.payload.recipeUserId.recipeUserId);

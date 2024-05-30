@@ -1,7 +1,7 @@
 import { fetch } from "cross-fetch";
 import { MockedVars } from "./api-mock-server";
 import { PROCESS_STATE } from "supertokens-node/lib/build/processState";
-import { serializeVars } from "./utils";
+import { deserializeVars } from "./utils";
 
 const API_PORT = Number(process.env.API_PORT || 3030);
 
@@ -194,7 +194,7 @@ export async function getMockedValues(): Promise<MockedVars> {
         method: "get",
         path: "/mock/mockedvalues",
     });
-    return serializeVars(vars);
+    return deserializeVars(vars);
 }
 
 export async function resetMockedValues() {
