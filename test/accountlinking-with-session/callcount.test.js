@@ -132,7 +132,6 @@ const setup = async function setup(config = {}) {
             config.initMFA && TOTP.init({}),
         ].filter((init) => !!init),
     });
-    return { info };
 };
 
 describe(`Multi-recipe account linking flows core call counts: ${printPath(
