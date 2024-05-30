@@ -16,5 +16,4 @@ releasePassword
 pyenv
 __pycache__
 
-api-mock/**/*.d.ts
-api-mock/**/*.js
+build
