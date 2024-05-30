@@ -269,7 +269,7 @@ function initST(config: any) {
 supertokens.init({
     ...defaultConfig,
     supertokens: {
-        connectionURI: "http://localhost:8080",
+        connectionURI: process.env.ST_CONNECTION_URI || "http://localhost:8080",
     },
     recipeList: [Session.init()],
 });
