@@ -50,6 +50,8 @@ import { setupTOTPRoutes } from "./mock-server/totp";
 const log = debug("api-mock");
 log.enabled = true;
 
+const API_PORT = Number(process.env.API_PORT || 3030);
+
 const defaultConfig = {
     appInfo: {
         apiDomain: "api.supertokens.io",
@@ -404,6 +406,6 @@ app.use((req, res, next) => {
     throw new Error(`api-mock: route not found ${req.method} ${req.path}`);
 });
 
-app.listen(3030, "localhost", () => {
-    log(`api-mock-server started on localhost:3030`);
+app.listen(API_PORT, "localhost", () => {
+    log(`api-mock-server started on localhost:${API_PORT}`);
 });

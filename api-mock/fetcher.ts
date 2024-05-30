@@ -3,7 +3,7 @@ import { MockedVars } from "./api-mock-server";
 import { PROCESS_STATE } from "supertokens-node/lib/build/processState";
 import { serializeVars } from "./utils";
 
-const apiMockPort = process.env.ST_SDK === "golang" ? 3032 : process.env.ST_SDK === "python" ? 3031 : 3030;
+const API_PORT = Number(process.env.API_PORT || 3030);
 
 let status: "NOT_READY" | "OK" = "NOT_READY";
 let stConfig: string;
@@ -41,7 +41,7 @@ export function request(): ChainedRequest {
             if (status === "NOT_READY") {
                 await initApp();
             }
-            const response = await fetch(`http://localhost:${apiMockPort}${path}`, {
+            const response = await fetch(`http://localhost:${API_PORT}${path}`, {
                 method,
                 headers,
                 body: input ? JSON.stringify(input) : undefined,
@@ -140,7 +140,7 @@ export async function queryAPI({
         await initApp();
     }
     try {
-        let response = await fetch(`http://localhost:${apiMockPort}${path}`, {
+        let response = await fetch(`http://localhost:${API_PORT}${path}`, {
             method,
             headers: {
                 "Content-Type": "application/json",
