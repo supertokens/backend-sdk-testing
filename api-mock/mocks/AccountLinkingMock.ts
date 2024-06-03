@@ -27,7 +27,7 @@ export const AccountLinkingMock: Partial<typeof AccountLinking> = {
     createPrimaryUser: async (recipeUserId, userContext) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/accountlinking/createprimaryuser",
+            path: "/test/accountlinking/createprimaryuser",
             input: {
                 recipeUserId: recipeUserId.getAsString(),
                 userContext,
@@ -41,7 +41,7 @@ export const AccountLinkingMock: Partial<typeof AccountLinking> = {
     linkAccounts: async (recipeUserId, primaryUserId, userContext) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/accountlinking/linkaccounts",
+            path: "/test/accountlinking/linkaccounts",
             input: {
                 recipeUserId: recipeUserId.getAsString(),
                 primaryUserId,
@@ -56,7 +56,7 @@ export const AccountLinkingMock: Partial<typeof AccountLinking> = {
     isEmailChangeAllowed: async (recipeUserId, newEmail, isVerified, session, userContext) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/accountlinking/isemailchangeallowed",
+            path: "/test/accountlinking/isemailchangeallowed",
             input: {
                 recipeUserId: recipeUserId.getAsString(),
                 newEmail,
@@ -69,7 +69,7 @@ export const AccountLinkingMock: Partial<typeof AccountLinking> = {
     unlinkAccount: async (recipeUserId, userContext) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/accountlinking/unlinkaccount",
+            path: "/test/accountlinking/unlinkaccount",
             input: {
                 recipeUserId: recipeUserId.getAsString(),
                 userContext,
@@ -79,14 +79,14 @@ export const AccountLinkingMock: Partial<typeof AccountLinking> = {
     createPrimaryUserIdOrLinkAccounts: async (tenantId, recipeUserId, session, userContext) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/accountlinking/createprimaryuseridorlinkaccounts",
+            path: "/test/accountlinking/createprimaryuseridorlinkaccounts",
             input: { tenantId, recipeUserId: recipeUserId.getAsString(), session, userContext },
         });
     },
     getPrimaryUserThatCanBeLinkedToRecipeUserId: async (tenantId, recipeUserId, userContext) => {
         const user = await queryAPI({
             method: "post",
-            path: "/mock/accountlinking/getprimaryuserthatcanbelinkedtorecipeuserid",
+            path: "/test/accountlinking/getprimaryuserthatcanbelinkedtorecipeuserid",
             input: {
                 tenantId,
                 recipeUserId: recipeUserId.getAsString(),
@@ -98,21 +98,21 @@ export const AccountLinkingMock: Partial<typeof AccountLinking> = {
     isSignUpAllowed: async (tenantId, newUser, isVerified, session, userContext) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/accountlinking/issignupallowed",
+            path: "/test/accountlinking/issignupallowed",
             input: { tenantId, newUser, isVerified, session, userContext },
         });
     },
     isSignInAllowed: async (tenantId, recipeUserId, session, userContext) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/accountlinking/issigninallowed",
+            path: "/test/accountlinking/issigninallowed",
             input: { tenantId, recipeUserId: recipeUserId.getAsString(), session, userContext },
         });
     },
     canCreatePrimaryUser: async (recipeUserId, userContext) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/accountlinking/cancreateprimaryuser",
+            path: "/test/accountlinking/cancreateprimaryuser",
             input: {
                 recipeUserId: recipeUserId.getAsString(),
                 userContext,
@@ -128,7 +128,7 @@ export const AccountLinkingRecipeMock = {
             verifyEmailForRecipeUserIfLinkedAccountsAreVerified: async (input) => {
                 return await queryAPI({
                     method: "post",
-                    path: "/mock/accountlinking/verifyemailforrecipeuseriflinkedaccountsareverified",
+                    path: "/test/accountlinking/verifyemailforrecipeuseriflinkedaccountsareverified",
                     input: {
                         ...input,
                         recipeUserId: input.recipeUserId.getAsString(),

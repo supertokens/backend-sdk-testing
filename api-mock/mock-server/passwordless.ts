@@ -4,7 +4,7 @@ import Passwordless from "supertokens-node/recipe/passwordless";
 import { handleSession } from "./utils/handleSession";
 
 export function setupPasswordlessRoutes(app: Express, log: Debugger) {
-    app.post("/mock/passwordless/signinup", async (req, res, next) => {
+    app.post("/test/passwordless/signinup", async (req, res, next) => {
         try {
             log("Passwordless:signInUp %j", req.body);
             const response = await Passwordless.signInUp({
@@ -37,7 +37,7 @@ export function setupPasswordlessRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/passwordless/createcode", async (req, res, next) => {
+    app.post("/test/passwordless/createcode", async (req, res, next) => {
         try {
             log("Passwordless:createCode %j", req.body);
             const response = await Passwordless.createCode({
@@ -53,7 +53,7 @@ export function setupPasswordlessRoutes(app: Express, log: Debugger) {
             next(e);
         }
     });
-    app.post("/mock/passwordless/consumecode", async (req, res, next) => {
+    app.post("/test/passwordless/consumecode", async (req, res, next) => {
         try {
             log("Passwordless:consumeCode %j", req.body);
             const response = await Passwordless.consumeCode({

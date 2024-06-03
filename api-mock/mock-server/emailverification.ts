@@ -6,7 +6,7 @@ import EmailVerification from "supertokens-node/recipe/emailverification";
 import supertokens = require("supertokens-node/lib/build");
 
 export function setupEmailverificationRoutes(app: Express, log: Debugger) {
-    app.post("/mock/emailverification/isemailverified", async (req, res, next) => {
+    app.post("/test/emailverification/isemailverified", async (req, res, next) => {
         try {
             log("EmailVerification:isEmailVerified %j", req.body);
             const recipeUserId = supertokens.convertToRecipeUserId(req.body.recipeUserId);
@@ -21,7 +21,7 @@ export function setupEmailverificationRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/emailverification/createemailverificationtoken", async (req, res, next) => {
+    app.post("/test/emailverification/createemailverificationtoken", async (req, res, next) => {
         try {
             log("EmailVerification:createEmailVerificationToken %j", req.body);
             const recipeUserId = supertokens.convertToRecipeUserId(req.body.recipeUserId);
@@ -37,7 +37,7 @@ export function setupEmailverificationRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/emailverification/verifyemailusingtoken", async (req, res, next) => {
+    app.post("/test/emailverification/verifyemailusingtoken", async (req, res, next) => {
         try {
             log("EmailVerification:verifyEmailUsingToken %j", req.body);
             const response = await EmailVerification.verifyEmailUsingToken(
@@ -52,7 +52,7 @@ export function setupEmailverificationRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/emailverification/unverifyemail", async (req, res, next) => {
+    app.post("/test/emailverification/unverifyemail", async (req, res, next) => {
         try {
             log("EmailVerification:unverifyEmail %j", req.body);
             const recipeUserId = supertokens.convertToRecipeUserId(req.body.recipeUserId);
@@ -63,7 +63,7 @@ export function setupEmailverificationRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/emailverification/updatesessionifrequiredpostemailverification", async (req, res, next) => {
+    app.post("/test/emailverification/updatesessionifrequiredpostemailverification", async (req, res, next) => {
         try {
             log("EmailVerificationRecipe:updateSessionIfRequiredPostEmailVerification %j", req.body);
             const recipeUserIdWhoseEmailGotVerified = supertokens.convertToRecipeUserId(

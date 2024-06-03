@@ -3,7 +3,7 @@ import type { Express } from "express";
 import TOTP from "supertokens-node/recipe/totp";
 
 export function setupTOTPRoutes(app: Express, log: Debugger) {
-    app.post("/mock/totp/createdevice", async (req, res, next) => {
+    app.post("/test/totp/createdevice", async (req, res, next) => {
         try {
             const response = await TOTP.createDevice(
                 req.body.userId,
@@ -19,7 +19,7 @@ export function setupTOTPRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/totp/verifydevice", async (req, res, next) => {
+    app.post("/test/totp/verifydevice", async (req, res, next) => {
         try {
             const response = await TOTP.verifyDevice(
                 req.body.tenantId,

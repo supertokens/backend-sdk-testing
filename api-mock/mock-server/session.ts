@@ -21,7 +21,7 @@ export function resetSessionVars() {
 }
 
 export function setupSessionRoutes(app: Express, log: Debugger) {
-    app.post("/mock/session/createnewsessionwithoutrequestresponse", async (req, res, next) => {
+    app.post("/test/session/createnewsessionwithoutrequestresponse", async (req, res, next) => {
         try {
             log("Session.createNewSessionWithoutRequestResponse %j", req.body);
             const recipeUserId = supertokens.convertToRecipeUserId(
@@ -41,7 +41,7 @@ export function setupSessionRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/session/getsessionwithoutrequestresponse", async (req, res, next) => {
+    app.post("/test/session/getsessionwithoutrequestresponse", async (req, res, next) => {
         try {
             log("Session.getSessionWithoutRequestResponse %j", req.body);
             const response = await Session.getSessionWithoutRequestResponse(
@@ -56,7 +56,7 @@ export function setupSessionRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/session/getsessioninformation", async (req, res, next) => {
+    app.post("/test/session/getsessioninformation", async (req, res, next) => {
         try {
             log("Session.getSessionInformation %j", req.body);
             const response = await Session.getSessionInformation(req.body.sessionHandle, req.body.userContext);
@@ -66,7 +66,7 @@ export function setupSessionRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/session/getallsessionhandlesforuser", async (req, res, next) => {
+    app.post("/test/session/getallsessionhandlesforuser", async (req, res, next) => {
         try {
             log("Session.getAllSessionHandlesForUser %j", req.body);
             const response = await Session.getAllSessionHandlesForUser(
@@ -81,7 +81,7 @@ export function setupSessionRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/session/refreshsessionwithoutrequestresponse", async (req, res, next) => {
+    app.post("/test/session/refreshsessionwithoutrequestresponse", async (req, res, next) => {
         try {
             log("Session.refreshSessionWithoutRequestResponse %j", req.body);
             const response = await Session.refreshSessionWithoutRequestResponse(
@@ -96,7 +96,7 @@ export function setupSessionRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/session/revokeallsessionsforuser", async (req, res, next) => {
+    app.post("/test/session/revokeallsessionsforuser", async (req, res, next) => {
         try {
             log("Session.revokeAllSessionsForUser %j", req.body);
             const response = await Session.revokeAllSessionsForUser(
@@ -111,7 +111,7 @@ export function setupSessionRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/session/mergeintoaccesspayload", async (req, res, next) => {
+    app.post("/test/session/mergeintoaccesspayload", async (req, res, next) => {
         try {
             log("Session.mergeIntoAccessPayload %j", req.body);
             const response = await Session.mergeIntoAccessTokenPayload(
@@ -125,7 +125,7 @@ export function setupSessionRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/session/fetchandsetclaim", async (req, res, next) => {
+    app.post("/test/session/fetchandsetclaim", async (req, res, next) => {
         try {
             log("Session.fetchAndSetClaim %j", req.body);
             let claim = new PrimitiveClaim({
@@ -139,7 +139,7 @@ export function setupSessionRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/session/validateclaimsforsessionhandle", async (req, res, next) => {
+    app.post("/test/session/validateclaimsforsessionhandle", async (req, res, next) => {
         try {
             log("Session.validateClaimsForSessionHandle %j", req.body);
 
@@ -157,7 +157,7 @@ export function setupSessionRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/session/regenerateaccesstoken", async (req, res, next) => {
+    app.post("/test/session/regenerateaccesstoken", async (req, res, next) => {
         try {
             log("Session.regenerateAccessToken %j", req.body);
             const response = await SessionRecipe.getInstanceOrThrowError().recipeInterfaceImpl.regenerateAccessToken(

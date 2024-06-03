@@ -4,7 +4,7 @@ import Multitenancy from "supertokens-node/recipe/multitenancy";
 import supertokens = require("supertokens-node/lib/build");
 
 export function setupMultitenancyRoutes(app: Express, log: Debugger) {
-    app.post("/mock/multitenancy/createorupdatetenant", async (req, res, next) => {
+    app.post("/test/multitenancy/createorupdatetenant", async (req, res, next) => {
         try {
             log("Multitenancy:createOrUpdateTenant %j", req.body);
             const response = await Multitenancy.createOrUpdateTenant(
@@ -18,7 +18,7 @@ export function setupMultitenancyRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/multitenancy/associateusertotenant", async (req, res, next) => {
+    app.post("/test/multitenancy/associateusertotenant", async (req, res, next) => {
         try {
             log("Multitenancy:associateUserToTenant %j", req.body);
             const response = await Multitenancy.associateUserToTenant(

@@ -27,7 +27,7 @@ export const PasswordlessMock: Partial<typeof Passwordless> = {
     signInUp: async (input) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/passwordless/signinup",
+            path: "/test/passwordless/signinup",
             input: { ...input },
         });
         return {
@@ -47,14 +47,14 @@ export const PasswordlessMock: Partial<typeof Passwordless> = {
     createCode: async (input) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/passwordless/createcode",
+            path: "/test/passwordless/createcode",
             input: { ...input },
         });
     },
     consumeCode: async (input) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/passwordless/consumecode",
+            path: "/test/passwordless/consumecode",
             input: { ...input },
         });
         return {

@@ -5,7 +5,7 @@ import { handleSession } from "./utils/handleSession";
 import supertokens = require("supertokens-node/lib/build");
 
 export function setupEmailpasswordRoutes(app: Express, log: Debugger) {
-    app.post("/mock/emailpassword/signup", async (req, res, next) => {
+    app.post("/test/emailpassword/signup", async (req, res, next) => {
         try {
             log("EmailPassword:signup %j", req.body);
             let session = req.body.session && (await handleSession(req.body.session));
@@ -34,7 +34,7 @@ export function setupEmailpasswordRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/emailpassword/signin", async (req, res, next) => {
+    app.post("/test/emailpassword/signin", async (req, res, next) => {
         try {
             log("EmailPassword:signin %j", req.body);
             let session = req.body.session && (await handleSession(req.body.session));
@@ -63,7 +63,7 @@ export function setupEmailpasswordRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/emailpassword/createresetpasswordlink", async (req, res, next) => {
+    app.post("/test/emailpassword/createresetpasswordlink", async (req, res, next) => {
         try {
             log("EmailPassword:createResetPasswordLink %j", req.body);
             const response = await EmailPassword.createResetPasswordLink(
@@ -78,7 +78,7 @@ export function setupEmailpasswordRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/emailpassword/updateemailorpassword", async (req, res, next) => {
+    app.post("/test/emailpassword/updateemailorpassword", async (req, res, next) => {
         try {
             log("EmailPassword:updateEmailOrPassword %j", req.body);
             const recipeUserId = supertokens.convertToRecipeUserId(req.body.recipeUserId);

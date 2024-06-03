@@ -4,7 +4,7 @@ import { MultiFactorAuthClaim } from "supertokens-node/lib/build/recipe/multifac
 import supertokens = require("supertokens-node/lib/build");
 
 export function setupMultiFactorAuthRoutes(app: Express, log: Debugger) {
-    app.post("/mock/multifactorauth/multifactorauthclaim.fetchvalue", async (req, res, next) => {
+    app.post("/test/multifactorauth/multifactorauthclaim.fetchvalue", async (req, res, next) => {
         try {
             const response = await MultiFactorAuthClaim.fetchValue(
                 req.body._userId,

@@ -285,16 +285,16 @@ app.use((req, res, next) => {
 app.use(middleware());
 app.use(errorHandler());
 
-app.get("/mock/ping", async (req, res, next) => {
+app.get("/test/ping", async (req, res, next) => {
     res.json({ ok: true });
 });
 
-app.post("/mock/init", async (req, res, next) => {
+app.post("/test/init", async (req, res, next) => {
     initST(req.body.config);
     res.json({ ok: true });
 });
 
-app.get("/mock/overrideparams", async (req, res, next) => {
+app.get("/test/overrideparams", async (req, res, next) => {
     let sessionVars = getSessionVars();
     const overrideparams: OverrideParamsType = {
         sendEmailToUserId,
@@ -319,18 +319,18 @@ app.get("/mock/overrideparams", async (req, res, next) => {
     res.json(overrideparams);
 });
 
-app.post("/mock/resetoverrideparams", async (req, res, next) => {
+app.post("/test/resetoverrideparams", async (req, res, next) => {
     resetOverrideparams();
     res.json({ ok: true });
 });
 
-app.post("/mock/mockexternalapi", async (req, res, next) => {
+app.post("/test/mockexternalapi", async (req, res, next) => {
     const { url, status, body, path, method } = req.body;
     nock(url)[method](path).reply(status, body);
     res.json({ ok: true });
 });
 
-app.get("/mock/waitforevent", async (req, res, next) => {
+app.get("/test/waitforevent", async (req, res, next) => {
     try {
         log("ProcessState:waitForEvent %j", req.query);
         const instance = ProcessState.getInstance();

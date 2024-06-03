@@ -38,14 +38,14 @@ export const EmailPasswordMock: Partial<typeof EmailPassword> = {
     createResetPasswordLink: async (tenantId, userId, email, userContext) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/emailpassword/createresetpasswordlink",
+            path: "/test/emailpassword/createresetpasswordlink",
             input: { tenantId, userId, email, userContext },
         });
     },
     signUp: async (tenantId, email, password, session, userContext) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/emailpassword/signup",
+            path: "/test/emailpassword/signup",
             input: { tenantId, email, password, session, userContext },
         });
         return {
@@ -65,7 +65,7 @@ export const EmailPasswordMock: Partial<typeof EmailPassword> = {
     signIn: async (tenantId, email, password, session, userContext) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/emailpassword/signin",
+            path: "/test/emailpassword/signin",
             input: { tenantId, email, password, session, userContext },
         });
         return {
@@ -85,7 +85,7 @@ export const EmailPasswordMock: Partial<typeof EmailPassword> = {
     updateEmailOrPassword: async ({ recipeUserId, ...input }) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/emailpassword/updateemailorpassword",
+            path: "/test/emailpassword/updateemailorpassword",
             input: {
                 recipeUserId: recipeUserId.getAsString(),
                 ...input,

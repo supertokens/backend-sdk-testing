@@ -55,7 +55,7 @@ export const ThirdPartyMock: Partial<typeof ThirdParty> = {
     ) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/thirdparty/manuallycreateorupdateuser",
+            path: "/test/thirdparty/manuallycreateorupdateuser",
             input: { tenantId, thirdPartyId, thirdPartyUserId, email, isVerified, session, userContext },
         });
         return {

@@ -24,7 +24,7 @@ export const SuperTokensMock: Partial<typeof SuperTokens> = {
     getUser: async (userId, userContext) => {
         const user = await queryAPI({
             method: "post",
-            path: "/mock/supertokens/getuser",
+            path: "/test/supertokens/getuser",
             input: {
                 userId,
                 userContext,
@@ -35,7 +35,7 @@ export const SuperTokensMock: Partial<typeof SuperTokens> = {
     deleteUser: async (userId, removeAllLinkedAccounts, userContext) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/supertokens/deleteuser",
+            path: "/test/supertokens/deleteuser",
             input: {
                 userId,
                 removeAllLinkedAccounts,
@@ -46,7 +46,7 @@ export const SuperTokensMock: Partial<typeof SuperTokens> = {
     listUsersByAccountInfo: async (tenantId, accountInfo, doUnionOfAccountInfo, userContext) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/supertokens/listusersbyaccountinfo",
+            path: "/test/supertokens/listusersbyaccountinfo",
             input: {
                 tenantId,
                 accountInfo,
@@ -58,7 +58,7 @@ export const SuperTokensMock: Partial<typeof SuperTokens> = {
     getUsersNewestFirst: async (input) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/supertokens/getusersnewestfirst",
+            path: "/test/supertokens/getusersnewestfirst",
             input,
         });
     },

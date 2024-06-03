@@ -4,7 +4,7 @@ import ThirdParty from "supertokens-node/recipe/thirdparty";
 import { handleSession } from "./utils/handleSession";
 
 export function setupThirdPartyRoutes(app: Express, log: Debugger) {
-    app.post("/mock/thirdparty/manuallycreateorupdateuser", async (req, res, next) => {
+    app.post("/test/thirdparty/manuallycreateorupdateuser", async (req, res, next) => {
         try {
             log("ThirdParty:manuallyCreateOrUpdateUser %j", req.body);
             let session = req.body.session && (await handleSession(req.body.session));

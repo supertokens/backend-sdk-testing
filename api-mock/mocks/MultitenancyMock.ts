@@ -11,14 +11,14 @@ export const MultitenancyMock: Partial<typeof Multitenancy> = {
     createOrUpdateTenant: async (tenantId, config, userContext) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/multitenancy/createorupdatetenant",
+            path: "/test/multitenancy/createorupdatetenant",
             input: { tenantId, config, userContext },
         });
     },
     associateUserToTenant: async (tenantId, recipeUserId, userContext) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/multitenancy/associateusertotenant",
+            path: "/test/multitenancy/associateusertotenant",
             input: { tenantId, recipeUserId: recipeUserId.getAsString(), userContext },
         });
     },

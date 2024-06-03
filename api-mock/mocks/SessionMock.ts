@@ -54,7 +54,7 @@ export const SessionMock: Partial<typeof Session> = {
     ) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/session/createnewsessionwithoutrequestresponse",
+            path: "/test/session/createnewsessionwithoutrequestresponse",
             input: {
                 tenantId,
                 recipeUserId: recipeUserId.getAsString(),
@@ -74,7 +74,7 @@ export const SessionMock: Partial<typeof Session> = {
     ) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/session/getsessionwithoutrequestresponse",
+            path: "/test/session/getsessionwithoutrequestresponse",
             input: {
                 accessToken,
                 antiCsrfToken,
@@ -87,7 +87,7 @@ export const SessionMock: Partial<typeof Session> = {
     getSessionInformation: async (sessionHandle, userContext) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/session/getsessioninformation",
+            path: "/test/session/getsessioninformation",
             input: {
                 sessionHandle,
                 userContext,
@@ -98,7 +98,7 @@ export const SessionMock: Partial<typeof Session> = {
     getAllSessionHandlesForUser: async (userId, fetchSessionsForAllLinkedAccounts, tenantId, userContext) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/session/getallsessionhandlesforuser",
+            path: "/test/session/getallsessionhandlesforuser",
             input: {
                 userId,
                 fetchSessionsForAllLinkedAccounts,
@@ -112,7 +112,7 @@ export const SessionMock: Partial<typeof Session> = {
         try {
             const response = await queryAPI({
                 method: "post",
-                path: "/mock/session/refreshsessionwithoutrequestresponse",
+                path: "/test/session/refreshsessionwithoutrequestresponse",
                 input: {
                     refreshToken,
                     disableAntiCsrf,
@@ -131,7 +131,7 @@ export const SessionMock: Partial<typeof Session> = {
     revokeAllSessionsForUser: async (userId, revokeSessionsForLinkedAccounts, tenantId, userContext) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/session/revokeallsessionsforuser",
+            path: "/test/session/revokeallsessionsforuser",
             input: {
                 userId,
                 revokeSessionsForLinkedAccounts,
@@ -144,7 +144,7 @@ export const SessionMock: Partial<typeof Session> = {
     mergeIntoAccessTokenPayload: async (sessionHandle, accessTokenPayloadUpdate, userContext) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/session/mergeintoaccesspayload",
+            path: "/test/session/mergeintoaccesspayload",
             input: {
                 sessionHandle,
                 accessTokenPayloadUpdate,
@@ -159,7 +159,7 @@ export const SessionMock: Partial<typeof Session> = {
 
         const response = await queryAPI({
             method: "post",
-            path: "/mock/session/fetchandsetclaim",
+            path: "/test/session/fetchandsetclaim",
             input: {
                 sessionHandle,
                 claim,
@@ -171,7 +171,7 @@ export const SessionMock: Partial<typeof Session> = {
     validateClaimsForSessionHandle: async (sessionHandle, overrideGlobalClaimValidators, userContext) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/session/validateclaimsforsessionhandle",
+            path: "/test/session/validateclaimsforsessionhandle",
             input: {
                 sessionHandle,
                 overrideGlobalClaimValidators: overrideGlobalClaimValidators
@@ -188,7 +188,7 @@ export const SessionRecipeMock: Partial<RecipeInterface> = {
     regenerateAccessToken: async (input) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/session/regenerateaccesstoken",
+            path: "/test/session/regenerateaccesstoken",
             input,
         });
         return response;

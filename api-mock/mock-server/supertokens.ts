@@ -3,7 +3,7 @@ import type { Express } from "express";
 import supertokens = require("supertokens-node/lib/build");
 
 export function setupSupertokensRoutes(app: Express, log: Debugger) {
-    app.post("/mock/supertokens/getuser", async (req, res, next) => {
+    app.post("/test/supertokens/getuser", async (req, res, next) => {
         try {
             log("SuperTokens:getUser %j", req.body);
             const response = await supertokens.getUser(req.body.userId, req.body.userContext);
@@ -12,7 +12,7 @@ export function setupSupertokensRoutes(app: Express, log: Debugger) {
             next(e);
         }
     });
-    app.post("/mock/supertokens/deleteuser", async (req, res, next) => {
+    app.post("/test/supertokens/deleteuser", async (req, res, next) => {
         try {
             log("SuperTokens:deleteUser %j", req.body);
             const response = await supertokens.deleteUser(
@@ -25,7 +25,7 @@ export function setupSupertokensRoutes(app: Express, log: Debugger) {
             next(e);
         }
     });
-    app.post("/mock/supertokens/listusersbyaccountinfo", async (req, res, next) => {
+    app.post("/test/supertokens/listusersbyaccountinfo", async (req, res, next) => {
         try {
             log("SuperTokens:listUsersByAccountInfo %j", req.body);
             const response = await supertokens.listUsersByAccountInfo(
@@ -39,7 +39,7 @@ export function setupSupertokensRoutes(app: Express, log: Debugger) {
             next(e);
         }
     });
-    app.post("/mock/supertokens/getusersnewestfirst", async (req, res, next) => {
+    app.post("/test/supertokens/getusersnewestfirst", async (req, res, next) => {
         try {
             log("SuperTokens:getUsersNewestFirst %j", req.body);
             const response = await supertokens.getUsersNewestFirst(req.body);

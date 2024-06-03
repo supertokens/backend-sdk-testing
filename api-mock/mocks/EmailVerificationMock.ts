@@ -10,7 +10,7 @@ export const EmailVerificationRecipeMock: Partial<EmailPasswordRecipe> = {
     updateSessionIfRequiredPostEmailVerification: async (input) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/emailverification/updatesessionifrequiredpostemailverification",
+            path: "/test/emailverification/updatesessionifrequiredpostemailverification",
             input,
         });
     },
@@ -56,7 +56,7 @@ export const EmailVerificationMock: Partial<typeof EmailVerification> = {
     isEmailVerified: async (recipeUserId, email, userContext) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/emailverification/isemailverified",
+            path: "/test/emailverification/isemailverified",
             input: {
                 recipeUserId: recipeUserId.getAsString(),
                 email,
@@ -72,7 +72,7 @@ export const EmailVerificationMock: Partial<typeof EmailVerification> = {
     ) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/emailverification/createemailverificationtoken",
+            path: "/test/emailverification/createemailverificationtoken",
             input: {
                 tenantId,
                 recipeUserId: recipeUserId.getAsString(),
@@ -89,7 +89,7 @@ export const EmailVerificationMock: Partial<typeof EmailVerification> = {
     ) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/emailverification/verifyemailusingtoken",
+            path: "/test/emailverification/verifyemailusingtoken",
             input: {
                 token,
                 userContext,
@@ -110,7 +110,7 @@ export const EmailVerificationMock: Partial<typeof EmailVerification> = {
     unverifyEmail: async (recipeUserId, email, userContext) => {
         return await queryAPI({
             method: "post",
-            path: "/mock/emailverification/unverifyemail",
+            path: "/test/emailverification/unverifyemail",
             input: {
                 recipeUserId: recipeUserId.getAsString(),
                 email,

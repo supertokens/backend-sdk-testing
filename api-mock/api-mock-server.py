@@ -92,12 +92,12 @@ app = FastAPI(docs_url=None, redoc_url=None)
 app.add_middleware(get_middleware())
 
 
-@app.get("/mock/ping")
+@app.get("/test/ping")
 async def mockPing():
     return {"ok": True}
 
 
-@app.post("/mock/reset")
+@app.post("/test/reset")
 async def mockReset(config: MockConfig = Body(None)):
     print('mockReset:', config)
     vars.clear()
@@ -105,12 +105,12 @@ async def mockReset(config: MockConfig = Body(None)):
     return {"ok": True}
 
 
-@app.get("/mock/getMockedValues")
+@app.get("/test/getMockedValues")
 async def getMockedValues():
     return vars
 
 
-@app.post("/mock/EmailPassword/signup")
+@app.post("/test/EmailPassword/signup")
 async def mockEmailPasswordSignup(body: dict = Body(None)):
     print("EmailPassword:signup:", body)
     return await emailpasswordAsyncio.sign_up(
@@ -122,7 +122,7 @@ async def mockEmailPasswordSignup(body: dict = Body(None)):
     )
 
 
-@app.post("/mock/EmailPassword/createResetPasswordLink")
+@app.post("/test/EmailPassword/createResetPasswordLink")
 async def mockEmailPasswordCreateResetPasswordLink(body: dict = Body(None)):
     print("EmailPassword:createResetPasswordLink:", body)
     return await emailpasswordAsyncio.create_reset_password_link(
@@ -133,7 +133,7 @@ async def mockEmailPasswordCreateResetPasswordLink(body: dict = Body(None)):
     )
 
 
-# app.post("/mock/AccountLinking/createPrimaryUser", async (req, res, next)= > {
+# app.post("/test/AccountLinking/createPrimaryUser", async (req, res, next)= > {
 #     try {
 #         log("AccountLinking:createPrimaryUser %j", req.body)
 #         const recipeUserId= STExpress.convertToRecipeUserId(req.body.recipeUserId)

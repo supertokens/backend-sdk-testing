@@ -6,7 +6,7 @@ import AccountLinking from "supertokens-node/recipe/accountlinking";
 import supertokens = require("supertokens-node/lib/build");
 
 export function setupAccountlinkingRoutes(app: Express, log: Debugger) {
-    app.post("/mock/accountlinking/createprimaryuser", async (req, res, next) => {
+    app.post("/test/accountlinking/createprimaryuser", async (req, res, next) => {
         try {
             log("AccountLinking:createPrimaryUser %j", req.body);
             const recipeUserId = supertokens.convertToRecipeUserId(req.body.recipeUserId);
@@ -17,7 +17,7 @@ export function setupAccountlinkingRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/accountlinking/linkaccounts", async (req, res, next) => {
+    app.post("/test/accountlinking/linkaccounts", async (req, res, next) => {
         try {
             log("AccountLinking:linkAccounts %j", req.body);
             const recipeUserId = supertokens.convertToRecipeUserId(req.body.recipeUserId);
@@ -39,7 +39,7 @@ export function setupAccountlinkingRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/accountlinking/isemailchangeallowed", async (req, res, next) => {
+    app.post("/test/accountlinking/isemailchangeallowed", async (req, res, next) => {
         try {
             log("AccountLinking:isEmailChangeAllowed %j", req.body);
             const recipeUserId = supertokens.convertToRecipeUserId(req.body.recipeUserId);
@@ -56,7 +56,7 @@ export function setupAccountlinkingRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/accountlinking/unlinkaccount", async (req, res, next) => {
+    app.post("/test/accountlinking/unlinkaccount", async (req, res, next) => {
         try {
             log("AccountLinking:unlinkAccount %j", req.body);
             const recipeUserId = supertokens.convertToRecipeUserId(req.body.recipeUserId);
@@ -67,7 +67,7 @@ export function setupAccountlinkingRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/accountlinking/createprimaryuseridorlinkaccounts", async (req, res, next) => {
+    app.post("/test/accountlinking/createprimaryuseridorlinkaccounts", async (req, res, next) => {
         try {
             log("AccountLinking:createPrimaryUserIdOrLinkAccounts %j", req.body);
             const recipeUserId = supertokens.convertToRecipeUserId(req.body.recipeUserId);
@@ -83,7 +83,7 @@ export function setupAccountlinkingRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/accountlinking/getprimaryuserthatcanbelinkedtorecipeuserid", async (req, res, next) => {
+    app.post("/test/accountlinking/getprimaryuserthatcanbelinkedtorecipeuserid", async (req, res, next) => {
         try {
             log("AccountLinking:getPrimaryUserThatCanBeLinkedToRecipeUserId %j", req.body);
             const recipeUserId = supertokens.convertToRecipeUserId(req.body.recipeUserId);
@@ -98,7 +98,7 @@ export function setupAccountlinkingRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/accountlinking/issignupallowed", async (req, res, next) => {
+    app.post("/test/accountlinking/issignupallowed", async (req, res, next) => {
         try {
             log("AccountLinking:isSignUpAllowed %j", req.body);
             const response = await AccountLinking.isSignUpAllowed(
@@ -114,7 +114,7 @@ export function setupAccountlinkingRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/accountlinking/issigninallowed", async (req, res, next) => {
+    app.post("/test/accountlinking/issigninallowed", async (req, res, next) => {
         try {
             log("AccountLinking:isSignInAllowed %j", req.body);
             const recipeUserId = supertokens.convertToRecipeUserId(req.body.recipeUserId);
@@ -130,7 +130,7 @@ export function setupAccountlinkingRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/accountlinking/verifyemailforrecipeuseriflinkedaccountsareverified", async (req, res, next) => {
+    app.post("/test/accountlinking/verifyemailforrecipeuseriflinkedaccountsareverified", async (req, res, next) => {
         try {
             log("AccountLinking:verifyEmailForRecipeUserIfLinkedAccountsAreVerified %j", req.body);
             const recipeUserId = supertokens.convertToRecipeUserId(req.body.recipeUserId);
@@ -148,7 +148,7 @@ export function setupAccountlinkingRoutes(app: Express, log: Debugger) {
         }
     });
 
-    app.post("/mock/accountlinking/cancreateprimaryuser", async (req, res, next) => {
+    app.post("/test/accountlinking/cancreateprimaryuser", async (req, res, next) => {
         try {
             log("AccountLinking:canCreatePrimaryUser %j", req.body);
             const recipeUserId = supertokens.convertToRecipeUserId(req.body.recipeUserId);

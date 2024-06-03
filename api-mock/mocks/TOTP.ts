@@ -13,7 +13,7 @@ export const TOTPMock: Partial<typeof TOTP> = {
     createDevice: async (userId, userIdentifierInfo, deviceName, skew, period, userContext) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/totp/createdevice",
+            path: "/test/totp/createdevice",
             input: { userId, userIdentifierInfo, deviceName, skew, period, userContext },
         });
         return {
@@ -23,7 +23,7 @@ export const TOTPMock: Partial<typeof TOTP> = {
     verifyDevice: async (tenantId, userId, deviceName, totp, userContext) => {
         const response = await queryAPI({
             method: "post",
-            path: "/mock/totp/verifydevice",
+            path: "/test/totp/verifydevice",
             input: { tenantId, userId, deviceName, totp, userContext },
         });
         return {

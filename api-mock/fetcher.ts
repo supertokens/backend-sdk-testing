@@ -174,7 +174,7 @@ export function setSTConfig(config) {
 export async function initApp() {
     await queryAPI({
         method: "post",
-        path: "/mock/init",
+        path: "/test/init",
         skipInit: true,
         input: { config: stConfig },
     });
@@ -184,7 +184,7 @@ export async function initApp() {
 export async function resetApp() {
     await queryAPI({
         method: "post",
-        path: "/mock/reset",
+        path: "/test/reset",
     });
     setMockStatus("NOT_READY");
 }
@@ -192,7 +192,7 @@ export async function resetApp() {
 export async function getOverrideParams(): Promise<OverrideParamsType> {
     const overrideParams = await queryAPI({
         method: "get",
-        path: "/mock/overrideparams",
+        path: "/test/overrideparams",
     });
     return deserializeOverrideParams(overrideParams);
 }
@@ -200,14 +200,14 @@ export async function getOverrideParams(): Promise<OverrideParamsType> {
 export async function resetOverrideParams() {
     await queryAPI({
         method: "post",
-        path: "/mock/resetoverrideparams",
+        path: "/test/resetoverrideparams",
     });
 }
 
 export async function waitForProcessState(eventName: PROCESS_STATE) {
     return await queryAPI({
         method: "get",
-        path: `/mock/waitforevent?event=${eventName}`,
+        path: `/test/waitforevent?event=${eventName}`,
     });
 }
 
@@ -218,7 +218,7 @@ export function mockExternalAPI(url: string) {
     async function reply(status: number, body: any) {
         return await queryAPI({
             method: "post",
-            path: `/mock/mockexternalapi`,
+            path: `/test/mockexternalapi`,
             input: {
                 url,
                 status,

@@ -5,7 +5,7 @@ import { queryAPI } from "../fetcher";
 MultiFactorAuthClaim.fetchValue = async (_userId, recipeUserId, tenantId, currentPayload, userContext) => {
     return await queryAPI({
         method: "post",
-        path: "/mock/multifactorauth/multifactorauthclaim.fetchvalue",
+        path: "/test/multifactorauth/multifactorauthclaim.fetchvalue",
         input: {
             _userId,
             recipeUserId: recipeUserId.getAsString(),
