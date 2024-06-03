@@ -1,7 +1,7 @@
 import { minify_sync } from "terser";
 import fs = require("fs");
 import SuperTokens from "supertokens-node";
-import { MockedVars } from "./api-mock-server";
+import { OverrideParamsType } from "./api-mock-server";
 import { User as UserClass } from "supertokens-node/lib/build/user";
 
 const uniqueFn = new Map<string, string>();
@@ -49,7 +49,7 @@ export function randomString(length = 30) {
     return result;
 }
 
-export function deserializeVars(vars: MockedVars) {
+export function deserializeOverrideParams(vars: OverrideParamsType) {
     if (vars.sendEmailToRecipeUserId) {
         vars.sendEmailToRecipeUserId = SuperTokens.convertToRecipeUserId(vars.sendEmailToRecipeUserId.recipeUserId);
     }

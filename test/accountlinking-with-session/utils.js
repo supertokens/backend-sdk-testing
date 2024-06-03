@@ -36,6 +36,12 @@ exports.setup = async function setup(config = {}) {
                           emailDelivery: {
                               service: {
                                   sendEmail: ({ userContext, ...rest }) => {
+                                      if (!store || !store.emailInputs) {
+                                          store = {
+                                              ...store,
+                                              emailInputs: [],
+                                          };
+                                      }
                                       store.emailInputs.push(rest);
                                       return;
                                   },

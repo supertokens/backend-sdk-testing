@@ -32,7 +32,7 @@ const {
     linkUsers,
 } = require("./utils");
 let assert = require("assert");
-const { recipesMock, setMockedValues, getMockedValues } = require("../../api-mock");
+const { recipesMock, getOverrideParams, resetOverrideParams } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const { supertokens, Passwordless } = recipesMock;
 
@@ -226,7 +226,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
-                    // await setMockedValues({ email1 });
 
                     const otherUser = await createThirdPartyUser(email2, true);
 
@@ -257,7 +256,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
-                    // await setMockedValues({ email1 });
 
                     let sessionUser = await createEmailPasswordUser(email1, true);
 
@@ -558,7 +556,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
-                    // await setMockedValues({ email1 });
 
                     const otherUser = await createThirdPartyUser(email2, true);
 
@@ -590,7 +587,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
-                    // await setMockedValues({ email1 });
 
                     let sessionUser = await createEmailPasswordUser(email1, true);
                     await createPasswordlessUser({ email: email2 });
@@ -981,7 +977,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                 shouldDoAutomaticAccountLinking:
                     shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
             });
-            // await setMockedValues({ email1 });
 
             let sessionUser = await createEmailPasswordUser(email1, true);
 
@@ -1041,7 +1036,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
             const email1 = getTestEmail("1");
             const email2 = getTestEmail("2");
             await setup({ emailInputs: true, globalConnectionURI });
-            await setMockedValues({ emailInputs: [] });
+            await resetOverrideParams();
             let sessionUser = await createEmailPasswordUser(email1, true);
             sessionUser = await makeUserPrimary(sessionUser);
             await createPasswordlessUser({ email: email2 });
@@ -1068,7 +1063,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
             const resendRespBody = resendResp.body;
             assert.strictEqual(resendRespBody.status, "OK");
 
-            let emailInputs = (await getMockedValues()).store.emailInputs;
+            let emailInputs = (await getOverrideParams()).store.emailInputs;
             assert.strictEqual(emailInputs.length, 2);
             assert.strictEqual(emailInputs[0].urlWithLinkCode, undefined);
             assert.strictEqual(emailInputs[1].urlWithLinkCode, undefined);

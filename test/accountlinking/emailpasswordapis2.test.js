@@ -21,7 +21,7 @@ const {
     createTenant,
 } = require("../utils");
 let assert = require("assert");
-const { getMockedValues, randomString, recipesMock, request } = require("../../api-mock");
+const { getOverrideParams, randomString, recipesMock, request } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const { AccountLinking, EmailPassword, EmailVerification, Session, supertokens, ThirdParty } = recipesMock;
 
@@ -126,8 +126,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailCallbackCalled = mocked.sendEmailCallbackCalled;
+            let overrideParams = await getOverrideParams();
+            sendEmailCallbackCalled = overrideParams.sendEmailCallbackCalled;
 
             assert(sendEmailCallbackCalled === false);
         });
@@ -207,8 +207,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
 
             assert(sendEmailToUserId === epUser.user.id);
         });
@@ -295,8 +295,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailCallbackCalled = mocked.sendEmailCallbackCalled;
+            let overrideParams = await getOverrideParams();
+            sendEmailCallbackCalled = overrideParams.sendEmailCallbackCalled;
 
             assert(sendEmailCallbackCalled === false);
         });
@@ -383,8 +383,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
 
             assert(sendEmailToUserId === tpUser.id);
         });
@@ -474,8 +474,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
 
             assert(sendEmailToUserId === tpUser.id);
         });
@@ -558,8 +558,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailCallbackCalled = mocked.sendEmailCallbackCalled;
+            let overrideParams = await getOverrideParams();
+            sendEmailCallbackCalled = overrideParams.sendEmailCallbackCalled;
 
             assert(sendEmailCallbackCalled === false);
         });
@@ -651,9 +651,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
-            sendEmailToUserId = mocked.sendEmailToUserId;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
 
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
@@ -747,9 +747,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
 
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
@@ -872,9 +872,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
-            sendEmailToUserId = mocked.sendEmailToUserId;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
 
             assert(sendEmailToUserEmail === undefined);
             assert(sendEmailToUserId === undefined);
@@ -996,9 +996,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
 
             assert(sendEmailToUserEmail === undefined);
             assert(sendEmailToUserId === undefined);
@@ -1088,9 +1088,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
 
             assert(sendEmailToUserEmail === "test2@example.com");
             assert(sendEmailToUserId === tpUser.id);
@@ -1184,9 +1184,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
-            sendEmailToUserId = mocked.sendEmailToUserId;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
 
             assert(sendEmailToUserEmail === undefined);
             assert(sendEmailToUserId === undefined);
@@ -1283,10 +1283,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            sendEmailToRecipeUserId = mocked.sendEmailToRecipeUserId;
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            sendEmailToRecipeUserId = overrideParams.sendEmailToRecipeUserId;
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
 
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToRecipeUserId.getAsString() === epUser.user.id);
@@ -1382,9 +1382,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
 
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
@@ -1480,9 +1480,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
 
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
@@ -1586,9 +1586,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
 
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
@@ -1702,9 +1702,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 "Reset password link was not created because of account take over risk. Please contact support. (ERR_CODE_001)"
             );
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
 
             assert.strictEqual(sendEmailToUserId, undefined);
             assert.strictEqual(sendEmailToUserEmail, undefined);
@@ -1813,9 +1813,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
 
             assert(sendEmailToUserId === tpUser.id);
             assert(sendEmailToUserEmail === "test@example.com");
@@ -1917,9 +1917,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            token = mocked.token;
-            sendEmailToUserId = mocked.sendEmailToUserId;
+            let overrideParams = await getOverrideParams();
+            token = overrideParams.token;
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
 
             assert(sendEmailToUserId === epUser.user.id);
 
@@ -1950,9 +1950,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 status: "OK",
             });
 
-            mocked = await getMockedValues();
-            emailPostPasswordReset = mocked.emailPostPasswordReset;
-            userPostPasswordReset = mocked.userPostPasswordReset;
+            overrideParams = await getOverrideParams();
+            emailPostPasswordReset = overrideParams.emailPostPasswordReset;
+            userPostPasswordReset = overrideParams.userPostPasswordReset;
 
             assert.strictEqual(emailPostPasswordReset, "test@example.com");
             assert(!userPostPasswordReset.isPrimaryUser);
@@ -2054,9 +2054,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            token = mocked.token;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            token = overrideParams.token;
 
             assert(sendEmailToUserId === epUser.user.id);
 
@@ -2198,9 +2198,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            token = mocked.token;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            token = overrideParams.token;
 
             assert(sendEmailToUserId === tpUser.id);
 
@@ -2231,9 +2231,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 status: "OK",
             });
 
-            mocked = await getMockedValues();
-            emailPostPasswordReset = mocked.emailPostPasswordReset;
-            userPostPasswordReset = mocked.userPostPasswordReset;
+            overrideParams = await getOverrideParams();
+            emailPostPasswordReset = overrideParams.emailPostPasswordReset;
+            userPostPasswordReset = overrideParams.userPostPasswordReset;
 
             assert(emailPostPasswordReset === "test@example.com");
             assert(userPostPasswordReset.isPrimaryUser);
@@ -2360,9 +2360,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            token = mocked.token;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            token = overrideParams.token;
 
             assert(sendEmailToUserId === tpUser.id);
 
@@ -2393,9 +2393,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 status: "OK",
             });
 
-            mocked = await getMockedValues();
-            emailPostPasswordReset = mocked.emailPostPasswordReset;
-            userPostPasswordReset = mocked.userPostPasswordReset;
+            overrideParams = await getOverrideParams();
+            emailPostPasswordReset = overrideParams.emailPostPasswordReset;
+            userPostPasswordReset = overrideParams.userPostPasswordReset;
 
             assert(emailPostPasswordReset === "test@example.com");
             assert(!userPostPasswordReset.isPrimaryUser);
@@ -2512,9 +2512,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            token = mocked.token;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            token = overrideParams.token;
 
             assert(sendEmailToUserId === tpUser.id);
 
@@ -2658,9 +2658,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            token = mocked.token;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            token = overrideParams.token;
 
             assert(sendEmailToUserId === tpUser.id);
 
@@ -2800,9 +2800,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            token = mocked.token;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            token = overrideParams.token;
 
             assert(sendEmailToUserId === tpUser.id);
 
@@ -2833,9 +2833,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 status: "OK",
             });
 
-            mocked = await getMockedValues();
-            emailPostPasswordReset = mocked.emailPostPasswordReset;
-            userPostPasswordReset = mocked.userPostPasswordReset;
+            overrideParams = await getOverrideParams();
+            emailPostPasswordReset = overrideParams.emailPostPasswordReset;
+            userPostPasswordReset = overrideParams.userPostPasswordReset;
 
             assert(emailPostPasswordReset === "test@example.com");
             assert(userPostPasswordReset.isPrimaryUser);
@@ -2957,10 +2957,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            token = mocked.token;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            token = overrideParams.token;
 
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
@@ -2992,9 +2992,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 status: "OK",
             });
 
-            mocked = await getMockedValues();
-            emailPostPasswordReset = mocked.emailPostPasswordReset;
-            userPostPasswordReset = mocked.userPostPasswordReset;
+            overrideParams = await getOverrideParams();
+            emailPostPasswordReset = overrideParams.emailPostPasswordReset;
+            userPostPasswordReset = overrideParams.userPostPasswordReset;
 
             assert(emailPostPasswordReset === "test@example.com");
             assert(userPostPasswordReset.isPrimaryUser);
@@ -3122,10 +3122,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            token = mocked.token;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            token = overrideParams.token;
 
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
@@ -3157,9 +3157,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 status: "OK",
             });
 
-            mocked = await getMockedValues();
-            emailPostPasswordReset = mocked.emailPostPasswordReset;
-            userPostPasswordReset = mocked.userPostPasswordReset;
+            overrideParams = await getOverrideParams();
+            emailPostPasswordReset = overrideParams.emailPostPasswordReset;
+            userPostPasswordReset = overrideParams.userPostPasswordReset;
 
             assert(emailPostPasswordReset === "test@example.com");
             assert(userPostPasswordReset.isPrimaryUser);
@@ -3293,10 +3293,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            token = mocked.token;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            token = overrideParams.token;
 
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
@@ -3328,9 +3328,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 status: "OK",
             });
 
-            mocked = await getMockedValues();
-            emailPostPasswordReset = mocked.emailPostPasswordReset;
-            userPostPasswordReset = mocked.userPostPasswordReset;
+            overrideParams = await getOverrideParams();
+            emailPostPasswordReset = overrideParams.emailPostPasswordReset;
+            userPostPasswordReset = overrideParams.userPostPasswordReset;
 
             assert(emailPostPasswordReset === "test@example.com");
             assert(userPostPasswordReset.isPrimaryUser);
@@ -3468,10 +3468,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            token = mocked.token;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            token = overrideParams.token;
 
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
@@ -3634,10 +3634,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            token = mocked.token;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            token = overrideParams.token;
 
             assert(sendEmailToUserEmail === email);
             assert(sendEmailToUserId === primUser.id);
@@ -3799,10 +3799,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            token = mocked.token;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            token = overrideParams.token;
 
             assert(sendEmailToUserEmail === email);
             assert(sendEmailToUserId === primUser.id);
@@ -3956,10 +3956,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            token = mocked.token;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            token = overrideParams.token;
 
             assert(sendEmailToUserEmail === email);
             assert(sendEmailToUserId === primUser.id);
@@ -4116,10 +4116,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(res !== undefined);
             assert(res.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            sendEmailToUserEmail = mocked.sendEmailToUserEmail;
-            sendEmailToUserId = mocked.sendEmailToUserId;
-            token = mocked.token;
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            token = overrideParams.token;
 
             assert(sendEmailToUserEmail === email);
             assert(sendEmailToUserId === primUser.id);

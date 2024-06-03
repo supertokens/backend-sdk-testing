@@ -22,7 +22,7 @@ const {
     createTenant,
 } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString, getMockedValues, resetMockedValues } = require("../../api-mock");
+const { recipesMock, randomString, getOverrideParams, resetOverrideParams } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const { AccountLinking, EmailPassword, EmailVerification, Session, supertokens, ThirdParty } = recipesMock;
 
@@ -229,9 +229,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
 
         let linkedUser = await supertokens.getUser(user.id);
 
-        let mocked = await getMockedValues();
-        primaryUserInCallback = mocked.primaryUserInCallback;
-        newAccountInfoInCallback = mocked.newAccountInfoInCallback;
+        let overrideParams = await getOverrideParams();
+        primaryUserInCallback = overrideParams.primaryUserInCallback;
+        newAccountInfoInCallback = overrideParams.newAccountInfoInCallback;
         // we do the json parse/stringify to remove the toJson and other functions in the login
         // method array in each of the below user objects.
         assertJSONEquals(linkedUser, primaryUserInCallback);
@@ -326,7 +326,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
         assert.strictEqual(initialResp.status, "OK");
         assert.notStrictEqual(initialResp.user, undefined);
 
-        await resetMockedValues();
+        await resetOverrideParams();
         primaryUserInCallback = undefined;
         newAccountInfoInCallback = undefined;
 
@@ -342,9 +342,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
         assert(response.accountsAlreadyLinked);
         assertJSONEquals(response.user.toJson(), initialResp.user.toJson());
 
-        let mocked = await getMockedValues();
-        primaryUserInCallback = mocked.primaryUserInCallback;
-        newAccountInfoInCallback = mocked.newAccountInfoInCallback;
+        let overrideParams = await getOverrideParams();
+        primaryUserInCallback = overrideParams.primaryUserInCallback;
+        newAccountInfoInCallback = overrideParams.newAccountInfoInCallback;
 
         assert.strictEqual(primaryUserInCallback, undefined);
         assert.strictEqual(newAccountInfoInCallback, undefined);
@@ -387,7 +387,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
         let otherPrimaryUser = (await EmailPassword.signUp("public", "test3@example.com", "password123")).user;
         await AccountLinking.createPrimaryUser(otherPrimaryUser.loginMethods[0].recipeUserId);
 
-        await resetMockedValues();
+        await resetOverrideParams();
         primaryUserInCallback = undefined;
 
         let response = await AccountLinking.linkAccounts(user2.loginMethods[0].recipeUserId, otherPrimaryUser.id);
@@ -395,8 +395,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
         assert(response.status === "RECIPE_USER_ID_ALREADY_LINKED_WITH_ANOTHER_PRIMARY_USER_ID_ERROR");
         assert(response.primaryUserId === user.id);
 
-        let mocked = await getMockedValues();
-        primaryUserInCallback = mocked.primaryUserInCallback;
+        let overrideParams = await getOverrideParams();
+        primaryUserInCallback = overrideParams.primaryUserInCallback;
 
         assert(primaryUserInCallback === undefined);
     });
@@ -635,7 +635,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
                 Session.init(),
                 AccountLinking.init({
                     shouldDoAutomaticAccountLinking:
-                        shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
+                        shouldDoAutomaticAccountLinkingOverride.linkingIfVerifyExceptWhenEmailMatchTest,
                 }),
             ],
         });
@@ -678,7 +678,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
                 EmailPassword.init(),
                 Session.init(),
                 AccountLinking.init({
-                    shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride,
+                    shouldDoAutomaticAccountLinking:
+                        shouldDoAutomaticAccountLinkingOverride.linkingIfVerifyExceptWhenEmailMatchTest,
                 }),
             ],
         });
@@ -721,7 +722,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
                 EmailPassword.init(),
                 Session.init(),
                 AccountLinking.init({
-                    shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride,
+                    shouldDoAutomaticAccountLinking:
+                        shouldDoAutomaticAccountLinkingOverride.linkingIfVerifyExceptWhenEmailMatchTest,
                 }),
             ],
         });

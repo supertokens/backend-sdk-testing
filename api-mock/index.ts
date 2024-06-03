@@ -1,12 +1,4 @@
-import {
-    getMockedValues,
-    mockExternalAPI,
-    queryAPI,
-    request,
-    resetApp,
-    resetMockedValues,
-    setMockedValues,
-} from "./fetcher";
+import { getOverrideParams, mockExternalAPI, queryAPI, request, resetApp, resetOverrideParams } from "./fetcher";
 import { AccountLinkingMock, AccountLinkingRecipeMock } from "./mocks/AccountLinkingMock";
 import { EmailPasswordMock } from "./mocks/EmailPasswordMock";
 import { EmailVerificationMock, EmailVerificationRecipeMock } from "./mocks/EmailVerificationMock";
@@ -37,13 +29,12 @@ const recipesMock = {
 };
 
 export {
-    getMockedValues,
+    getOverrideParams,
     mockExternalAPI,
     queryAPI,
     randomString,
     recipesMock,
     request,
     resetApp,
-    setMockedValues,
-    resetMockedValues,
+    resetOverrideParams,
 };

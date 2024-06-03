@@ -21,12 +21,12 @@ ThirdParty.init({
     },
 });
 // this is how we get the value
-let mocked = await getMockedValues();
-userInCallback = mocked.userInCallback;
+let overrideParams = await getOverrideParams();
+userInCallback = overrideParams.userInCallback;
 // ...
 
 // there is also a helper to reset the values
-await resetMockedValues();
+await resetOverrideParams();
 ```
 
 ### nock - mocking external API

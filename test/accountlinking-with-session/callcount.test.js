@@ -30,7 +30,7 @@ const {
     testPassword,
 } = require("./utils");
 let assert = require("assert");
-const { recipesMock, randomString, resetMockedValues, getMockedValues } = require("../../api-mock");
+const { recipesMock, randomString, resetOverrideParams, getOverrideParams } = require("../../api-mock");
 const {
     AccountLinking,
     EmailPassword,
@@ -158,8 +158,8 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             const resp = await signUpPOST(email);
             assert.strictEqual(resp.body.status, "OK");
 
-            let mocked = await getMockedValues();
-            let info = mocked.info;
+            let overrideParams = await getOverrideParams();
+            let info = overrideParams.info;
             assert.strictEqual(info.coreCallCount, 6);
         });
         it("should call the core <=8 times with AL without MFA", async () => {
@@ -171,8 +171,8 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             const resp = await signUpPOST(email);
             assert.strictEqual(resp.body.status, "OK");
 
-            let mocked = await getMockedValues();
-            let info = mocked.info;
+            let overrideParams = await getOverrideParams();
+            let info = overrideParams.info;
             assert.strictEqual(info.coreCallCount, 8);
         });
 
@@ -185,8 +185,8 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             const resp = await signUpPOST(email);
             assert.strictEqual(resp.body.status, "OK");
 
-            let mocked = await getMockedValues();
-            let info = mocked.info;
+            let overrideParams = await getOverrideParams();
+            let info = overrideParams.info;
             assert.strictEqual(info.coreCallCount, 12);
         });
     });
@@ -199,13 +199,13 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             });
             const email = getTestEmail();
             await createEmailPasswordUser(email, true);
-            await resetMockedValues();
+            await resetOverrideParams();
 
             const resp = await signInPOST(email);
             assert.strictEqual(resp.body.status, "OK");
 
-            let mocked = await getMockedValues();
-            let info = mocked.info;
+            let overrideParams = await getOverrideParams();
+            let info = overrideParams.info;
             assert.strictEqual(info.coreCallCount, 6);
         });
         it("should call the core <=9 times with AL without MFA", async () => {
@@ -216,13 +216,13 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
 
             const email = getTestEmail();
             await createEmailPasswordUser(email);
-            await resetMockedValues();
+            await resetOverrideParams();
 
             const resp = await signInPOST(email);
             assert.strictEqual(resp.body.status, "OK");
 
-            let mocked = await getMockedValues();
-            let info = mocked.info;
+            let overrideParams = await getOverrideParams();
+            let info = overrideParams.info;
             assert.strictEqual(info.coreCallCount, 9);
         });
 
@@ -234,13 +234,13 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
 
             const email = getTestEmail();
             await createEmailPasswordUser(email);
-            await resetMockedValues();
+            await resetOverrideParams();
 
             const resp = await signInPOST(email);
             assert.strictEqual(resp.body.status, "OK");
 
-            let mocked = await getMockedValues();
-            let info = mocked.info;
+            let overrideParams = await getOverrideParams();
+            let info = overrideParams.info;
             assert.strictEqual(info.coreCallCount, 13);
         });
     });
@@ -255,13 +255,13 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             let user = await createThirdPartyUser(email, true);
             user = await makeUserPrimary(user);
             const session = await getSessionForUser(user);
-            await resetMockedValues();
+            await resetOverrideParams();
 
             const resp = await signUpPOST(email, session);
             assert.strictEqual(resp.body.status, "OK");
 
-            let mocked = await getMockedValues();
-            let info = mocked.info;
+            let overrideParams = await getOverrideParams();
+            let info = overrideParams.info;
             assert.strictEqual(info.coreCallCount, 3);
         });
 
@@ -274,12 +274,12 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             const email = getTestEmail();
             const user = await createThirdPartyUser(email, true);
             const session = await getSessionForUser(user);
-            await resetMockedValues();
+            await resetOverrideParams();
 
             const resp = await signUpPOST(email, session);
             assert.strictEqual(resp.body.status, "OK");
-            let mocked = await getMockedValues();
-            let info = mocked.info;
+            let overrideParams = await getOverrideParams();
+            let info = overrideParams.info;
             assert.strictEqual(info.coreCallCount, 9);
         });
 
@@ -292,12 +292,12 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             const email = getTestEmail();
             let user = await createThirdPartyUser(email, true);
             const session = await getSessionForUser(user);
-            await resetMockedValues();
+            await resetOverrideParams();
             const resp = await signUpPOST(email, session);
             assert.strictEqual(resp.body.status, "OK");
 
-            let mocked = await getMockedValues();
-            let info = mocked.info;
+            let overrideParams = await getOverrideParams();
+            let info = overrideParams.info;
             assert.strictEqual(info.coreCallCount, 17);
         });
         it("should call the core <=15 times with MFA and AL while migrating the session and making the session user primary", async () => {
@@ -309,12 +309,12 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             const email = getTestEmail();
             let user = await createThirdPartyUser(email, false);
             const session = await getSessionForUser(user);
-            await resetMockedValues();
+            await resetOverrideParams();
             const resp = await signUpPOST(email, session);
             assert.strictEqual(resp.body.status, "OK");
 
-            let mocked = await getMockedValues();
-            let info = mocked.info;
+            let overrideParams = await getOverrideParams();
+            let info = overrideParams.info;
             assert.strictEqual(info.coreCallCount, 15);
         });
         it("should call the core <=13 times with MFA and AL while migrating the session", async () => {
@@ -327,12 +327,12 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             let user = await createThirdPartyUser(email, false);
             user = await makeUserPrimary(user);
             const session = await getSessionForUser(user);
-            await resetMockedValues();
+            await resetOverrideParams();
             const resp = await signUpPOST(email, session);
             assert.strictEqual(resp.body.status, "OK");
 
-            let mocked = await getMockedValues();
-            let info = mocked.info;
+            let overrideParams = await getOverrideParams();
+            let info = overrideParams.info;
             assert.strictEqual(info.coreCallCount, 13);
         });
         it("should call the core <=9 times with MFA and AL", async () => {
@@ -346,12 +346,12 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             user = await makeUserPrimary(user);
             const session = await getSessionForUser(user);
             await session.fetchAndSetClaim(MultiFactorAuth.MultiFactorAuthClaim);
-            await resetMockedValues();
+            await resetOverrideParams();
             const resp = await signUpPOST(email, session);
             assert.strictEqual(resp.body.status, "OK");
 
-            let mocked = await getMockedValues();
-            let info = mocked.info;
+            let overrideParams = await getOverrideParams();
+            let info = overrideParams.info;
             assert.strictEqual(info.coreCallCount, 9);
         });
     });
@@ -380,12 +380,12 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
                 tenantId: "public",
                 session,
             });
-            await resetMockedValues();
+            await resetOverrideParams();
 
             const resp = await consumeCodePOST(code, session);
             assert.strictEqual(resp.body.status, "OK");
-            let mocked = await getMockedValues();
-            let info = mocked.info;
+            let overrideParams = await getOverrideParams();
+            let info = overrideParams.info;
             assert.strictEqual(info.coreCallCount, 8);
         });
 
@@ -409,12 +409,12 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             );
             assert.strictEqual(verifyRes.status, "OK");
 
-            await resetMockedValues();
+            await resetOverrideParams();
 
             const resp = await totpVerifyPOST(totpGen.generate({ timestamp: Date.now() + 30000 }), session);
             assert.strictEqual(resp.body.status, "OK");
-            let mocked = await getMockedValues();
-            let info = mocked.info;
+            let overrideParams = await getOverrideParams();
+            let info = overrideParams.info;
             assert.strictEqual(info.coreCallCount, 5);
         });
     });

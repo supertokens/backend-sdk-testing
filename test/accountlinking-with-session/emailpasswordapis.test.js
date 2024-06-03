@@ -33,7 +33,7 @@ const {
     createPasswordlessUser,
 } = require("./utils");
 let assert = require("assert");
-const { recipesMock, setMockedValues } = require("../../api-mock");
+const { recipesMock } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const { supertokens } = recipesMock;
 
@@ -163,7 +163,6 @@ describe(`emailpassword accountlinkingTests w/ session: ${printPath(
                     shouldDoAutomaticAccountLinking:
                         shouldDoAutomaticAccountLinkingOverride.linkingIfVerifyExceptWhenEmailMatchTest,
                 });
-                // await setMockedValues({ email1 });
 
                 const otherUser = await createThirdPartyUser(email2, true);
 
@@ -189,7 +188,6 @@ describe(`emailpassword accountlinkingTests w/ session: ${printPath(
                     shouldDoAutomaticAccountLinking:
                         shouldDoAutomaticAccountLinkingOverride.linkingIfVerifyExceptWhenEmailMatchTest,
                 });
-                // await setMockedValues({ email1 });
 
                 let sessionUser = await createThirdPartyUser(email1, true);
 
@@ -365,7 +363,6 @@ describe(`emailpassword accountlinkingTests w/ session: ${printPath(
                     shouldDoAutomaticAccountLinking:
                         shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                 });
-                // await setMockedValues({ email1 });
 
                 let sessionUser = await createThirdPartyUser(email1, true);
 
@@ -472,7 +469,6 @@ describe(`emailpassword accountlinkingTests w/ session: ${printPath(
                     shouldDoAutomaticAccountLinking:
                         shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                 });
-                // await setMockedValues({ email1 });
 
                 let sessionUser = await createThirdPartyUser(email1, true);
 
@@ -724,7 +720,6 @@ describe(`emailpassword accountlinkingTests w/ session: ${printPath(
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
-                    // await setMockedValues({ email1 });
 
                     const otherUser = await createThirdPartyUser(email2, true);
 
@@ -751,7 +746,6 @@ describe(`emailpassword accountlinkingTests w/ session: ${printPath(
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
-                    // await setMockedValues({ email1 });
 
                     let sessionUser = await createThirdPartyUser(email1, true);
                     await createEmailPasswordUser(email2, true);
@@ -1001,7 +995,6 @@ describe(`emailpassword accountlinkingTests w/ session: ${printPath(
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
-                    // await setMockedValues({ email1 });
 
                     const otherUser = await createThirdPartyUser(email2, true);
 
@@ -1025,7 +1018,6 @@ describe(`emailpassword accountlinkingTests w/ session: ${printPath(
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
-                    // await setMockedValues({ email1 });
 
                     let sessionUser = await createThirdPartyUser(email1, true);
                     await createEmailPasswordUser(email2, false);

@@ -1,11 +1,11 @@
 import SuperTokens from "supertokens-node";
 import { User as UserClass } from "supertokens-node/lib/build/user";
-import { queryAPI, setMockStatus, setMockConfig } from "../fetcher";
+import { queryAPI, setMockStatus, setSTConfig } from "../fetcher";
 import { minify } from "../utils";
 
 export const SuperTokensMock: Partial<typeof SuperTokens> = {
     init: (config) => {
-        setMockConfig(
+        setSTConfig(
             JSON.stringify({
                 ...config,
                 ...(config.supertokens?.networkInterceptor

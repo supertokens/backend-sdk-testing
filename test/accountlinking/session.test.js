@@ -22,7 +22,7 @@ const {
     createTenant,
 } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString, request, getMockedValues } = require("../../api-mock");
+const { recipesMock, randomString, request, getOverrideParams } = require("../../api-mock");
 const { AccountLinking, EmailPassword, Session, supertokens, EmailVerification } = recipesMock;
 let { protectedProps } = require("supertokens-node/lib/build/recipe/session/constants");
 let { PrimitiveClaim } = require("supertokens-node/lib/build/recipe/session/claimBaseClasses/primitiveClaim");
@@ -1276,9 +1276,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js
 
             await Session.fetchAndSetClaim(session.getHandle(), primitiveClaim);
 
-            let mocked = await getMockedValues();
-            userIdInCallback = mocked.userIdInCallback;
-            recipeUserIdInCallback = mocked.recipeUserIdInCallback;
+            let overrideParams = await getOverrideParams();
+            userIdInCallback = overrideParams.userIdInCallback;
+            recipeUserIdInCallback = overrideParams.recipeUserIdInCallback;
 
             assert(userIdInCallback === epUser.id);
             assert(recipeUserIdInCallback.getAsString() === epUser2.loginMethods[0].recipeUserId.getAsString());
@@ -1343,9 +1343,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js
                 epUser2.loginMethods[0].recipeUserId
             );
 
-            let mocked = await getMockedValues();
-            userIdInCallback = mocked.userIdInCallback;
-            recipeUserIdInCallback = mocked.recipeUserIdInCallback;
+            let overrideParams = await getOverrideParams();
+            userIdInCallback = overrideParams.userIdInCallback;
+            recipeUserIdInCallback = overrideParams.recipeUserIdInCallback;
 
             assert(userIdInCallback === epUser.id);
             assert(recipeUserIdInCallback.getAsString() === epUser2.loginMethods[0].recipeUserId.getAsString());

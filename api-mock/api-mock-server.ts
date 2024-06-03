@@ -60,7 +60,7 @@ const defaultConfig = {
     },
 };
 
-export type MockedVars = {
+export type OverrideParamsType = {
     sendEmailToUserId: string | undefined;
     token: string | undefined;
     userPostPasswordReset: User | undefined;
@@ -98,7 +98,7 @@ const info = {
 };
 let store;
 
-function resetVars() {
+function resetOverrideparams() {
     sendEmailToUserId = undefined;
     token = undefined;
     userPostPasswordReset = undefined;
@@ -118,7 +118,7 @@ function resetVars() {
 }
 
 function STReset() {
-    resetVars();
+    resetOverrideparams();
 
     EmailPasswordRecipe.reset();
     SessionRecipe.reset();
@@ -294,9 +294,9 @@ app.post("/mock/init", async (req, res, next) => {
     res.json({ ok: true });
 });
 
-app.get("/mock/mockedvalues", async (req, res, next) => {
+app.get("/mock/overrideparams", async (req, res, next) => {
     let sessionVars = getSessionVars();
-    const vars: MockedVars = {
+    const overrideparams: OverrideParamsType = {
         sendEmailToUserId,
         token,
         userPostPasswordReset,
@@ -316,19 +316,11 @@ app.get("/mock/mockedvalues", async (req, res, next) => {
         info,
         store,
     };
-    res.json(vars);
+    res.json(overrideparams);
 });
 
-app.post("/mock/setmockedvalues", async (req, res, next) => {
-    store = {
-        ...store,
-        ...req.body.store,
-    };
-    res.json({ ok: true });
-});
-
-app.post("/mock/resetmockedvalues", async (req, res, next) => {
-    resetVars();
+app.post("/mock/resetoverrideparams", async (req, res, next) => {
+    resetOverrideparams();
     res.json({ ok: true });
 });
 

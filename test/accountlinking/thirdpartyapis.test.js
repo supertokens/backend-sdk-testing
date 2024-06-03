@@ -23,7 +23,7 @@ const {
 } = require("../utils");
 let assert = require("assert");
 let { PROCESS_STATE } = require("supertokens-node/lib/build/processState");
-const { recipesMock, randomString, request, mockExternalAPI, getMockedValues } = require("../../api-mock");
+const { recipesMock, randomString, request, mockExternalAPI, getOverrideParams } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const {
     AccountLinking,
@@ -645,8 +645,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             assert(pUser.loginMethods[1].thirdParty.id === "custom-ev");
             assert(pUser.loginMethods[0].thirdParty.id === "google");
 
-            let mocked = await getMockedValues();
-            userInCallback = mocked.userInCallback;
+            let overrideParams = await getOverrideParams();
+            userInCallback = overrideParams.userInCallback;
 
             assert(userInCallback !== undefined);
             assert.equal(JSON.stringify(pUser), JSON.stringify(userInCallback));

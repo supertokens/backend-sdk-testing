@@ -24,7 +24,7 @@ const {
 let assert = require("assert");
 let fs = require("fs");
 let path = require("path");
-const { recipesMock, randomString, getMockedValues, request } = require("../../api-mock");
+const { recipesMock, randomString, getOverrideParams, request } = require("../../api-mock");
 const {
     AccountLinking,
     EmailPassword,
@@ -835,8 +835,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             assert(tokens.accessTokenFromAny === undefined);
             assert(tokens.accessTokenFromHeader === undefined);
 
-            let mocked = await getMockedValues();
-            userInCallback = mocked.userInCallback;
+            let overrideParams = await getOverrideParams();
+            userInCallback = overrideParams.userInCallback;
 
             assert(userInCallback.id === epUser.id);
             assert(userInCallback.email === "test@example.com");
@@ -928,8 +928,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             let tokens = extractInfoFromResponse(response);
             assert.notStrictEqual(tokens.accessTokenFromAny, undefined);
 
-            let mocked = await getMockedValues();
-            userInCallback = mocked.userInCallback;
+            let overrideParams = await getOverrideParams();
+            userInCallback = overrideParams.userInCallback;
 
             assert(userInCallback === undefined);
         });
@@ -1025,8 +1025,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             let claimValue = await newSession.getClaimValue(EmailVerification.EmailVerificationClaim);
             assert(claimValue === false);
 
-            let mocked = await getMockedValues();
-            userInCallback = mocked.userInCallback;
+            let overrideParams = await getOverrideParams();
+            userInCallback = overrideParams.userInCallback;
 
             assert(userInCallback.id === epUser.id);
             assert(userInCallback.email === "test@example.com");
@@ -1122,8 +1122,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             let claimValue = await newSession.getClaimValue(EmailVerification.EmailVerificationClaim);
             assert(claimValue === true);
 
-            let mocked = await getMockedValues();
-            userInCallback = mocked.userInCallback;
+            let overrideParams = await getOverrideParams();
+            userInCallback = overrideParams.userInCallback;
 
             assert(userInCallback === undefined);
         });
@@ -1174,8 +1174,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
             await EmailVerification.isEmailVerified(epUser.user.loginMethods[0].recipeUserId);
 
-            let mocked = await getMockedValues();
-            email = mocked.email;
+            let overrideParams = await getOverrideParams();
+            email = overrideParams.email;
 
             assert.strictEqual(email, "random@example.com");
         });
@@ -1223,8 +1223,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
             await EmailVerification.isEmailVerified(epUser.user.loginMethods[0].recipeUserId);
 
-            let mocked = await getMockedValues();
-            email = mocked.email;
+            let overrideParams = await getOverrideParams();
+            email = overrideParams.email;
 
             assert.strictEqual(email, "random@example.com");
         });
@@ -1281,8 +1281,8 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
             await EmailVerification.isEmailVerified(epUser2.user.loginMethods[0].recipeUserId);
 
-            let mocked = await getMockedValues();
-            email = mocked.email;
+            let overrideParams = await getOverrideParams();
+            email = overrideParams.email;
 
             assert.strictEqual(email, "random2@example.com");
         });
@@ -1431,14 +1431,14 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             assert(response !== undefined);
             assert(response.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            token = mocked.token;
+            let overrideParams = await getOverrideParams();
+            token = overrideParams.token;
 
             assert(token !== undefined);
         }
 
-        let mocked = await getMockedValues();
-        token = mocked.token;
+        let overrideParams = await getOverrideParams();
+        token = overrideParams.token;
         // now we verify the token
         {
             let response = await new Promise((resolve) =>
@@ -1571,14 +1571,14 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             assert(response !== undefined);
             assert(response.body.status === "OK");
 
-            let mocked = await getMockedValues();
-            token = mocked.token;
+            let overrideParams = await getOverrideParams();
+            token = overrideParams.token;
 
             assert(token !== undefined);
         }
 
-        let mocked = await getMockedValues();
-        token = mocked.token;
+        let overrideParams = await getOverrideParams();
+        token = overrideParams.token;
 
         // now we verify the token
         {

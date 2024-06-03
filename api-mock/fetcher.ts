@@ -1,7 +1,7 @@
 import { fetch } from "cross-fetch";
-import { MockedVars } from "./api-mock-server";
+import { OverrideParamsType } from "./api-mock-server";
 import { PROCESS_STATE } from "supertokens-node/lib/build/processState";
-import { deserializeVars } from "./utils";
+import { deserializeOverrideParams } from "./utils";
 
 const API_PORT = Number(process.env.API_PORT || 3030);
 
@@ -167,7 +167,7 @@ export function setMockStatus(newStatus: "NOT_READY" | "OK") {
     apiStatus = newStatus;
 }
 
-export function setMockConfig(config) {
+export function setSTConfig(config) {
     stConfig = config;
 }
 
@@ -189,30 +189,22 @@ export async function resetApp() {
     setMockStatus("NOT_READY");
 }
 
-export async function getMockedValues(): Promise<MockedVars> {
-    const vars = await queryAPI({
+export async function getOverrideParams(): Promise<OverrideParamsType> {
+    const overrideParams = await queryAPI({
         method: "get",
-        path: "/mock/mockedvalues",
+        path: "/mock/overrideparams",
     });
-    return deserializeVars(vars);
+    return deserializeOverrideParams(overrideParams);
 }
 
-export async function resetMockedValues() {
+export async function resetOverrideParams() {
     await queryAPI({
         method: "post",
-        path: "/mock/resetmockedvalues",
+        path: "/mock/resetoverrideparams",
     });
 }
 
-export async function setMockedValues(store: { [key: string]: any }) {
-    await queryAPI({
-        method: "post",
-        path: "/mock/setmockedvalues",
-        input: { store },
-    });
-}
-
-export async function getMockedEvents(eventName: PROCESS_STATE) {
+export async function waitForProcessState(eventName: PROCESS_STATE) {
     return await queryAPI({
         method: "get",
         path: `/mock/waitforevent?event=${eventName}`,
