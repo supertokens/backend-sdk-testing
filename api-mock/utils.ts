@@ -1,7 +1,7 @@
 import { minify_sync } from "terser";
 import fs = require("fs");
 import SuperTokens from "supertokens-node";
-import { OverrideParamsType } from "./api-mock-server";
+import { OverrideParamsType } from "supertokens-node/test/test-server";
 import { User as UserClass } from "supertokens-node/lib/build/user";
 
 const uniqueFn = new Map<string, string>();

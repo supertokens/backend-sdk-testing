@@ -10,12 +10,7 @@
         "pretty": "npx pretty-quick .",
         "format": "prettier --write .",
         "build-pretty": "npm run build && npm run pretty && npm run pretty",
-        "set-up-hooks": "cp hooks/pre-commit.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit",
-        "start:node": "SUPERTOKENS_ENV=testing TEST_MODE=testing node build/api-mock/api-mock-server.js",
-        "start:python": "SUPERTOKENS_ENV=testing TEST_MODE=testing uvicorn api-mock.api-mock-server:app --host localhost --port 3031",
-        "dev:node:build": "tsc -w -p tsconfig.json",
-        "dev:node:mock": "SUPERTOKENS_ENV=testing TEST_MODE=testing tsx watch api-mock/api-mock-server.ts",
-        "dev:node": "run-p dev:node:*"
+        "set-up-hooks": "cp hooks/pre-commit.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
     },
     "repository": {
         "type": "git",

@@ -1,5 +1,5 @@
 import { fetch } from "cross-fetch";
-import { OverrideParamsType } from "./api-mock-server";
+import { OverrideParamsType } from "supertokens-node/test/test-server";
 import { PROCESS_STATE } from "supertokens-node/lib/build/processState";
 import { deserializeOverrideParams } from "./utils";
 
