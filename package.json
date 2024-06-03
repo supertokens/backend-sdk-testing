@@ -1,11 +1,11 @@
 {
     "name": "backend-sdk-testing",
-    "version": "17.1.2",
+    "version": "18",
     "scripts": {
         "postinstall": "npm run set-up-hooks",
         "test": "TEST_MODE=testing npx mocha --node-option no-experimental-fetch -r test/fetch-polyfill.mjs --timeout 500000",
         "build-check": "tsc --noEmit -p tsconfig.json && npm run build",
-        "build": "tsc -p tsconfig.json && cd test/with-typescript && npm run build",
+        "build": "tsc -p tsconfig.json",
         "pretty-check": "npx pretty-quick --check .",
         "pretty": "npx pretty-quick .",
         "format": "prettier --write .",
