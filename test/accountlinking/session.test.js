@@ -1307,9 +1307,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js
                                 return {
                                     ...oI,
                                     createNewSession: async (input) => {
-                                        const {
-                                            PrimitiveClaim,
-                                        } = require("supertokens-node/lib/build/recipe/session/claims");
+                                        const { PrimitiveClaim } = require("../../../lib/build/recipe/session/claims");
                                         let primitiveClaim = new PrimitiveClaim({
                                             key: "some-key",
                                             fetchValue: async (userId, recipeUserId) => {

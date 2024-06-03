@@ -20,10 +20,7 @@ const { default: fetch } = require("cross-fetch");
 let SuperTokens = require("supertokens-node/lib/build/supertokens").default;
 let SessionRecipe = require("supertokens-node/lib/build/recipe/session/recipe").default;
 let AccountLinkingRecipe = require("supertokens-node/lib/build/recipe/accountlinking/recipe").default;
-let ThirPartyRecipe = require("supertokens-node/lib/build/recipe/thirdparty/recipe").default;
-let ThirPartyPasswordless = require("supertokens-node/lib/build/recipe/thirdpartypasswordless/recipe").default;
-let ThirdPartyEmailPasswordRecipe = require("supertokens-node/lib/build/recipe/thirdpartyemailpassword/recipe").default;
-let ThirdPartyPasswordlessRecipe = require("supertokens-node/lib/build/recipe/thirdpartypasswordless/recipe").default;
+let ThirdPartyRecipe = require("supertokens-node/lib/build/recipe/thirdparty/recipe").default;
 let EmailPasswordRecipe = require("supertokens-node/lib/build/recipe/emailpassword/recipe").default;
 let DashboardRecipe = require("supertokens-node/lib/build/recipe/dashboard/recipe").default;
 let TotpRecipe = require("supertokens-node/lib/build/recipe/totp/recipe").default;
@@ -256,11 +253,8 @@ module.exports.resetAll = function (disableLogging = true) {
     SuperTokens.reset();
     AccountLinkingRecipe.reset();
     SessionRecipe.reset();
-    ThirdPartyPasswordlessRecipe.reset();
-    ThirdPartyEmailPasswordRecipe.reset();
-    ThirPartyPasswordless.reset();
     EmailPasswordRecipe.reset();
-    ThirPartyRecipe.reset();
+    ThirdPartyRecipe.reset();
     EmailVerificationRecipe.reset();
     JWTRecipe.reset();
     UserMetadataRecipe.reset();
@@ -428,7 +422,6 @@ module.exports.startSTWithMultitenancyAndAccountLinking = async function (config
     return connectionURI;
 };
 
-/** @type {import('./types').createTenant} */
 module.exports.createTenant = async function (connectionURI, appId, coreConfig = {}) {
     const createAppResp = await fetch(`${connectionURI}/recipe/multitenancy/app`, {
         method: "PUT",
