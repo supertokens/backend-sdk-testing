@@ -21,7 +21,7 @@ const {
     createTenant,
 } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString, resetApp: resetAll } = require("../../api-mock");
+const { recipesMock, randomString } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const { AccountLinking, EmailPassword, EmailVerification, Session, supertokens, ThirdParty } = recipesMock;
 
@@ -494,7 +494,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
 
             const primUser = linkResp.user;
 
-            resetAll();
+            // init will reset the app
 
             supertokens.init({
                 supertokens: {

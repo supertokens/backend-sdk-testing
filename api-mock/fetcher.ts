@@ -181,14 +181,6 @@ export async function initApp() {
     setMockStatus("OK");
 }
 
-export async function resetApp() {
-    await queryAPI({
-        method: "post",
-        path: "/test/reset",
-    });
-    setMockStatus("NOT_READY");
-}
-
 export async function getOverrideParams(): Promise<OverrideParamsType> {
     const overrideParams = await queryAPI({
         method: "get",
