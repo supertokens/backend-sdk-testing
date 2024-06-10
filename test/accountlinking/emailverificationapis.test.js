@@ -36,7 +36,7 @@ const {
 } = recipesMock;
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 
-describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailverificationapi.test.js]")}`, function () {
+describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailverificationapis.test.js]")}`, function () {
     let globalConnectionURI;
 
     const startSTWithMultitenancyAndAccountLinking = async () => {
@@ -1291,12 +1291,15 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
     it("email verification recipe uses getUser function only in getEmailForRecipeUserId", async function () {
         // search through all files in directory for a string
         let files = await new Promise((resolve, reject) => {
-            recursive(path.resolve("node_modules/supertokens-node/lib/ts/recipe/emailverification"), (err, files) => {
-                if (err) {
-                    reject(err);
+            recursive(
+                path.resolve("node_modules/supertokens-node/lib/build/recipe/emailverification"),
+                (err, files) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    resolve(files);
                 }
-                resolve(files);
-            });
+            );
         });
         let getUserCount = 0;
         for (let i = 0; i < files.length; i++) {

@@ -1,5 +1,4 @@
 import { fetch } from "cross-fetch";
-import { OverrideParamsType } from "supertokens-node/test/test-server";
 import { PROCESS_STATE } from "supertokens-node/lib/build/processState";
 import { deserializeOverrideParams } from "./utils";
 
@@ -181,7 +180,7 @@ export async function initApp() {
     setMockStatus("OK");
 }
 
-export async function getOverrideParams(): Promise<OverrideParamsType> {
+export async function getOverrideParams() {
     const overrideParams = await queryAPI({
         method: "get",
         path: "/test/overrideparams",
