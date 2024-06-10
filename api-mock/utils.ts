@@ -1,7 +1,6 @@
 import { minify_sync } from "terser";
 // import fs = require("fs");
 import SuperTokens from "supertokens-node";
-import { OverrideParamsType } from "supertokens-node/test/test-server";
 import { User as UserClass } from "supertokens-node/lib/build/user";
 
 const uniqueFn = new Map<string, string>();
@@ -42,20 +41,20 @@ export function randomString(length = 30) {
     return result;
 }
 
-export function deserializeOverrideParams(vars: OverrideParamsType) {
+export function deserializeOverrideParams(vars) {
     if (vars.sendEmailToRecipeUserId) {
         vars.sendEmailToRecipeUserId = SuperTokens.convertToRecipeUserId(vars.sendEmailToRecipeUserId.recipeUserId);
     }
-    if (vars.userPostPasswordReset?.loginMethods.length) {
-        vars.userPostPasswordReset = {
+    if (vars.userPostPasswordReset) {
+        vars.userPostPasswordReset = new UserClass({
             ...vars.userPostPasswordReset,
             // @ts-ignore
             loginMethods: vars.userPostPasswordReset.loginMethods.map((lm) => ({
                 ...lm,
                 // @ts-ignore
-                recipeUserId: SuperTokens.convertToRecipeUserId(lm.recipeUserId.recipeUserId),
+                recipeUserId: lm.recipeUserId.recipeUserId,
             })),
-        };
+        } as any);
     }
     if (vars.userInCallback) {
         vars.userInCallback = {
