@@ -15,27 +15,27 @@
 const {
     printPath,
     setupST,
-    startST,
-    stopST,
     killAllST,
     cleanST,
-    resetAll,
-    startSTWithMultitenancyAndAccountLinking,
+    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    createTenant,
 } = require("../utils");
-let supertokens = require("supertokens-node");
-let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("supertokens-node/lib/build/processState");
-let EmailPassword = require("supertokens-node/recipe/emailpassword");
-let ThirdParty = require("supertokens-node/recipe/thirdparty");
-let AccountLinking = require("supertokens-node/recipe/accountlinking");
-let EmailVerification = require("supertokens-node/recipe/emailverification");
+const { recipesMock, randomString } = require("../../api-mock");
+const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
+const { AccountLinking, EmailPassword, EmailVerification, Session, supertokens, ThirdParty } = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.test.js]")}`, function () {
-    beforeEach(async function () {
+    let globalConnectionURI;
+
+    const startSTWithMultitenancyAndAccountLinking = async () => {
+        return createTenant(globalConnectionURI, randomString());
+    };
+
+    before(async function () {
         await killAllST();
         await setupST();
-        ProcessState.getInstance().reset();
+        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
     });
 
     after(async function () {
@@ -76,12 +76,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                 recipeList: [
                     EmailPassword.init(),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: false,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -104,12 +100,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                 recipeList: [
                     EmailPassword.init(),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -150,12 +142,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -209,12 +197,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: false,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -268,11 +252,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: false,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkDisabled,
                     }),
                 ],
             });
@@ -324,23 +305,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (newAccountInfo, user) => {
-                            if (newAccountInfo.recipeId === "emailpassword") {
-                                let existingUser = await supertokens.listUsersByAccountInfo("public", {
-                                    email: newAccountInfo.email,
-                                });
-                                let doesEmailPasswordUserExist = existingUser.length > 1;
-                                if (!doesEmailPasswordUserExist) {
-                                    return {
-                                        shouldAutomaticallyLink: false,
-                                    };
-                                }
-                            }
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptEmailPasswordExist,
                     }),
                 ],
             });
@@ -378,24 +344,15 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                 recipeList: [
                     EmailPassword.init(),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (_, __, _session, _tenantId, userContext) => {
-                            if (userContext.doNotLink) {
-                                return {
-                                    shouldAutomaticallyLink: false,
-                                };
-                            }
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: false,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
 
             let user = (
                 await EmailPassword.signUp("public", "test@example.com", "password123", undefined, {
-                    doNotLink: true,
+                    DO_NOT_LINK: true,
                 })
             ).user;
             assert(!user.isPrimaryUser);
@@ -418,17 +375,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                 recipeList: [
                     EmailPassword.init(),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (_, __, _session, _tenantId, userContext) => {
-                            if (userContext.doNotLink) {
-                                return {
-                                    shouldAutomaticallyLink: false,
-                                };
-                            }
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: false,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                     Session.init(),
                 ],
@@ -442,7 +390,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
 
             let user = (
                 await EmailPassword.signUp("public", "test@example.com", "password123", undefined, {
-                    doNotLink: true,
+                    DO_NOT_LINK: true,
                 })
             ).user;
             assert(!user.isPrimaryUser);
@@ -489,12 +437,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -530,17 +474,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                 recipeList: [
                     EmailPassword.init(),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (_, __, _session, _tenantId, userContext) => {
-                            if (userContext.doNotLink) {
-                                return {
-                                    shouldAutomaticallyLink: false,
-                                };
-                            }
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: false,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -550,7 +485,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
             const email2 = `test+${Date.now()}@example.com`;
             let user2 = (
                 await EmailPassword.signUp("public", email2, "password123", undefined, {
-                    doNotLink: true,
+                    DO_NOT_LINK: true,
                 })
             ).user;
 
@@ -559,7 +494,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
 
             const primUser = linkResp.user;
 
-            resetAll();
+            // init will reset the app
 
             supertokens.init({
                 supertokens: {
@@ -614,12 +549,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (newAccountInfo, user) => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: false,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -687,11 +618,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (newAccountInfo, user) => {
-                            return {
-                                shouldAutomaticallyLink: false,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkDisabled,
                     }),
                 ],
             });
@@ -762,12 +690,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (newAccountInfo, user) => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });

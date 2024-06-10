@@ -15,28 +15,28 @@
 const {
     printPath,
     setupST,
-    startST,
-    stopST,
     killAllST,
     cleanST,
-    resetAll,
     assertJSONEquals,
-    startSTWithMultitenancyAndAccountLinking,
+    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    createTenant,
 } = require("../utils");
-let supertokens = require("supertokens-node");
-let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("supertokens-node/lib/build/processState");
-let EmailPassword = require("supertokens-node/recipe/emailpassword");
-let EmailVerification = require("supertokens-node/recipe/emailverification");
-let ThirdParty = require("supertokens-node/recipe/thirdparty");
-let AccountLinking = require("supertokens-node/recipe/accountlinking");
+const { recipesMock, randomString, getOverrideParams, resetOverrideParams } = require("../../api-mock");
+const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
+const { AccountLinking, EmailPassword, EmailVerification, Session, supertokens, ThirdParty } = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.test.js]")}`, function () {
-    beforeEach(async function () {
+    let globalConnectionURI;
+
+    const startSTWithMultitenancyAndAccountLinking = async () => {
+        return createTenant(globalConnectionURI, randomString());
+    };
+
+    before(async function () {
         await killAllST();
         await setupST();
-        ProcessState.getInstance().reset();
+        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
     });
 
     after(async function () {
@@ -228,6 +228,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
         assert(response.accountsAlreadyLinked === false);
 
         let linkedUser = await supertokens.getUser(user.id);
+
+        let overrideParams = await getOverrideParams();
+        primaryUserInCallback = overrideParams.primaryUserInCallback;
+        newAccountInfoInCallback = overrideParams.newAccountInfoInCallback;
         // we do the json parse/stringify to remove the toJson and other functions in the login
         // method array in each of the below user objects.
         assertJSONEquals(linkedUser, primaryUserInCallback);
@@ -322,6 +326,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
         assert.strictEqual(initialResp.status, "OK");
         assert.notStrictEqual(initialResp.user, undefined);
 
+        await resetOverrideParams();
         primaryUserInCallback = undefined;
         newAccountInfoInCallback = undefined;
 
@@ -336,6 +341,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
         assert.strictEqual(response.status, "OK");
         assert(response.accountsAlreadyLinked);
         assertJSONEquals(response.user.toJson(), initialResp.user.toJson());
+
+        let overrideParams = await getOverrideParams();
+        primaryUserInCallback = overrideParams.primaryUserInCallback;
+        newAccountInfoInCallback = overrideParams.newAccountInfoInCallback;
 
         assert.strictEqual(primaryUserInCallback, undefined);
         assert.strictEqual(newAccountInfoInCallback, undefined);
@@ -378,12 +387,16 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
         let otherPrimaryUser = (await EmailPassword.signUp("public", "test3@example.com", "password123")).user;
         await AccountLinking.createPrimaryUser(otherPrimaryUser.loginMethods[0].recipeUserId);
 
+        await resetOverrideParams();
         primaryUserInCallback = undefined;
 
         let response = await AccountLinking.linkAccounts(user2.loginMethods[0].recipeUserId, otherPrimaryUser.id);
 
         assert(response.status === "RECIPE_USER_ID_ALREADY_LINKED_WITH_ANOTHER_PRIMARY_USER_ID_ERROR");
         assert(response.primaryUserId === user.id);
+
+        let overrideParams = await getOverrideParams();
+        primaryUserInCallback = overrideParams.primaryUserInCallback;
 
         assert(primaryUserInCallback === undefined);
     });
@@ -621,17 +634,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
                 EmailPassword.init(),
                 Session.init(),
                 AccountLinking.init({
-                    shouldDoAutomaticAccountLinking: async (newAccountInfo, user) => {
-                        if (newAccountInfo.email === "test2@example.com" && user === undefined) {
-                            return {
-                                shouldAutomaticallyLink: false,
-                            };
-                        }
-                        return {
-                            shouldAutomaticallyLink: true,
-                            shouldRequireVerification: false,
-                        };
-                    },
+                    shouldDoAutomaticAccountLinking:
+                        shouldDoAutomaticAccountLinkingOverride.linkingIfVerifyExceptWhenEmailMatchTest,
                 }),
             ],
         });
@@ -674,17 +678,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
                 EmailPassword.init(),
                 Session.init(),
                 AccountLinking.init({
-                    shouldDoAutomaticAccountLinking: async (newAccountInfo, user) => {
-                        if (newAccountInfo.email === "test2@example.com" && user === undefined) {
-                            return {
-                                shouldAutomaticallyLink: false,
-                            };
-                        }
-                        return {
-                            shouldAutomaticallyLink: true,
-                            shouldRequireVerification: false,
-                        };
-                    },
+                    shouldDoAutomaticAccountLinking:
+                        shouldDoAutomaticAccountLinkingOverride.linkingIfVerifyExceptWhenEmailMatchTest,
                 }),
             ],
         });
@@ -727,17 +722,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
                 EmailPassword.init(),
                 Session.init(),
                 AccountLinking.init({
-                    shouldDoAutomaticAccountLinking: async (newAccountInfo, user) => {
-                        if (newAccountInfo.email === "test2@example.com" && user === undefined) {
-                            return {
-                                shouldAutomaticallyLink: false,
-                            };
-                        }
-                        return {
-                            shouldAutomaticallyLink: true,
-                            shouldRequireVerification: false,
-                        };
-                    },
+                    shouldDoAutomaticAccountLinking:
+                        shouldDoAutomaticAccountLinkingOverride.linkingIfVerifyExceptWhenEmailMatchTest,
                 }),
             ],
         });

@@ -12,32 +12,32 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { printPath, setupST, killAllST, cleanST } = require("../utils");
 const {
-    getTestEmail,
-    setup,
+    printPath,
+    setupST,
+    killAllST,
+    cleanST,
+    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+} = require("../utils");
+const {
     postAPI,
-    getAPI,
     putAPI,
-    createEmailPasswordUser,
-    makeUserPrimary,
-    getSessionForUser,
     getUpdatedUserFromDBForRespCompare,
     getSessionFromResponse,
-    createThirdPartyUser,
-    linkUsers,
     testPassword,
+    setup,
 } = require("./utils");
-let supertokens = require("supertokens-node");
 let assert = require("assert");
-let Passwordless = require("supertokens-node/recipe/passwordless");
+
+let globalConnectionURI;
 
 describe(`Multi-recipe account linking flows w/ session: ${printPath(
     "[test/accountlinking-with-session/combination.flows.test.js]"
 )}`, function () {
-    beforeEach(async function () {
+    before(async function () {
         await killAllST();
         await setupST();
+        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
     });
 
     after(async function () {
@@ -47,9 +47,9 @@ describe(`Multi-recipe account linking flows w/ session: ${printPath(
 
     describe("Discord-like (fake email)", function () {
         it("should be able to add a password to a fake-email tp user", async () => {
-            const app = await setup();
+            await setup({ globalConnectionURI });
 
-            const createResp = await signInUpPOST(app, undefined, true, undefined);
+            const createResp = await signInUpPOST(undefined, true, undefined);
             assert.strictEqual(createResp.status, 200);
             assert.ok(createResp.body);
 
@@ -57,11 +57,11 @@ describe(`Multi-recipe account linking flows w/ session: ${printPath(
             assert.strictEqual(createRespBody.status, "OK");
             const session = await getSessionFromResponse(createResp);
 
-            const mfaInfo = await mfaInfoPUT(app, session);
+            const mfaInfo = await mfaInfoPUT(session);
             const infoBody = mfaInfo.body;
             assert.deepStrictEqual(infoBody.emails.emailpassword, createRespBody.user.emails);
 
-            const addPWResp = await signUpPOST(app, infoBody.emails.emailpassword[0], session);
+            const addPWResp = await signUpPOST(infoBody.emails.emailpassword[0], session);
 
             assert.strictEqual(addPWResp.body.status, "OK");
             assert.strictEqual(addPWResp.body.user.id, createRespBody.user.id);
@@ -69,9 +69,9 @@ describe(`Multi-recipe account linking flows w/ session: ${printPath(
         });
 
         it("should not be able to sign up with fake-email without a session", async () => {
-            const app = await setup();
+            await setup({ globalConnectionURI });
 
-            const createResp = await signInUpPOST(app, undefined, true, undefined);
+            const createResp = await signInUpPOST(undefined, true, undefined);
             assert.strictEqual(createResp.status, 200);
             assert.ok(createResp.body);
 
@@ -79,11 +79,11 @@ describe(`Multi-recipe account linking flows w/ session: ${printPath(
             assert.strictEqual(createRespBody.status, "OK");
             const session = await getSessionFromResponse(createResp);
 
-            const mfaInfo = await mfaInfoPUT(app, session);
+            const mfaInfo = await mfaInfoPUT(session);
             const infoBody = mfaInfo.body;
             assert.deepStrictEqual(infoBody.emails.emailpassword, createRespBody.user.emails);
 
-            const addPWResp = await signUpPOST(app, infoBody.emails.emailpassword[0]);
+            const addPWResp = await signUpPOST(infoBody.emails.emailpassword[0]);
             assert.deepStrictEqual(addPWResp.body, {
                 status: "FIELD_ERROR",
                 formFields: [
@@ -94,7 +94,7 @@ describe(`Multi-recipe account linking flows w/ session: ${printPath(
                 ],
             });
 
-            const addPWResp2 = await signUpPOST(app, "notexists" + infoBody.emails.emailpassword[0]);
+            const addPWResp2 = await signUpPOST("notexists" + infoBody.emails.emailpassword[0]);
             assert.deepStrictEqual(addPWResp2.body, {
                 status: "FIELD_ERROR",
                 formFields: [
@@ -108,9 +108,8 @@ describe(`Multi-recipe account linking flows w/ session: ${printPath(
     });
 });
 
-async function signInUpPOST(app, email, isVerified, session, userId = email, error = undefined) {
+async function signInUpPOST(email, isVerified, session, userId = email, error = undefined) {
     return postAPI(
-        app,
         "/auth/signinup",
         {
             thirdPartyId: "custom",
@@ -125,9 +124,8 @@ async function signInUpPOST(app, email, isVerified, session, userId = email, err
     );
 }
 
-async function signUpPOST(app, email, session, password = testPassword) {
+async function signUpPOST(email, session, password = testPassword) {
     return postAPI(
-        app,
         "/auth/signup",
         {
             formFields: [
@@ -139,20 +137,6 @@ async function signUpPOST(app, email, session, password = testPassword) {
     );
 }
 
-async function signInPOST(app, email, session, password = testPassword) {
-    return postAPI(
-        app,
-        "/auth/signin",
-        {
-            formFields: [
-                { id: "email", value: email },
-                { id: "password", value: password },
-            ],
-        },
-        session
-    );
-}
-
-async function mfaInfoPUT(app, session) {
-    return putAPI(app, "/auth/mfa/info", undefined, session);
+async function mfaInfoPUT(session) {
+    return putAPI("/auth/mfa/info", undefined, session);
 }

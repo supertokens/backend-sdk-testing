@@ -15,29 +15,36 @@
 const {
     printPath,
     setupST,
-    startST,
-    stopST,
     killAllST,
     cleanST,
-    resetAll,
-    startSTWithMultitenancyAndAccountLinking,
+    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    createTenant,
 } = require("../utils");
-let supertokens = require("supertokens-node");
-let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("supertokens-node/lib/build/processState");
-let EmailPassword = require("supertokens-node/recipe/emailpassword");
-let EmailVerification = require("supertokens-node/recipe/emailverification");
-let AccountLinking = require("supertokens-node/recipe/accountlinking");
-let Passwordless = require("supertokens-node/recipe/passwordless");
-let ThirdParty = require("supertokens-node/recipe/thirdparty");
-let MultiTenancy = require("supertokens-node/recipe/multitenancy");
+const { recipesMock, randomString } = require("../../api-mock");
+const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
+const {
+    AccountLinking,
+    EmailPassword,
+    EmailVerification,
+    Session,
+    supertokens,
+    ThirdParty,
+    Multitenancy: MultiTenancy,
+    Passwordless,
+} = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.test.js]")}`, function () {
-    beforeEach(async function () {
+    let globalConnectionURI;
+
+    const startSTWithMultitenancyAndAccountLinking = async () => {
+        return createTenant(globalConnectionURI, randomString());
+    };
+
+    before(async function () {
         await killAllST();
         await setupST();
-        ProcessState.getInstance().reset();
+        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
     });
 
     after(async function () {
@@ -61,7 +68,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                     MultiTenancy.init(),
                     EmailPassword.init(),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkNoVerify,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -103,7 +111,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkNoVerify,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -133,7 +142,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             const signInRes = await Passwordless.signInUp({
                 email,
                 tenantId: "tenant1",
-                userContext: { doNotLink: true },
+                userContext: { DO_NOT_LINK: true },
             });
 
             assert.strictEqual(signInRes.status, "OK");
@@ -161,7 +170,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkNoVerify,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -212,7 +222,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkNoVerify,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -242,7 +253,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             const signInRes = await Passwordless.signInUp({
                 email,
                 tenantId: "tenant1",
-                userContext: { doNotLink: true },
+                userContext: { DO_NOT_LINK: true },
             });
 
             assert.strictEqual(signInRes.status, "OK");
@@ -270,7 +281,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkNoVerify,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -289,7 +301,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             const pwlessSignUpResp = await Passwordless.signInUp({
                 email,
                 tenantId: "tenant1",
-                userContext: { doNotLink: true },
+                userContext: { DO_NOT_LINK: true },
             });
             const createPrimRes = await AccountLinking.createPrimaryUser(pwlessSignUpResp.recipeUserId);
             assert.strictEqual(createPrimRes.status, "OK");
@@ -321,7 +333,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkNoVerify,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -340,7 +353,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             const pwlessSignUpResp = await Passwordless.signInUp({
                 email,
                 tenantId: "tenant1",
-                userContext: { doNotLink: true },
+                userContext: { DO_NOT_LINK: true },
             });
 
             const toLink = await AccountLinking.getPrimaryUserThatCanBeLinkedToRecipeUserId(
@@ -369,7 +382,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkNoVerify,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -388,7 +402,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             const pwlessSignUpResp = await Passwordless.signInUp({
                 email,
                 tenantId: "tenant1",
-                userContext: { doNotLink: true },
+                userContext: { DO_NOT_LINK: true },
             });
 
             const toLink = await AccountLinking.getPrimaryUserThatCanBeLinkedToRecipeUserId(
@@ -419,7 +433,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkNoVerify,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -438,7 +453,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             const pwlessSignUpResp = await Passwordless.signInUp({
                 email,
                 tenantId: "tenant1",
-                userContext: { doNotLink: true },
+                userContext: { DO_NOT_LINK: true },
             });
 
             const shareRes = await MultiTenancy.associateUserToTenant("tenant1", primUser.loginMethods[0].recipeUserId);
@@ -467,7 +482,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkNoVerify,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -486,7 +502,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             const pwlessSignUpResp = await Passwordless.signInUp({
                 email,
                 tenantId: "tenant1",
-                userContext: { doNotLink: true },
+                userContext: { DO_NOT_LINK: true },
             });
 
             const resp = await AccountLinking.canCreatePrimaryUser(pwlessSignUpResp.recipeUserId);
@@ -514,7 +530,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkNoVerify,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -533,7 +550,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             const pwlessSignUpResp = await Passwordless.signInUp({
                 email,
                 tenantId: "tenant1",
-                userContext: { doNotLink: true },
+                userContext: { DO_NOT_LINK: true },
             });
 
             const shareRes = await MultiTenancy.associateUserToTenant("tenant1", primUser.loginMethods[0].recipeUserId);
@@ -562,7 +579,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkNoVerify,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -581,7 +599,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             const pwlessSignUpResp = await Passwordless.signInUp({
                 email,
                 tenantId: "tenant1",
-                userContext: { doNotLink: true },
+                userContext: { DO_NOT_LINK: true },
             });
 
             const resp = await AccountLinking.createPrimaryUser(pwlessSignUpResp.recipeUserId);
@@ -609,7 +627,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkNoVerify,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -628,7 +647,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             const pwlessSignUpResp = await Passwordless.signInUp({
                 email,
                 tenantId: "tenant1",
-                userContext: { doNotLink: true },
+                userContext: { DO_NOT_LINK: true },
             });
 
             const shareRes = await MultiTenancy.associateUserToTenant("tenant1", primUser.loginMethods[0].recipeUserId);
@@ -657,7 +676,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkNoVerify,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -676,7 +696,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             const pwlessSignUpResp = await Passwordless.signInUp({
                 email,
                 tenantId: "tenant1",
-                userContext: { doNotLink: true },
+                userContext: { DO_NOT_LINK: true },
             });
 
             const resp = await AccountLinking.linkAccounts(pwlessSignUpResp.recipeUserId, primUser.id);
@@ -704,7 +724,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkNoVerify,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -754,7 +775,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkIfVerified,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -804,7 +826,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkNoVerify,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                 ],
             });
@@ -857,7 +880,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkIfVerified,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -903,7 +927,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkIfVerified,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -957,7 +982,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkIfVerified,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -1007,7 +1033,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
                         flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: automaticallyLinkIfVerified,
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -1027,7 +1054,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             const pwlessSignUpResp = await Passwordless.signInUp({
                 email,
                 tenantId: "tenant1",
-                userContext: { doNotLink: true },
+                userContext: { DO_NOT_LINK: true },
             });
 
             const resp = await AccountLinking.isSignInAllowed("tenant1", pwlessSignUpResp.recipeUserId);
@@ -1035,23 +1062,3 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
         });
     });
 });
-
-const automaticallyLinkNoVerify = async (_accountInfo, _user, _session, _tenantId, userContext) => {
-    if (userContext.doNotLink === true) {
-        return { shouldAutomaticallyLink: false };
-    }
-    return {
-        shouldAutomaticallyLink: true,
-        shouldRequireVerification: false,
-    };
-};
-
-const automaticallyLinkIfVerified = async (_accountInfo, _user, _session, _tenantId, userContext) => {
-    if (userContext?.doNotLink === true) {
-        return { shouldAutomaticallyLink: false };
-    }
-    return {
-        shouldAutomaticallyLink: true,
-        shouldRequireVerification: true,
-    };
-};

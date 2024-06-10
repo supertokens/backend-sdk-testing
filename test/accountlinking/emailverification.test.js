@@ -15,27 +15,27 @@
 const {
     printPath,
     setupST,
-    startST,
-    stopST,
     killAllST,
     cleanST,
-    resetAll,
-    startSTWithMultitenancyAndAccountLinking,
+    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    createTenant,
 } = require("../utils");
-let supertokens = require("supertokens-node");
-let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("supertokens-node/lib/build/processState");
-let EmailPassword = require("supertokens-node/recipe/emailpassword");
-let ThirdParty = require("supertokens-node/recipe/thirdparty");
-let AccountLinking = require("supertokens-node/recipe/accountlinking");
-let EmailVerification = require("supertokens-node/recipe/emailverification");
+const { randomString, recipesMock } = require("../../api-mock");
+const { AccountLinking, EmailPassword, EmailVerification, Session, supertokens, ThirdParty } = recipesMock;
+const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 
 describe(`emailverificationTests: ${printPath("[test/accountlinking/emailverification.test.js]")}`, function () {
-    beforeEach(async function () {
+    let globalConnectionURI;
+
+    const startSTWithMultitenancyAndAccountLinking = async () => {
+        return createTenant(globalConnectionURI, randomString());
+    };
+
+    before(async function () {
         await killAllST();
         await setupST();
-        ProcessState.getInstance().reset();
+        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
     });
 
     after(async function () {
@@ -79,12 +79,8 @@ describe(`emailverificationTests: ${printPath("[test/accountlinking/emailverific
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -157,12 +153,8 @@ describe(`emailverificationTests: ${printPath("[test/accountlinking/emailverific
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -246,12 +238,8 @@ describe(`emailverificationTests: ${printPath("[test/accountlinking/emailverific
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -313,11 +301,8 @@ describe(`emailverificationTests: ${printPath("[test/accountlinking/emailverific
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
-                            return {
-                                shouldAutomaticallyLink: false,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkDisabled,
                     }),
                 ],
             });
@@ -390,11 +375,8 @@ describe(`emailverificationTests: ${printPath("[test/accountlinking/emailverific
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
-                            return {
-                                shouldAutomaticallyLink: false,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkDisabled,
                     }),
                 ],
             });
@@ -456,11 +438,8 @@ describe(`emailverificationTests: ${printPath("[test/accountlinking/emailverific
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
-                            return {
-                                shouldAutomaticallyLink: false,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkDisabled,
                     }),
                 ],
             });
@@ -522,12 +501,8 @@ describe(`emailverificationTests: ${printPath("[test/accountlinking/emailverific
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -602,12 +577,8 @@ describe(`emailverificationTests: ${printPath("[test/accountlinking/emailverific
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
@@ -676,12 +647,8 @@ describe(`emailverificationTests: ${printPath("[test/accountlinking/emailverific
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async function (input) {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });

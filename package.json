@@ -1,22 +1,17 @@
 {
     "name": "backend-sdk-testing",
-    "version": "17.1.2",
+    "version": "18",
     "scripts": {
         "postinstall": "npm run set-up-hooks",
         "pretest": "npm run build",
         "test": "TEST_MODE=testing npx mocha --node-option no-experimental-fetch -r test/fetch-polyfill.mjs --timeout 500000",
         "build-check": "tsc --noEmit -p tsconfig.json && npm run build",
-        "build": "tsc -p tsconfig.json && cd test/with-typescript && npm run build",
+        "build": "tsc -p tsconfig.json",
         "pretty-check": "npx pretty-quick --check .",
         "pretty": "npx pretty-quick .",
         "format": "prettier --write .",
         "build-pretty": "npm run build && npm run pretty && npm run pretty",
-        "set-up-hooks": "cp hooks/pre-commit.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit",
-        "start:node": "SUPERTOKENS_ENV=testing TEST_MODE=testing node api-mock/api-mock-server.js",
-        "start:python": "SUPERTOKENS_ENV=testing TEST_MODE=testing uvicorn api-mock.api-mock-server:app --host localhost --port 3031",
-        "dev:node:build": "tsc -w -p tsconfig.json",
-        "dev:node:mock": "SUPERTOKENS_ENV=testing TEST_MODE=testing tsx watch api-mock/api-mock-server.ts",
-        "dev:node": "run-p dev:node:*"
+        "set-up-hooks": "cp hooks/pre-commit.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
     },
     "repository": {
         "type": "git",
@@ -57,7 +52,8 @@
         "react": "^18.2.0",
         "sinon": "^14.0.0",
         "supertest": "4.0.2",
-        "supertokens-node": "file:../supertokens-node",
+        "supertokens-node": "18.0.0",
+        "terser": "^5.31.0",
         "tsx": "^4.10.2",
         "typescript": "4.2"
     },

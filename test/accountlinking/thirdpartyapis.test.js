@@ -15,29 +15,34 @@
 const {
     printPath,
     setupST,
-    startST,
-    stopST,
     killAllST,
     cleanST,
-    resetAll,
+    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    createTenant,
     extractInfoFromResponse,
-    startSTWithMultitenancyAndAccountLinking,
 } = require("../utils");
-let supertokens = require("supertokens-node");
-let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
-let EmailPassword = require("supertokens-node/recipe/emailpassword");
-let ThirdParty = require("supertokens-node/recipe/thirdparty");
-let AccountLinking = require("supertokens-node/recipe/accountlinking");
-let EmailVerification = require("supertokens-node/recipe/emailverification");
-const express = require("express");
-let { middleware, errorHandler } = require("supertokens-node/framework/express");
-const request = require("supertest");
-let nock = require("nock");
+let { PROCESS_STATE } = require("supertokens-node/lib/build/processState");
+const { recipesMock, randomString, request, mockExternalAPI, getOverrideParams } = require("../../api-mock");
+const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
+const {
+    AccountLinking,
+    EmailPassword,
+    Session,
+    supertokens,
+    ThirdParty,
+    EmailVerification,
+    ProcessState,
+} = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.test.js]")}`, function () {
-    before(function () {
+    let globalConnectionURI;
+
+    const startSTWithMultitenancyAndAccountLinking = async () => {
+        return createTenant(globalConnectionURI, randomString());
+    };
+
+    before(async function () {
         this.customProviderWithEmailVerified = {
             config: {
                 thirdPartyId: "custom-ev",
@@ -92,11 +97,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                 },
             }),
         };
-    });
-    beforeEach(async function () {
         await killAllST();
         await setupST();
-        ProcessState.getInstance().reset();
+        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
     });
 
     after(async function () {
@@ -142,21 +145,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
-            nock("https://test.com").post("/oauth/token").reply(200, {});
+            await mockExternalAPI("https://test.com").post("/oauth/token").reply(200, {});
 
             let tpUser = (
                 await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "abc", "email@test.com", true)
@@ -168,7 +163,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                 undefined
             );
             let response = await new Promise((resolve, reject) =>
-                request(app)
+                request()
                     .post("/auth/signinup")
                     .send({
                         thirdPartyId: "custom-ev",
@@ -233,21 +228,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
-            nock("https://test.com").post("/oauth/token").reply(200, {});
+            await mockExternalAPI("https://test.com").post("/oauth/token").reply(200, {});
 
             let tpUser = (
                 await ThirdParty.manuallyCreateOrUpdateUser("public", "custom-ev", "user", "email2@test.com", true)
@@ -255,7 +242,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             await AccountLinking.createPrimaryUser(tpUser.loginMethods[0].recipeUserId);
 
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signinup")
                     .send({
                         thirdPartyId: "custom-ev",
@@ -319,21 +306,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
-            nock("https://test.com").post("/oauth/token").reply(200, {});
+            await mockExternalAPI("https://test.com").post("/oauth/token").reply(200, {});
 
             let tpUser = (
                 await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "abcd", "email@test.com", true)
@@ -341,7 +320,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             await AccountLinking.createPrimaryUser(tpUser.loginMethods[0].recipeUserId);
 
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signinup")
                     .send({
                         thirdPartyId: "custom-no-ev",
@@ -409,21 +388,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
-            nock("https://test.com").post("/oauth/token").reply(200, {});
+            await mockExternalAPI("https://test.com").post("/oauth/token").reply(200, {});
 
             let tpUser = (
                 await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "abcd", "email@test.com", true)
@@ -431,7 +402,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             await AccountLinking.createPrimaryUser(tpUser.loginMethods[0].recipeUserId);
 
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signinup")
                     .send({
                         thirdPartyId: "custom-ev",
@@ -507,26 +478,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (_, __, _session, _tenantId, userContext) => {
-                            if (userContext.doNotLink) {
-                                return {
-                                    shouldAutomaticallyLink: false,
-                                };
-                            }
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
-            nock("https://test.com").post("/oauth/token").reply(200, {});
+            await mockExternalAPI("https://test.com").post("/oauth/token").reply(200, {});
 
             let tpUser = (
                 await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "abcd", "email@test.com", true)
@@ -542,14 +500,14 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                     true,
                     undefined,
                     {
-                        doNotLink: true,
+                        DO_NOT_LINK: true,
                     }
                 )
             ).user;
             assert(tpUser2.isPrimaryUser === false);
 
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signinup")
                     .send({
                         thirdPartyId: "custom-ev",
@@ -644,21 +602,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
-            nock("https://test.com").post("/oauth/token").reply(200, {});
+            await mockExternalAPI("https://test.com").post("/oauth/token").reply(200, {});
 
             let tpUser = (
                 await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "abcd", "email@test.com", true)
@@ -666,7 +616,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             await AccountLinking.createPrimaryUser(tpUser.loginMethods[0].recipeUserId);
 
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signinup")
                     .send({
                         thirdPartyId: "custom-ev",
@@ -694,6 +644,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             assert(pUser.loginMethods.length === 2);
             assert(pUser.loginMethods[1].thirdParty.id === "custom-ev");
             assert(pUser.loginMethods[0].thirdParty.id === "google");
+
+            let overrideParams = await getOverrideParams();
+            userInCallback = overrideParams.userInCallback;
 
             assert(userInCallback !== undefined);
             assert.equal(JSON.stringify(pUser), JSON.stringify(userInCallback));
@@ -736,21 +689,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
-            nock("https://test.com").post("/oauth/token").reply(200, {});
+            await mockExternalAPI("https://test.com").post("/oauth/token").reply(200, {});
 
             let tpUser = (
                 await ThirdParty.manuallyCreateOrUpdateUser("public", "custom-ev", "user", "email2@test.com", true)
@@ -763,7 +708,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             assert(tpUser2.isPrimaryUser === true);
 
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signinup")
                     .send({
                         thirdPartyId: "custom-ev",
@@ -831,21 +776,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
-            nock("https://test.com").post("/oauth/token").reply(200, {});
+            await mockExternalAPI("https://test.com").post("/oauth/token").reply(200, {});
 
             let tpUser = (
                 await ThirdParty.manuallyCreateOrUpdateUser("public", "custom-no-ev", "user", "email2@test.com", false)
@@ -858,7 +795,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             assert(tpUser2.isPrimaryUser === true);
 
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signinup")
                     .send({
                         thirdPartyId: "custom-no-ev",
@@ -929,26 +866,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (_, __, _session, _tenantId, userContext) => {
-                            if (userContext.doNotLink) {
-                                return {
-                                    shouldAutomaticallyLink: false,
-                                };
-                            }
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
-            nock("https://test.com").post("/oauth/token").reply(200, {});
+            await mockExternalAPI("https://test.com").post("/oauth/token").reply(200, {});
 
             let tpUser = (
                 await ThirdParty.manuallyCreateOrUpdateUser(
@@ -959,7 +883,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                     true,
                     undefined,
                     {
-                        doNotLink: true,
+                        DO_NOT_LINK: true,
                     }
                 )
             ).user;
@@ -978,7 +902,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             assert(tpUser2.isPrimaryUser === true);
 
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signinup")
                     .send({
                         thirdPartyId: "custom-no-ev",
@@ -1043,21 +967,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
-            nock("https://test.com").post("/oauth/token").reply(200, {});
+            await mockExternalAPI("https://test.com").post("/oauth/token").reply(200, {});
 
             let tpUser = (
                 await ThirdParty.manuallyCreateOrUpdateUser("public", "custom-no-ev", "user", "email@test.com", false)
@@ -1070,7 +986,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             assert(tpUser2.isPrimaryUser === true);
 
             let response = await new Promise((resolve, reject) =>
-                request(app)
+                request()
                     .post("/auth/signinup")
                     .send({
                         thirdPartyId: "custom-no-ev",
@@ -1138,26 +1054,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (_, __, _session, _tenantId, userContext) => {
-                            if (userContext.doNotLink) {
-                                return {
-                                    shouldAutomaticallyLink: false,
-                                };
-                            }
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
-            nock("https://test.com").post("/oauth/token").reply(200, {});
+            await mockExternalAPI("https://test.com").post("/oauth/token").reply(200, {});
 
             let tpUser = (
                 await ThirdParty.manuallyCreateOrUpdateUser(
@@ -1168,7 +1071,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                     true,
                     undefined,
                     {
-                        doNotLink: true,
+                        DO_NOT_LINK: true,
                     }
                 )
             ).user;
@@ -1180,7 +1083,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             assert(tpUser2.isPrimaryUser === true);
 
             let response = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signinup")
                     .send({
                         thirdPartyId: "custom-no-ev",
@@ -1249,21 +1152,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
-            nock("https://test.com").post("/oauth/token").reply(200, {});
+            await mockExternalAPI("https://test.com").post("/oauth/token").reply(200, {});
 
             let tpUser = (
                 await ThirdParty.manuallyCreateOrUpdateUser("public", "custom-no-ev", "user", "email2@test.com", false)
@@ -1276,7 +1171,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             assert(tpUser2.isPrimaryUser === false);
 
             let response = await new Promise((resolve, reject) =>
-                request(app)
+                request()
                     .post("/auth/signinup")
                     .send({
                         thirdPartyId: "custom-no-ev",
@@ -1344,21 +1239,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
 
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
-
-            nock("https://test.com").post("/oauth/token").reply(200, {});
+            await mockExternalAPI("https://test.com").post("/oauth/token").reply(200, {});
 
             let tpUser = (
                 await ThirdParty.manuallyCreateOrUpdateUser("public", "custom-no-ev", "user", "email2@test.com", false)
@@ -1379,7 +1266,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             await AccountLinking.createPrimaryUser(tpUser2.loginMethods[0].recipeUserId);
 
             let response = await new Promise((resolve, reject) =>
-                request(app)
+                request()
                     .post("/auth/signinup")
                     .send({
                         thirdPartyId: "custom-no-ev",
@@ -1454,21 +1341,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                             },
                         }),
                         AccountLinking.init({
-                            shouldDoAutomaticAccountLinking: async () => {
-                                return {
-                                    shouldAutomaticallyLink: true,
-                                    shouldRequireVerification: true,
-                                };
-                            },
+                            shouldDoAutomaticAccountLinking:
+                                shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                         }),
                     ],
                 });
 
-                const app = express();
-                app.use(middleware());
-                app.use(errorHandler());
-
-                nock("https://test.com").post("/oauth/token").reply(200, {});
+                await mockExternalAPI("https://test.com").post("/oauth/token").reply(200, {});
 
                 let tpUser = (
                     await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "abcd" + date, email, true)
@@ -1490,7 +1369,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                 const primUser = await supertokens.getUser(linkRes.user.id);
 
                 let response = await new Promise((resolve) =>
-                    request(app)
+                    request()
                         .post("/auth/signinup")
                         .send({
                             thirdPartyId: "custom-ev",

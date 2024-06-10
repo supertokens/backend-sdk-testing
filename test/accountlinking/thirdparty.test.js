@@ -15,27 +15,27 @@
 const {
     printPath,
     setupST,
-    startST,
-    stopST,
     killAllST,
     cleanST,
-    resetAll,
-    startSTWithMultitenancyAndAccountLinking,
+    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    createTenant,
 } = require("../utils");
-let supertokens = require("supertokens-node");
-let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState } = require("supertokens-node/lib/build/processState");
-let EmailPassword = require("supertokens-node/recipe/emailpassword");
-let ThirdParty = require("supertokens-node/recipe/thirdparty");
-let AccountLinking = require("supertokens-node/recipe/accountlinking");
-let EmailVerification = require("supertokens-node/recipe/emailverification");
+const { recipesMock, randomString } = require("../../api-mock");
+const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
+const { AccountLinking, EmailVerification, Session, supertokens, ThirdParty } = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test.js]")}`, function () {
-    beforeEach(async function () {
+    let globalConnectionURI;
+
+    const startSTWithMultitenancyAndAccountLinking = async () => {
+        return createTenant(globalConnectionURI, randomString());
+    };
+
+    before(async function () {
         await killAllST();
         await setupST();
-        ProcessState.getInstance().reset();
+        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
     });
 
     after(async function () {
@@ -57,12 +57,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -107,12 +103,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -157,12 +149,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: false,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -207,11 +195,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: false,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkDisabled,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -256,11 +241,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: false,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkDisabled,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -305,12 +287,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -370,12 +348,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -442,12 +416,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -506,12 +476,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -570,12 +536,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -634,12 +596,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -707,12 +665,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -761,12 +715,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -821,12 +771,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -880,12 +826,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -933,12 +875,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -986,12 +924,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: false,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -1039,12 +973,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                     ThirdParty.init({
                         signInAndUpFeature: {
@@ -1085,12 +1015,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: false,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     }),
                     ThirdParty.init({
                         signInAndUpFeature: {
@@ -1131,12 +1057,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",
@@ -1363,12 +1285,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 },
                 recipeList: [
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                     EmailVerification.init({
                         mode: "OPTIONAL",

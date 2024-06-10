@@ -15,32 +15,29 @@
 const {
     printPath,
     setupST,
-    startST,
-    stopST,
     killAllST,
     cleanST,
-    resetAll,
     extractInfoFromResponse,
-    startSTWithMultitenancyAndAccountLinking,
+    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    createTenant,
 } = require("../utils");
-let supertokens = require("supertokens-node");
-let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let AccountLinking = require("supertokens-node/recipe/accountlinking").default;
-let { ProcessState } = require("supertokens-node/lib/build/processState");
-let EmailPassword = require("supertokens-node/recipe/emailpassword");
-let EmailVerification = require("supertokens-node/recipe/emailverification");
-const express = require("express");
-const request = require("supertest");
-let { middleware, errorHandler } = require("supertokens-node/framework/express");
+const { recipesMock, randomString, request, getOverrideParams } = require("../../api-mock");
+const { AccountLinking, EmailPassword, Session, supertokens, EmailVerification } = recipesMock;
 let { protectedProps } = require("supertokens-node/lib/build/recipe/session/constants");
 let { PrimitiveClaim } = require("supertokens-node/lib/build/recipe/session/claimBaseClasses/primitiveClaim");
 
-describe(`sessionTests: ${printPath("[test/accountlinking/session.test.js]")}`, function () {
-    beforeEach(async function () {
+describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js]")}`, function () {
+    let globalConnectionURI;
+
+    const startSTWithMultitenancyAndAccountLinking = async () => {
+        return createTenant(globalConnectionURI, randomString());
+    };
+
+    before(async function () {
         await killAllST();
         await setupST();
-        ProcessState.getInstance().reset();
+        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
     });
 
     after(async function () {
@@ -145,20 +142,12 @@ describe(`sessionTests: ${printPath("[test/accountlinking/session.test.js]")}`, 
 
             let epUser = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.post("/create", async (req, res) => {
-                await Session.createNewSession(req, res, "public", epUser.loginMethods[0].recipeUserId, {}, {});
-                res.status(200).send("");
-            });
-
-            app.use(errorHandler());
-
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/create")
+                    .send({
+                        recipeUserId: epUser.loginMethods[0].recipeUserId.getAsString(),
+                    })
                     .expect(200)
                     .end((err, res) => {
                         if (err) {
@@ -198,20 +187,12 @@ describe(`sessionTests: ${printPath("[test/accountlinking/session.test.js]")}`, 
 
             await AccountLinking.linkAccounts(epUser2.loginMethods[0].recipeUserId, epUser.id);
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.post("/create", async (req, res) => {
-                await Session.createNewSession(req, res, "public", epUser2.loginMethods[0].recipeUserId, {}, {});
-                res.status(200).send("");
-            });
-
-            app.use(errorHandler());
-
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/create")
+                    .send({
+                        recipeUserId: epUser2.loginMethods[0].recipeUserId.getAsString(),
+                    })
                     .expect(200)
                     .end((err, res) => {
                         if (err) {
@@ -246,20 +227,12 @@ describe(`sessionTests: ${printPath("[test/accountlinking/session.test.js]")}`, 
                 recipeList: [EmailPassword.init(), Session.init()],
             });
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.post("/create", async (req, res) => {
-                await Session.createNewSession(req, res, "public", supertokens.convertToRecipeUserId("random"), {}, {});
-                res.status(200).send("");
-            });
-
-            app.use(errorHandler());
-
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/create")
+                    .send({
+                        recipeUserId: "random",
+                    })
                     .expect(200)
                     .end((err, res) => {
                         if (err) {
@@ -482,21 +455,8 @@ describe(`sessionTests: ${printPath("[test/accountlinking/session.test.js]")}`, 
                 {}
             );
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.post("/getsession", async (req, res) => {
-                let session = await Session.getSession(req, res);
-                userId = session.getUserId();
-                recipeUserId = session.getRecipeUserId().getAsString();
-                res.status(200).send("");
-            });
-
-            app.use(errorHandler());
-
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/getsession")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .expect(200)
@@ -508,6 +468,9 @@ describe(`sessionTests: ${printPath("[test/accountlinking/session.test.js]")}`, 
                         }
                     })
             );
+
+            userId = res.body.userId;
+            recipeUserId = res.body.recipeUserId;
 
             assert(userId === recipeUserId && userId !== undefined);
         });
@@ -542,21 +505,8 @@ describe(`sessionTests: ${printPath("[test/accountlinking/session.test.js]")}`, 
                 {}
             );
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.post("/getsession", async (req, res) => {
-                let session = await Session.getSession(req, res);
-                userId = session.getUserId();
-                recipeUserId = session.getRecipeUserId().getAsString();
-                res.status(200).send("");
-            });
-
-            app.use(errorHandler());
-
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/getsession")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .expect(200)
@@ -568,6 +518,9 @@ describe(`sessionTests: ${printPath("[test/accountlinking/session.test.js]")}`, 
                         }
                     })
             );
+
+            userId = res.body.userId;
+            recipeUserId = res.body.recipeUserId;
 
             assert(userId !== recipeUserId);
             assert(userId === epUser.id);
@@ -597,21 +550,8 @@ describe(`sessionTests: ${printPath("[test/accountlinking/session.test.js]")}`, 
                 {}
             );
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.post("/getsession", async (req, res) => {
-                let session = await Session.getSession(req, res);
-                userId = session.getUserId();
-                recipeUserId = session.getRecipeUserId().getAsString();
-                res.status(200).send("");
-            });
-
-            app.use(errorHandler());
-
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/getsession")
                     .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
                     .expect(200)
@@ -623,6 +563,9 @@ describe(`sessionTests: ${printPath("[test/accountlinking/session.test.js]")}`, 
                         }
                     })
             );
+
+            userId = res.body.userId;
+            recipeUserId = res.body.recipeUserId;
 
             assert(userId === recipeUserId && userId !== undefined);
             assert(userId === "random");
@@ -876,21 +819,8 @@ describe(`sessionTests: ${printPath("[test/accountlinking/session.test.js]")}`, 
                 epUser2.loginMethods[0].recipeUserId
             );
 
-            const app = express();
-
-            app.use(middleware());
-
-            app.post("/refreshsession", async (req, res) => {
-                let session = await Session.refreshSession(req, res);
-                userId = session.getUserId();
-                recipeUserId = session.getRecipeUserId().getAsString();
-                res.status(200).send("");
-            });
-
-            app.use(errorHandler());
-
             let res = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/refreshsession")
                     .set("Cookie", ["sRefreshToken=" + session.getAllSessionTokensDangerously().refreshToken])
                     .expect(200)
@@ -1346,6 +1276,10 @@ describe(`sessionTests: ${printPath("[test/accountlinking/session.test.js]")}`, 
 
             await Session.fetchAndSetClaim(session.getHandle(), primitiveClaim);
 
+            let overrideParams = await getOverrideParams();
+            userIdInCallback = overrideParams.userIdInCallback;
+            recipeUserIdInCallback = overrideParams.recipeUserIdInCallback;
+
             assert(userIdInCallback === epUser.id);
             assert(recipeUserIdInCallback.getAsString() === epUser2.loginMethods[0].recipeUserId.getAsString());
         });
@@ -1355,15 +1289,6 @@ describe(`sessionTests: ${printPath("[test/accountlinking/session.test.js]")}`, 
 
             let userIdInCallback;
             let recipeUserIdInCallback;
-
-            let primitiveClaim = new PrimitiveClaim({
-                key: "some-key",
-                fetchValue: async (userId, recipeUserId) => {
-                    userIdInCallback = userId;
-                    recipeUserIdInCallback = recipeUserId;
-                    return undefined;
-                },
-            });
 
             supertokens.init({
                 supertokens: {
@@ -1382,6 +1307,15 @@ describe(`sessionTests: ${printPath("[test/accountlinking/session.test.js]")}`, 
                                 return {
                                     ...oI,
                                     createNewSession: async (input) => {
+                                        const { PrimitiveClaim } = require("../../../lib/build/recipe/session/claims");
+                                        let primitiveClaim = new PrimitiveClaim({
+                                            key: "some-key",
+                                            fetchValue: async (userId, recipeUserId) => {
+                                                userIdInCallback = userId;
+                                                recipeUserIdInCallback = recipeUserId;
+                                                return undefined;
+                                            },
+                                        });
                                         input.accessTokenPayload = {
                                             ...input.accessTokenPayload,
                                             ...primitiveClaim.build(input.userId, input.recipeUserId),
@@ -1406,6 +1340,10 @@ describe(`sessionTests: ${printPath("[test/accountlinking/session.test.js]")}`, 
                 "public",
                 epUser2.loginMethods[0].recipeUserId
             );
+
+            let overrideParams = await getOverrideParams();
+            userIdInCallback = overrideParams.userIdInCallback;
+            recipeUserIdInCallback = overrideParams.recipeUserIdInCallback;
 
             assert(userIdInCallback === epUser.id);
             assert(recipeUserIdInCallback.getAsString() === epUser2.loginMethods[0].recipeUserId.getAsString());

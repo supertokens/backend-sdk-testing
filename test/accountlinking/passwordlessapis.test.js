@@ -15,27 +15,16 @@
 const {
     printPath,
     setupST,
-    startST,
-    stopST,
     killAllST,
     cleanST,
-    resetAll,
-    extractInfoFromResponse,
+    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    createTenant,
     assertJSONEquals,
-    startSTWithMultitenancyAndAccountLinking,
 } = require("../utils");
-let supertokens = require("supertokens-node");
-let Session = require("supertokens-node/recipe/session");
 let assert = require("assert");
-let { ProcessState, PROCESS_STATE } = require("supertokens-node/lib/build/processState");
-let EmailPassword = require("supertokens-node/recipe/emailpassword");
-let Passwordless = require("supertokens-node/recipe/passwordless");
-let ThirdParty = require("supertokens-node/recipe/thirdparty");
-let AccountLinking = require("supertokens-node/recipe/accountlinking");
-let EmailVerification = require("supertokens-node/recipe/emailverification");
-const express = require("express");
-let { middleware, errorHandler } = require("supertokens-node/framework/express");
-const request = require("supertest");
+const { recipesMock, randomString, request } = require("../../api-mock");
+const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
+const { AccountLinking, EmailVerification, Session, supertokens, ThirdParty, Passwordless } = recipesMock;
 
 // phoneNumber based accounts can't exist in other recipes now,
 const createCodeBehaviours = [
@@ -207,11 +196,17 @@ const consumeCodeBehaviours = [
     },
 ];
 
+let globalConnectionURI;
+
+const startSTWithMultitenancyAndAccountLinking = async () => {
+    return createTenant(globalConnectionURI, randomString());
+};
+
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapis.test.js]")}`, function () {
-    beforeEach(async function () {
+    before(async function () {
         await killAllST();
         await setupST();
-        ProcessState.getInstance().reset();
+        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
     });
 
     after(async function () {
@@ -262,19 +257,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
-
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
 
             const email = "test@example.com";
             let tpUser = await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "abc", email, false);
@@ -282,7 +269,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
 
             // createCodeAPI with email
             let createCodeResponse = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signinup/code")
                     .send({
                         email: email,
@@ -346,24 +333,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (_, __, _session, _tenantId, userContext) => {
-                            if (userContext.doNotLink) {
-                                return {
-                                    shouldAutomaticallyLink: false,
-                                };
-                            }
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
-
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
 
             const email = "test@example.com";
             let tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
@@ -374,13 +348,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                 true,
                 undefined,
                 {
-                    doNotLink: true,
+                    DO_NOT_LINK: true,
                 }
             );
 
             // createCodeAPI with email
             let createCodeResponse = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signinup/code")
                     .send({
                         email: email,
@@ -440,26 +414,18 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async () => {
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
-
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
 
             const email = "test@example.com";
             let tpUser = await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "abc", email, false);
 
             // createCodeAPI with email
             let createCodeResponse = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signinup/code")
                     .send({
                         email: email,
@@ -523,34 +489,23 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                         },
                     }),
                     AccountLinking.init({
-                        shouldDoAutomaticAccountLinking: async (_newAccountInfo, _user, _tenantId, userContext) => {
-                            if (userContext?.doNotLink === true) {
-                                return { shouldAutomaticallyLink: false };
-                            }
-                            return {
-                                shouldAutomaticallyLink: true,
-                                shouldRequireVerification: true,
-                            };
-                        },
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                     }),
                 ],
             });
-
-            const app = express();
-            app.use(middleware());
-            app.use(errorHandler());
 
             const email = "test@example.com";
             let tpUser = await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "abc", email, false);
             await Passwordless.signInUp({
                 email,
                 tenantId: "public",
-                userContext: { doNotLink: true },
+                userContext: { DO_NOT_LINK: true },
             });
 
             // createCodeAPI with email
             let createCodeResponse = await new Promise((resolve) =>
-                request(app)
+                request()
                     .post("/auth/signinup/code")
                     .send({
                         email: email,
@@ -682,24 +637,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                             mode: "REQUIRED",
                         }),
                         AccountLinking.init({
-                            shouldDoAutomaticAccountLinking: async (userInfo, __, _session, _tenantId, userContext) => {
-                                if (userContext.doNotLink || userInfo.email?.includes("doNotLink") === true) {
-                                    return {
-                                        shouldAutomaticallyLink: false,
-                                    };
-                                }
-                                return {
-                                    shouldAutomaticallyLink: true,
-                                    shouldRequireVerification: true,
-                                };
-                            },
+                            shouldDoAutomaticAccountLinking:
+                                shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                         }),
                     ],
                 });
-
-                const app = express();
-                app.use(middleware());
-                app.use(errorHandler());
 
                 const email = `test-${Date.now()}@example.com`;
 
@@ -718,17 +660,29 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                     false,
                     undefined,
                     {
-                        doNotLink: true,
+                        DO_NOT_LINK: true,
                     }
                 );
 
                 assert.strictEqual(tpUser.status, "OK");
 
-                let consumeCodeResponse = await request(app).post("/auth/signinup/code/consume").send({
-                    preAuthSessionId: code.preAuthSessionId,
-                    deviceId: code.deviceId,
-                    userInputCode: code.userInputCode,
-                });
+                let consumeCodeResponse = await new Promise((resolve) =>
+                    request()
+                        .post("/auth/signinup/code/consume")
+                        .send({
+                            preAuthSessionId: code.preAuthSessionId,
+                            deviceId: code.deviceId,
+                            userInputCode: code.userInputCode,
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
 
                 assert.strictEqual(consumeCodeResponse.body.status, "SIGN_IN_UP_NOT_ALLOWED");
             });
@@ -778,24 +732,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                             mode: "REQUIRED",
                         }),
                         AccountLinking.init({
-                            shouldDoAutomaticAccountLinking: async (userInfo, __, _session, _tenantId, userContext) => {
-                                if (userContext.doNotLink || userInfo.email?.includes("doNotLink") === true) {
-                                    return {
-                                        shouldAutomaticallyLink: false,
-                                    };
-                                }
-                                return {
-                                    shouldAutomaticallyLink: true,
-                                    shouldRequireVerification: true,
-                                };
-                            },
+                            shouldDoAutomaticAccountLinking:
+                                shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
                         }),
                     ],
                 });
-
-                const app = express();
-                app.use(middleware());
-                app.use(errorHandler());
 
                 const email = `test-${Date.now()}@example.com`;
 
@@ -814,7 +755,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                     false,
                     undefined,
                     {
-                        doNotLink: true,
+                        DO_NOT_LINK: true,
                     }
                 );
 
@@ -822,11 +763,23 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
                 const resp = await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.user.id));
                 assert.strictEqual(resp.status, "OK");
 
-                let consumeCodeResponse = await request(app).post("/auth/signinup/code/consume").send({
-                    preAuthSessionId: code.preAuthSessionId,
-                    deviceId: code.deviceId,
-                    userInputCode: code.userInputCode,
-                });
+                let consumeCodeResponse = await new Promise((resolve) =>
+                    request()
+                        .post("/auth/signinup/code/consume")
+                        .send({
+                            preAuthSessionId: code.preAuthSessionId,
+                            deviceId: code.deviceId,
+                            userInputCode: code.userInputCode,
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
 
                 assert.strictEqual(consumeCodeResponse.body.status, "SIGN_IN_UP_NOT_ALLOWED");
             });
@@ -886,24 +839,15 @@ async function getCreateCodeTestCase({ pwlessUser, otherRecipeUser, accountLinki
                 mode: "REQUIRED",
             }),
             AccountLinking.init({
-                shouldDoAutomaticAccountLinking: async (userInfo, __, _session, _tenantId, userContext) => {
-                    if (userContext.doNotLink || userInfo.email?.includes("doNotLink") === true) {
-                        return {
-                            shouldAutomaticallyLink: false,
-                        };
-                    }
-                    return {
-                        shouldAutomaticallyLink: accountLinking.enabled,
-                        shouldRequireVerification: accountLinking.requiresVerification,
-                    };
-                },
+                shouldDoAutomaticAccountLinking:
+                    accountLinking.enabled && accountLinking.requiresVerification
+                        ? shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified
+                        : accountLinking.enabled
+                        ? shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify
+                        : shouldDoAutomaticAccountLinkingOverride.automaticallyLinkDisabled,
             }),
         ],
     });
-
-    const app = express();
-    app.use(middleware());
-    app.use(errorHandler());
 
     const email = "test@example.com";
 
@@ -917,7 +861,7 @@ async function getCreateCodeTestCase({ pwlessUser, otherRecipeUser, accountLinki
             otherRecipeUser.verified,
             undefined,
             {
-                doNotLink: !otherRecipeUser.primary,
+                DO_NOT_LINK: !otherRecipeUser.primary,
             }
         );
 
@@ -939,7 +883,7 @@ async function getCreateCodeTestCase({ pwlessUser, otherRecipeUser, accountLinki
                 userInputCode: code.userInputCode,
             },
             {
-                doNotLink: pwlessUser.linked !== true,
+                DO_NOT_LINK: pwlessUser.linked !== true,
             }
         );
         assert.strictEqual(consumeResp.status, "OK");
@@ -953,7 +897,7 @@ async function getCreateCodeTestCase({ pwlessUser, otherRecipeUser, accountLinki
     }
 
     let createCodeResponse = await new Promise((resolve) =>
-        request(app)
+        request()
             .post("/auth/signinup/code")
             .send({
                 email: email,
@@ -1016,24 +960,15 @@ async function getConsumeCodeTestCase({ pwlessUser, otherRecipeUser, accountLink
                 mode: "REQUIRED",
             }),
             AccountLinking.init({
-                shouldDoAutomaticAccountLinking: async (userInfo, __, _session, _tenantId, userContext) => {
-                    if (userContext.doNotLink || userInfo.email?.includes("doNotLink") === true) {
-                        return {
-                            shouldAutomaticallyLink: false,
-                        };
-                    }
-                    return {
-                        shouldAutomaticallyLink: accountLinking.enabled,
-                        shouldRequireVerification: accountLinking.requiresVerification,
-                    };
-                },
+                shouldDoAutomaticAccountLinking:
+                    accountLinking.enabled && accountLinking.requiresVerification
+                        ? shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified
+                        : accountLinking.enabled
+                        ? shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify
+                        : shouldDoAutomaticAccountLinkingOverride.automaticallyLinkDisabled,
             }),
         ],
     });
-
-    const app = express();
-    app.use(middleware());
-    app.use(errorHandler());
 
     const email = `test-${Date.now()}@example.com`;
 
@@ -1047,7 +982,7 @@ async function getConsumeCodeTestCase({ pwlessUser, otherRecipeUser, accountLink
             otherRecipeUser.verified,
             undefined,
             {
-                doNotLink: !otherRecipeUser.primary,
+                DO_NOT_LINK: !otherRecipeUser.primary,
             }
         );
 
@@ -1069,7 +1004,7 @@ async function getConsumeCodeTestCase({ pwlessUser, otherRecipeUser, accountLink
                 userInputCode: code.userInputCode,
             },
             {
-                doNotLink: pwlessUser.linked !== true,
+                DO_NOT_LINK: pwlessUser.linked !== true,
             }
         );
         assert.strictEqual(consumeResp.status, "OK");
@@ -1089,11 +1024,23 @@ async function getConsumeCodeTestCase({ pwlessUser, otherRecipeUser, accountLink
 
     const code = await Passwordless.createCode({ tenantId: "public", email });
 
-    let consumeCodeResponse = await request(app).post("/auth/signinup/code/consume").send({
-        preAuthSessionId: code.preAuthSessionId,
-        deviceId: code.deviceId,
-        userInputCode: code.userInputCode,
-    });
+    let consumeCodeResponse = await new Promise((resolve) =>
+        request()
+            .post("/auth/signinup/code/consume")
+            .send({
+                preAuthSessionId: code.preAuthSessionId,
+                deviceId: code.deviceId,
+                userInputCode: code.userInputCode,
+            })
+            .expect(200)
+            .end((err, res) => {
+                if (err) {
+                    resolve(undefined);
+                } else {
+                    resolve(res);
+                }
+            })
+    );
 
     assert.strictEqual(consumeCodeResponse.body.status, expect.status);
     if (expect.status === "OK") {
