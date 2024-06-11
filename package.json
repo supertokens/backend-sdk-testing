@@ -42,6 +42,7 @@
         "fastify": "3.18.1",
         "koa": "^2.13.3",
         "mocha": "^10.2.0",
+        "mocha-split-tests": "github:rishabhpoddar/mocha-split-tests",
         "next": "^14.0.4",
         "next-test-api-route-handler": "^3.1.10",
         "nock": "11.7.0",
