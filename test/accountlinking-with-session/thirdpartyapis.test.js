@@ -12,13 +12,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const {
-    printPath,
-    setupST,
-    killAllST,
-    cleanST,
-    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
-} = require("../utils");
+const { printPath, setupST, killAllST, cleanST, startST: globalStartST } = require("../utils");
 const {
     getTestEmail,
     setup,
@@ -43,7 +37,7 @@ describe(`thirdparty accountlinkingTests w/ session: ${printPath(
     before(async function () {
         await killAllST();
         await setupST();
-        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
+        globalConnectionURI = await globalStartST();
     });
 
     after(async function () {

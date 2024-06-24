@@ -18,7 +18,7 @@ const {
     killAllST,
     cleanST,
     extractInfoFromResponse,
-    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    startST: globalStartST,
     createTenant,
 } = require("../utils");
 let assert = require("assert");
@@ -38,14 +38,14 @@ const {
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordapis.test.js]")}`, function () {
     let globalConnectionURI;
 
-    const startSTWithMultitenancyAndAccountLinking = async () => {
+    const startST = async () => {
         return createTenant(globalConnectionURI, randomString());
     };
 
     before(async function () {
         await killAllST();
         await setupST();
-        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
+        globalConnectionURI = await globalStartST();
     });
 
     after(async function () {
@@ -55,7 +55,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
 
     describe("signUpPOST tests", function () {
         it("calling signUpPOST returns email already exists if an EP user exsits with the same email even with account linking turned on", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -129,7 +129,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signUpPOST fails if email exists in some non email password primary user - account linking enabled and email verification required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -208,7 +208,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signUpPOST succeeds, but not linked account, if email exists in some non email password, non primary user, verified account with account linking enabled, and email verification required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -299,7 +299,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signUpPOST fails but not linked account, if email exists in some non email password, non primary user, with account linking enabled, and email verification required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -381,7 +381,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signUpPOST fails but not linked account, if email exists in some non email password, primary user, with account linking enabled, and email verification required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -463,7 +463,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signUpPOST succeeds, and linked account, if email exists in some non email password primary user - account linking enabled and email verification not required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -557,7 +557,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signUpPOST succeeds, and links to older account, if email exists in some non email password, non primary user - account linking enabled, and email verification not required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -646,7 +646,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signUpPOST succeeds if email exists in some non email password primary user - account linking disabled", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -729,7 +729,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signUpPOST succeeds if email exists in some non email password, non primary user - account linking disabled", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -811,7 +811,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signUpPOST fails if email exists in email password primary user - account linking enabled and email verification required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -885,7 +885,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signUpPOST fails if email exists in email password user, non primary user - account linking enabled, and email verification required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -959,7 +959,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signUpPOST fails if email exists in email password primary user - account linking enabled and email verification not required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1036,7 +1036,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signUpPOST fails if email exists in email password, non primary user - account linking enabled, and email verification not required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1115,7 +1115,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signUpPOST fails if email exists in email password primary user - account linking disabled", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1192,7 +1192,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signUpPOST fails if email exists in email password, non primary user - account linking disabled", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1271,7 +1271,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
 
     describe("signInPOST tests", function () {
         it("calling signInPOST creates session with correct userId and recipeUserId in case accounts are linked", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1360,7 +1360,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signInPOST creates session with correct userId and recipeUserId in case accounts are not linked", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1455,7 +1455,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signInPOST calls isSignInAllowed and returns SIGN_IN_NOT_ALLOWED in case that function returns false.", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1542,7 +1542,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signInPOST links account if needed", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1638,7 +1638,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling signInPOST allows sign-in with a fresh user", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,

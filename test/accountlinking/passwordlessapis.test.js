@@ -17,7 +17,7 @@ const {
     setupST,
     killAllST,
     cleanST,
-    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    startST: globalStartST,
     createTenant,
     assertJSONEquals,
 } = require("../utils");
@@ -198,7 +198,7 @@ const consumeCodeBehaviours = [
 
 let globalConnectionURI;
 
-const startSTWithMultitenancyAndAccountLinking = async () => {
+const startST = async () => {
     return createTenant(globalConnectionURI, randomString());
 };
 
@@ -206,7 +206,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
     before(async function () {
         await killAllST();
         await setupST();
-        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
+        globalConnectionURI = await globalStartST();
     });
 
     after(async function () {
@@ -216,7 +216,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
 
     describe("createCodePOST tests", function () {
         it("calling createCodePOST fails if email exists in some non passwordless primary user - account linking enabled and email verification required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -292,7 +292,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
         });
 
         it("calling createCodePOST succeeds, if email exists in some non passwordless, non primary user, verified account with account linking enabled, and email verification required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -373,7 +373,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
         });
 
         it("calling createCodePOST fails during sign up, if email exists in some non passwordless, non primary user, with account linking enabled, and email verification required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -448,7 +448,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
         });
 
         it("calling createCodePOST returns OK during sign in, if email exists in some non passwordless, non primary user, with account linking enabled, and email verification required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -593,7 +593,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
 
         describe("SIGN_IN_UP_NOT_ALLOWED", () => {
             it("should be returned if another (non-primary, unverified) user signs up after the code was created for a pwless sign up", async () => {
-                const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+                const connectionURI = await startST();
                 supertokens.init({
                     supertokens: {
                         connectionURI,
@@ -688,7 +688,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
             });
 
             it("should be returned if another (primary, unverified) user signs up after the code was created for a pwless sign up", async () => {
-                const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+                const connectionURI = await startST();
                 supertokens.init({
                     supertokens: {
                         connectionURI,
@@ -795,7 +795,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/passwordlessapi
 */
 
 async function getCreateCodeTestCase({ pwlessUser, otherRecipeUser, accountLinking, expect }) {
-    const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+    const connectionURI = await startST();
     supertokens.init({
         supertokens: {
             connectionURI,
@@ -916,7 +916,7 @@ async function getCreateCodeTestCase({ pwlessUser, otherRecipeUser, accountLinki
 }
 
 async function getConsumeCodeTestCase({ pwlessUser, otherRecipeUser, accountLinking, expect }) {
-    const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+    const connectionURI = await startST();
     supertokens.init({
         supertokens: {
             connectionURI,

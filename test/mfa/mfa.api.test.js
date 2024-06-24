@@ -16,7 +16,7 @@
 const {
     printPath,
     setupST,
-    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    startST: globalStartST,
     killAllST,
     cleanST,
     createTenant,
@@ -49,14 +49,14 @@ const {
 describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     let globalConnectionURI;
 
-    const startSTWithMultitenancy = async () => {
+    const startST = async () => {
         return createTenant(globalConnectionURI, randomString());
     };
 
     before(async function () {
         await killAllST();
         await setupST();
-        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
+        globalConnectionURI = await globalStartST();
     });
 
     after(async function () {
@@ -65,7 +65,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     });
 
     it("test with firstFactors not set allows all factors", async function () {
-        const connectionURI = await startSTWithMultitenancy();
+        const connectionURI = await startST();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -162,7 +162,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     });
 
     // it("test mfa info after first factor", async function () {
-    //     const connectionURI = await startSTWithMultitenancy();
+    //     const connectionURI = await startST();
     //     SuperTokens.init({
     //         supertokens: {
     //             connectionURI,
@@ -225,7 +225,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     // });
 
     // it("mfa info errors if the user is stuck", async function () {
-    //     const connectionURI = await startSTWithMultitenancy();
+    //     const connectionURI = await startST();
     //     let requireFactor = false;
 
     //     SuperTokens.init({
@@ -283,7 +283,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     // });
 
     // it("test that only a valid first factor is allowed to login", async function () {
-    //     const connectionURI = await startSTWithMultitenancy();
+    //     const connectionURI = await startST();
     //     SuperTokens.init({
     //         supertokens: {
     //             connectionURI,
@@ -320,7 +320,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     // });
 
     // it("test that only a valid first factor is allowed to login and tenant config is prioritised", async function () {
-    //     const connectionURI = await startSTWithMultitenancy();
+    //     const connectionURI = await startST();
     //     SuperTokens.init({
     //         supertokens: {
     //             connectionURI,
@@ -361,7 +361,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     // });
 
     // it("test that once user has more than one factor setup, they need 2FA to setup a new factor", async function () {
-    //     const connectionURI = await startSTWithMultitenancy();
+    //     const connectionURI = await startST();
     //     SuperTokens.init({
     //         supertokens: {
     //             connectionURI,
@@ -423,7 +423,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     // });
 
     // it("test that existing user sign in links the user to the current one if allowed", async function () {
-    //     const connectionURI = await startSTWithMultitenancy();
+    //     const connectionURI = await startST();
     //     SuperTokens.init({
     //         supertokens: {
     //             connectionURI,
@@ -480,7 +480,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     // });
 
     // it("test that the factor doesn't get completed if signing in with another primary user", async function () {
-    //     const connectionURI = await startSTWithMultitenancy();
+    //     const connectionURI = await startST();
     //     SuperTokens.init({
     //         supertokens: {
     //             connectionURI,

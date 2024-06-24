@@ -12,14 +12,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const {
-    printPath,
-    setupST,
-    killAllST,
-    cleanST,
-    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
-    createTenant,
-} = require("../utils");
+const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
 const {
     getTestEmail,
     postAPI,
@@ -48,7 +41,7 @@ const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping
 
 let globalConnectionURI;
 
-const startSTWithMultitenancyAndAccountLinking = async () => {
+const startST = async () => {
     return createTenant(globalConnectionURI, randomString());
 };
 
@@ -56,7 +49,7 @@ const setup = async function setup(config = {}) {
     const info = {
         coreCallCount: 0,
     };
-    const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+    const connectionURI = await startST();
     supertokens.init({
         // debug: true,
         supertokens: {
@@ -140,7 +133,7 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
     before(async function () {
         await killAllST();
         await setupST();
-        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
+        globalConnectionURI = await globalStartST();
     });
 
     after(async function () {

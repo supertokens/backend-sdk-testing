@@ -334,16 +334,6 @@ module.exports.startST = async function (config = {}) {
     });
 };
 
-module.exports.startSTWithMultitenancy = async function (config) {
-    const connectionURI = await module.exports.startST(config);
-    return connectionURI;
-};
-
-module.exports.startSTWithMultitenancyAndAccountLinking = async function (config) {
-    const connectionURI = await module.exports.startST(config);
-    return connectionURI;
-};
-
 module.exports.createTenant = async function (connectionURI, appId, coreConfig = {}) {
     const createAppResp = await fetch(`${connectionURI}/recipe/multitenancy/app`, {
         method: "PUT",
