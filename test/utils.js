@@ -343,19 +343,6 @@ module.exports.startST = async function (config = {}) {
 
                         await module.exports.removeAppAndTenants(appId);
 
-                        const OPAQUE_KEY_WITH_MULTITENANCY_FEATURE =
-                            "ijaleljUd2kU9XXWLiqFYv5br8nutTxbyBqWypQdv2N-BocoNriPrnYQd0NXPm8rVkeEocN9ayq0B7c3Pv-BTBIhAZSclXMlgyfXtlwAOJk=9BfESEleW6LyTov47dXu";
-
-                        await fetch(`http://${host}:${port}/ee/license`, {
-                            method: "PUT",
-                            headers: {
-                                "content-type": "application/json; charset=utf-8",
-                            },
-                            body: JSON.stringify({
-                                licenseKey: OPAQUE_KEY_WITH_MULTITENANCY_FEATURE,
-                            }),
-                        });
-
                         // Create app
                         const createAppResp = await fetch(`http://${host}:${port}/recipe/multitenancy/app`, {
                             method: "PUT",
@@ -388,37 +375,11 @@ module.exports.startST = async function (config = {}) {
 
 module.exports.startSTWithMultitenancy = async function (config) {
     const connectionURI = await module.exports.startST(config);
-    const OPAQUE_KEY_WITH_MULTITENANCY_FEATURE =
-        "ijaleljUd2kU9XXWLiqFYv5br8nutTxbyBqWypQdv2N-BocoNriPrnYQd0NXPm8rVkeEocN9ayq0B7c3Pv-BTBIhAZSclXMlgyfXtlwAOJk=9BfESEleW6LyTov47dXu";
-
-    await fetch(`${connectionURI}/ee/license`, {
-        method: "PUT",
-        headers: {
-            "content-type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify({
-            licenseKey: OPAQUE_KEY_WITH_MULTITENANCY_FEATURE,
-        }),
-    });
     return connectionURI;
 };
 
 module.exports.startSTWithMultitenancyAndAccountLinking = async function (config) {
     const connectionURI = await module.exports.startST(config);
-
-    const OPAQUE_KEY_WITH_FEATURES =
-        "N2yITHflaFS4BPm7n0bnfFCjP4sJoTERmP0J=kXQ5YONtALeGnfOOe2rf2QZ0mfOh0aO3pBqfF-S0jb0ABpat6pySluTpJO6jieD6tzUOR1HrGjJO=50Ob3mHi21tQHJ";
-
-    await fetch(`${connectionURI}/ee/license`, {
-        method: "PUT",
-        headers: {
-            "content-type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify({
-            licenseKey: OPAQUE_KEY_WITH_FEATURES,
-        }),
-    });
-
     return connectionURI;
 };
 
