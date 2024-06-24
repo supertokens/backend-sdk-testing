@@ -42,20 +42,9 @@ git clone https://github.com/supertokens/supertokens-python.git
 ##### Node
 
 4. Install the project dependencies  
-   `npm i -d`
-5. Install the dependencies inside `test/with-typescript`  
-   `cd test/with-typescript && npm i && cd ../..`
-6. Build packages
+   `npm i -d && npm run set-up-hooks`
+5. Build packages
    `npm run build-pretty`
-
-##### Python
-
-7. Create a new python virtual environment
-   `python3 -m venv pyenv`
-8. Activate the new virtual environment
-   `source pyenv/bin/activate`
-9. Install dependencies
-   `pip install -r requirements.txt`
 
 ## Modifying Code
 
@@ -68,22 +57,17 @@ git clone https://github.com/supertokens/supertokens-python.git
 1. Navigate to the `supertokens-root` repository
 2. Start the testing environment  
    `./startTestEnv --wait`
-3. Navigate to the `backend-sdk-testing` repository
-4. Start the API mock server, and keep it running
-   `npm run start:node`
+3. Navigate to the `supertokens-node` repository
+4. Start the API test server, and keep it running
+   `cd test/test-server && npm i && npm run start`
 5. In another terminal run all tests against node-sdk
    `INSTALL_PATH=../supertokens-root npm test`
 
 ## Python Testing
+TODO
 
-1. Navigate to the `supertokens-root` repository
-2. Start the testing environment  
-   `./startTestEnv --wait`
-3. Navigate to the `backend-sdk-testing` repository
-4. Start the API mock server, and keep it running
-   `npm run start:python`
-5. In another terminal run all tests against node-sdk
-   `ST_SDK=python INSTALL_PATH=../supertokens-root npm test`
+## Golang Testing
+TODO
 
 ## Pull Request
 
