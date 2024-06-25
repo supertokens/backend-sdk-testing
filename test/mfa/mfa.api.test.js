@@ -222,63 +222,74 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
         assert.deepEqual(["emailpassword", "otp-email", "totp"], res.body.factors.allowedToSetup);
     });
 
-    // it("mfa info errors if the user is stuck", async function () {
-    //     const connectionURI = await startST();
-    //     let requireFactor = false;
+    it("mfa info errors if the user is stuck", async function () {
+        const connectionURI = await startST();
+        let requireFactor = false;
 
-    //     supertokens.init({
-    //         supertokens: {
-    //             connectionURI,
-    //         },
-    //         appInfo: {
-    //             apiDomain: "api.supertokens.io",
-    //             appName: "supertokens",
-    //             websiteDomain: "supertokens.io",
-    //         },
-    //         recipeList: [
-    //             EmailPassword.init(),
-    //             ThirdParty.init(),
-    //             AccountLinking.init({
-    //                 shouldDoAutomaticAccountLinking: async () => ({
-    //                     shouldAutomaticallyLink: true,
-    //                     shouldRequireVerification: true,
-    //                 }),
-    //             }),
-    //             MultiFactorAuth.init({
-    //                 override: {
-    //                     functions: (oI) => ({
-    //                         ...oI,
-    //                         getMFARequirementsForAuth: () => (requireFactor ? ["otp-phone"] : []),
-    //                     }),
-    //                 },
-    //             }),
-    //             Session.init(),
-    //         ],
-    //     });
+        supertokens.init({
+            supertokens: {
+                connectionURI,
+            },
+            appInfo: {
+                apiDomain: "api.supertokens.io",
+                appName: "supertokens",
+                websiteDomain: "supertokens.io",
+            },
+            recipeList: [
+                EmailPassword.init(),
+                ThirdParty.init(),
+                AccountLinking.init({
+                    shouldDoAutomaticAccountLinking: async () => ({
+                        shouldAutomaticallyLink: true,
+                        shouldRequireVerification: true,
+                    }),
+                }),
+                MultiFactorAuth.init({
+                    override: {
+                        apis: (oI) => {
+                            return {
+                                ...oI,
+                                resyncSessionAndFetchMFAInfoPUT: async (input) => {
+                                    let body = await input.options.req.getJSONBody();
+                                    if (body.userContext && body.userContext.requireFactor !== undefined) {
+                                        input.userContext.requireFactor = body.userContext.requireFactor;
+                                    }
+                                    return oI.resyncSessionAndFetchMFAInfoPUT(input);
+                                },
+                            };
+                        },
+                        functions: (oI) => ({
+                            ...oI,
+                            getMFARequirementsForAuth: (input) =>
+                                input.userContext.requireFactor ? ["otp-phone"] : [],
+                        }),
+                    },
+                }),
+                Session.init(),
+            ],
+        });
 
-    //     const app = getTestExpressApp();
+        await EmailPassword.signUp("public", "test@example.com", "password");
 
-    //     await EmailPassword.signUp("public", "test@example.com", "password");
+        let res = await epSignIn("test@example.com", "password");
+        assert.equal("OK", res.body.status);
 
-    //     let res = await epSignIn(app, "test@example.com", "password");
-    //     assert.equal("OK", res.body.status);
+        let cookies = extractInfoFromResponse(res);
+        const accessToken = cookies.accessTokenFromAny;
 
-    //     let cookies = extractInfoFromResponse(res);
-    //     const accessToken = cookies.accessTokenFromAny;
+        res = await getMfaInfo(accessToken);
+        assert.equal("OK", res.body.status);
+        assert.deepEqual([], res.body.factors.next);
 
-    //     res = await getMfaInfo(app, accessToken);
-    //     assert.equal("OK", res.body.status);
-    //     assert.deepEqual([], res.body.factors.next);
-
-    //     requireFactor = true;
-
-    //     res = await getMfaInfo(app, accessToken, 500);
-    //     assert(
-    //         res.text.includes(
-    //             "The user is required to complete secondary factors they are not allowed to (otp-phone), likely because of configuration issues."
-    //         )
-    //     );
-    // });
+        res = await getMfaInfo(accessToken, 500, {
+            requireFactor: true,
+        });
+        assert(
+            res.body.message.includes(
+                "The user is required to complete secondary factors they are not allowed to (otp-phone), likely because of configuration issues."
+            )
+        );
+    });
 
     // it("test that only a valid first factor is allowed to login", async function () {
     //     const connectionURI = await startST();

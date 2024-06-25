@@ -98,7 +98,7 @@ module.exports.epSignIn = async function (email, password, accessToken) {
                 })
                 .end((err, res) => {
                     if (err) {
-                        resolve(undefined);
+                        resolve(err);
                     } else {
                         resolve(res);
                     }
@@ -281,15 +281,16 @@ module.exports.tpSignInUp = async function (thirdPartyId, email, accessToken) {
     }
 };
 
-module.exports.getMfaInfo = async function (accessToken, statusCode = 200) {
+module.exports.getMfaInfo = async function (accessToken, statusCode = 200, userContext = {}) {
     return await new Promise((resolve) => {
         request()
             .put("/auth/mfa/info")
             .set("Authorization", `Bearer ${accessToken}`)
+            .send({ userContext })
             .expect(statusCode)
             .end((err, res) => {
                 if (err) {
-                    resolve(undefined);
+                    resolve(err);
                 } else {
                     resolve(res);
                 }
