@@ -17,7 +17,7 @@ const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTe
 let assert = require("assert");
 const { plessCreateCode, plessResendCode, getTestExpressApp, getTestEmail, getTestPhoneNumber } = require("./utils");
 const { recipesMock, randomString, getOverrideParams } = require("../../api-mock");
-const { Session, supertokens: SuperTokens, MultiFactorAuth, Passwordless, ProcessState } = recipesMock;
+const { Session, supertokens: SuperTokens, MultiFactorAuth, Passwordless } = recipesMock;
 
 describe(`mfa with passwordless: ${printPath("[test/mfa/mfa.passwordlessapis.test.js]")}`, function () {
     let globalConnectionURI;
