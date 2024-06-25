@@ -31,6 +31,18 @@ export const PasswordlessMock: Partial<typeof Passwordless> = {
                           },
                       }
                     : {}),
+                ...(config?.override
+                    ? {
+                          override: {
+                              ...config.override,
+                              ...(config.override.apis
+                                  ? {
+                                        apis: minify(config?.override?.apis.toString()),
+                                    }
+                                  : {}),
+                          },
+                      }
+                    : {}),
             }),
             recipeId: "passwordless",
         } as any;

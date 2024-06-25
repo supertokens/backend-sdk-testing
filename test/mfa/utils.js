@@ -16,7 +16,7 @@
 const { recipesMock, request } = require("../../api-mock");
 const { EmailVerification, Passwordless, supertokens } = recipesMock;
 
-module.exports.epSignUp = async function (email, password, accessToken) {
+module.exports.epSignUp = async function (email, password, accessToken, userContext = {}) {
     if (accessToken === undefined) {
         return await new Promise((resolve) => {
             request()
@@ -32,6 +32,7 @@ module.exports.epSignUp = async function (email, password, accessToken) {
                             value: email,
                         },
                     ],
+                    userContext,
                 })
                 .expect(200)
                 .end((err, res) => {
@@ -58,6 +59,7 @@ module.exports.epSignUp = async function (email, password, accessToken) {
                             value: email,
                         },
                     ],
+                    userContext,
                 })
                 .expect(200)
                 .end((err, res) => {
@@ -208,7 +210,7 @@ module.exports.plessResendCode = async function (code, accessToken) {
     }
 };
 
-module.exports.plessEmailSignInUp = async function (email, accessToken) {
+module.exports.plessEmailSignInUp = async function (email, accessToken, userContext = {}) {
     const code = await Passwordless.createCode({
         tenantId: "public",
         email,
@@ -222,6 +224,7 @@ module.exports.plessEmailSignInUp = async function (email, accessToken) {
                     preAuthSessionId: code.preAuthSessionId,
                     userInputCode: code.userInputCode,
                     deviceId: code.deviceId,
+                    userContext,
                 })
                 .end((err, res) => {
                     if (err) {
@@ -240,6 +243,7 @@ module.exports.plessEmailSignInUp = async function (email, accessToken) {
                     preAuthSessionId: code.preAuthSessionId,
                     userInputCode: code.userInputCode,
                     deviceId: code.deviceId,
+                    userContext,
                 })
                 .expect(200)
                 .end((err, res) => {
@@ -297,7 +301,7 @@ module.exports.plessPhoneSigninUp = async function (phoneNumber, accessToken) {
     }
 };
 
-module.exports.tpSignInUp = async function (thirdPartyId, email, accessToken) {
+module.exports.tpSignInUp = async function (thirdPartyId, email, accessToken, userContext = {}) {
     if (accessToken === undefined) {
         return await new Promise((resolve) => {
             request()
@@ -310,10 +314,11 @@ module.exports.tpSignInUp = async function (thirdPartyId, email, accessToken) {
                             email: email,
                         },
                     },
+                    userContext,
                 })
                 .end((err, res) => {
                     if (err) {
-                        resolve(undefined);
+                        resolve(err);
                     } else {
                         resolve(res);
                     }
@@ -332,10 +337,11 @@ module.exports.tpSignInUp = async function (thirdPartyId, email, accessToken) {
                             email: email,
                         },
                     },
+                    userContext,
                 })
                 .end((err, res) => {
                     if (err) {
-                        resolve(undefined);
+                        resolve(err);
                     } else {
                         resolve(res);
                     }

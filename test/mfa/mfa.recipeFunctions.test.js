@@ -15,7 +15,6 @@
 
 const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTenant } = require("../utils");
 let assert = require("assert");
-// let MultiFactorAuthRecipe = require("../../lib/build/recipe/multifactorauth/recipe").default;
 const { recipesMock, getOverrideParams, randomString } = require("../../api-mock");
 const {
     AccountLinking,
