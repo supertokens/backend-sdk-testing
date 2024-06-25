@@ -13,21 +13,6 @@ export function minify(code: string) {
             keep_fnames: true,
         },
     });
-
-    // // TODO: remove this once we have all functions that we need to handle
-    // if (result.code && !uniqueFn.has(result.code)) {
-    //     uniqueFn.set(result.code, code);
-    //     fs.writeFileSync(
-    //         "overridesFn.json",
-    //         JSON.stringify(
-    //             Array.from(uniqueFn.entries())
-    //                 .sort()
-    //                 .map(([key, value]) => key),
-    //             null,
-    //             2
-    //         )
-    //     );
-    // }
     return result.code;
 }
 

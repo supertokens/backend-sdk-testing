@@ -12,14 +12,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const {
-    printPath,
-    setupST,
-    killAllST,
-    cleanST,
-    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
-    createTenant,
-} = require("../utils");
+const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
 let assert = require("assert");
 const { recipesMock, randomString } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
@@ -28,14 +21,14 @@ const { AccountLinking, EmailPassword, EmailVerification, Session, supertokens, 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.test.js]")}`, function () {
     let globalConnectionURI;
 
-    const startSTWithMultitenancyAndAccountLinking = async () => {
+    const startST = async () => {
         return createTenant(globalConnectionURI, randomString());
     };
 
     before(async function () {
         await killAllST();
         await setupST();
-        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
+        globalConnectionURI = await globalStartST();
     });
 
     after(async function () {
@@ -45,7 +38,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
 
     describe("sign up tests", function () {
         it("sign up without account linking does not make primary user", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -63,7 +56,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
         });
 
         it("sign up with account linking makes primary user if email verification is not require", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -87,7 +80,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
         });
 
         it("sign up with account linking does not make primary user if email verification is required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -111,7 +104,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
         });
 
         it("sign up allowed even if account linking is on and email already used by another recipe (cause in recipe level, it is allowed), but no linking happens if email verification is required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -166,7 +159,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
         });
 
         it("sign up allowed if account linking is on, email verification is off, and email already used by another recipe", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -221,7 +214,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
         });
 
         it("sign up allowed if account linking is off, and email already used by another recipe", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -274,7 +267,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
         });
 
         it("sign up doesn't link user to existing account if email verification is needed", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -331,7 +324,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
 
     describe("sign in tests", function () {
         it("sign in recipe function should make the user primary if verification is not required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -362,7 +355,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
         });
 
         it("sign in recipe function should link to the session user if verification is not required", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -403,7 +396,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
         });
 
         it("sign in recipe function marks email as verified if linked accounts has email as verified and uses the same email", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -461,7 +454,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
         });
 
         it("sign in returns the primary user even if accountlinking was later disabled", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -518,7 +511,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
 
     describe("update email or password tests", function () {
         it("update email which belongs to other primary account, and current user is also a primary user should not work", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -584,7 +577,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
         });
 
         it("update email which belongs to other primary account should work if email password user is not a primary user or is not linked, and account linking is disabled", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -656,7 +649,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
         });
 
         it("update email which belongs to linked user should mark email as verified of email password user", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,

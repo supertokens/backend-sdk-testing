@@ -18,7 +18,7 @@ const {
     killAllST,
     cleanST,
     extractInfoFromResponse,
-    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    startST: globalStartST,
     createTenant,
 } = require("../utils");
 let assert = require("assert");
@@ -39,14 +39,14 @@ const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping
 describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailverificationapis.test.js]")}`, function () {
     let globalConnectionURI;
 
-    const startSTWithMultitenancyAndAccountLinking = async () => {
+    const startST = async () => {
         return createTenant(globalConnectionURI, randomString());
     };
 
     before(async function () {
         await killAllST();
         await setupST();
-        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
+        globalConnectionURI = await globalStartST();
     });
 
     after(async function () {
@@ -56,7 +56,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
     describe("updateSessionIfRequiredPostEmailVerification tests", function () {
         it("updateSessionIfRequiredPostEmailVerification throws unauthorised error in case user does not exist and session exists", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -124,7 +124,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
         });
 
         it("updateSessionIfRequiredPostEmailVerification does not throws unauthorised error in case user does not exist and session does not exists", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -188,7 +188,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
         });
 
         it("updateSessionIfRequiredPostEmailVerification sets the right claim in the session post verification of the current logged in user, if it did not get linked to another user ", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -271,7 +271,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
         });
 
         it("updateSessionIfRequiredPostEmailVerification creates a new session if the user is linked to another user", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -370,7 +370,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
         });
 
         it("updateSessionIfRequiredPostEmailVerification works fine if session does not exist for user", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -445,7 +445,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
     describe("isEmailVerifiedGET tests", function () {
         it("calling isEmailVerifiedGET  gives false for currently logged in user if email is not verified, and updates session", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -515,7 +515,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
         });
 
         it("calling isEmailVerifiedGET gives true for currently logged in user if email is verified, and updates session", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -591,7 +591,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
         });
 
         it("calling isEmailVerifiedGET gives false for currently logged in user if email is not verified, and updates session if needed", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -673,7 +673,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
         });
 
         it("calling isEmailVerifiedGET gives true for currently logged in user if email is verified, and updates session if needed", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -756,7 +756,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
     describe("generateEmailVerifyTokenPOST tests", function () {
         it("calling generateEmailVerifyTokenPOST generates for currently logged in user if email is not verified, and does not update session", async function () {
             let userInCallback = undefined;
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -845,7 +845,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
         it("calling generateEmailVerifyTokenPOST gives already verified for currently logged in user if email is verified, and updates session", async function () {
             let userInCallback = undefined;
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -936,7 +936,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
         it("calling generateEmailVerifyTokenPOST sends email for currently logged in user if email is not verified, and updates session if needed", async function () {
             let userInCallback = undefined;
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1035,7 +1035,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
         it("calling generateEmailVerifyTokenPOST gives email already verified for currently logged in user if email is verified, and updates session if needed", async function () {
             let userInCallback = undefined;
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1132,7 +1132,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
     describe("getEmailForRecipeUserId tests", function () {
         it("calling getEmailForRecipeUserId returns email provided from the config", async function () {
             let email;
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1182,7 +1182,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
         it("calling getEmailForRecipeUserId falls back on default method of getting email if UNKNOWN_USER_ID_ERROR is returned", async function () {
             let email;
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1231,7 +1231,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
         it("calling getEmailForRecipeUserId with recipe user id that has many other linked recipe user ids returns the right email", async function () {
             let email;
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1347,7 +1347,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
     it("email and session flow work with random user ID", async function () {
         let token = undefined;
-        const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        const connectionURI = await startST();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -1487,7 +1487,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
     it("email and session flow work with random user ID, with session during verify email", async function () {
         let token = undefined;
-        const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        const connectionURI = await startST();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -1629,7 +1629,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
     describe("verifyEmailPOST tests", function () {
         it("verifyEmailPOST links accounts if required for new user post sign up", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1718,7 +1718,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
         });
 
         it("verifyEmailPOST does not link accounts if account linking is disabled", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
                     connectionURI,

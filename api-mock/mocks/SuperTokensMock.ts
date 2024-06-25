@@ -62,4 +62,11 @@ export const SuperTokensMock: Partial<typeof SuperTokens> = {
             input,
         });
     },
+    getUsersOldestFirst: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/supertokens/getusersoldestfirst",
+            input,
+        });
+    },
 };

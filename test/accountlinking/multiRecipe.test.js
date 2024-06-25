@@ -12,14 +12,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const {
-    printPath,
-    setupST,
-    killAllST,
-    cleanST,
-    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
-    createTenant,
-} = require("../utils");
+const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
 let assert = require("assert");
 const { recipesMock, randomString, request } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
@@ -36,14 +29,14 @@ const {
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/multiRecipe.test.js]")}`, function () {
     let globalConnectionURI;
 
-    const startSTWithMultitenancyAndAccountLinking = async () => {
+    const startST = async () => {
         return createTenant(globalConnectionURI, randomString());
     };
 
     before(async function () {
         await killAllST();
         await setupST();
-        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
+        globalConnectionURI = await globalStartST();
     });
 
     after(async function () {
@@ -53,7 +46,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multiRecipe.tes
 
     describe("migration tests", function () {
         it("allows sign in with verified recipe user even if there is an unverified one w/ the same email", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             initST(connectionURI);
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
@@ -92,7 +85,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multiRecipe.tes
         });
 
         it("should not allow sign in with unverified recipe user when there is a verified one w/ the same email", async function () {
-            const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+            const connectionURI = await startST();
             initST(connectionURI);
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");

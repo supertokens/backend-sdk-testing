@@ -14,7 +14,6 @@
  */
 const { exec } = require("child_process");
 const nock = require("nock");
-const request = require("supertest");
 let fs = require("fs");
 const { default: fetch } = require("cross-fetch");
 let SuperTokens = require("supertokens-node/lib/build/supertokens").default;
@@ -32,14 +31,8 @@ let MultitenancyRecipe = require("supertokens-node/lib/build/recipe/multitenancy
 let MultiFactorAuthRecipe = require("supertokens-node/lib/build/recipe/multifactorauth/recipe").default;
 const UserRolesRecipe = require("supertokens-node/lib/build/recipe/userroles/recipe").default;
 let { ProcessState } = require("supertokens-node/lib/build/processState");
-let { Querier } = require("supertokens-node/lib/build/querier");
-let { maxVersion } = require("supertokens-node/lib/build/utils");
 const { default: OpenIDRecipe } = require("supertokens-node/lib/build/recipe/openid/recipe");
-const { wrapRequest } = require("supertokens-node/framework/express");
-const { join } = require("path");
 let debug = require("debug");
-
-const users = require("./users.json");
 let assert = require("assert");
 const { CollectingResponse } = require("supertokens-node/framework/custom");
 
@@ -187,31 +180,6 @@ module.exports.extractInfoFromResponse = function (res) {
     };
 };
 
-module.exports.extractCookieCountInfo = function (res) {
-    let accessToken = 0;
-    let refreshToken = 0;
-    let idRefreshToken = 0;
-    let cookies = res.headers["set-cookie"] || res.headers["Set-Cookie"];
-    cookies = cookies === undefined ? [] : cookies;
-    if (!Array.isArray(cookies)) {
-        cookies = [cookies];
-    }
-    cookies.forEach((i) => {
-        if (i.split(";")[0].split("=")[0] === "sAccessToken") {
-            accessToken += 1;
-        } else if (i.split(";")[0].split("=")[0] === "sRefreshToken") {
-            refreshToken += 1;
-        } else {
-            idRefreshToken += 1;
-        }
-    });
-    return {
-        accessToken,
-        refreshToken,
-        idRefreshToken,
-    };
-};
-
 module.exports.setupST = async function () {
     let installationPath = process.env.INSTALL_PATH;
     try {
@@ -280,13 +248,6 @@ module.exports.killAllST = async function () {
     nock.cleanAll();
 };
 
-module.exports.killAllSTCoresOnly = async function () {
-    let pids = await getListOfPids();
-    for (let i = 0; i < pids.length; i++) {
-        await module.exports.stopST(pids[i]);
-    }
-};
-
 module.exports.startST = async function (config = {}) {
     const host = config.host ?? "localhost";
     const port = config.port ?? 8080;
@@ -343,19 +304,6 @@ module.exports.startST = async function (config = {}) {
 
                         await module.exports.removeAppAndTenants(appId);
 
-                        const OPAQUE_KEY_WITH_MULTITENANCY_FEATURE =
-                            "ijaleljUd2kU9XXWLiqFYv5br8nutTxbyBqWypQdv2N-BocoNriPrnYQd0NXPm8rVkeEocN9ayq0B7c3Pv-BTBIhAZSclXMlgyfXtlwAOJk=9BfESEleW6LyTov47dXu";
-
-                        await fetch(`http://${host}:${port}/ee/license`, {
-                            method: "PUT",
-                            headers: {
-                                "content-type": "application/json; charset=utf-8",
-                            },
-                            body: JSON.stringify({
-                                licenseKey: OPAQUE_KEY_WITH_MULTITENANCY_FEATURE,
-                            }),
-                        });
-
                         // Create app
                         const createAppResp = await fetch(`http://${host}:${port}/recipe/multitenancy/app`, {
                             method: "PUT",
@@ -384,42 +332,6 @@ module.exports.startST = async function (config = {}) {
             reject("could not start ST process");
         }
     });
-};
-
-module.exports.startSTWithMultitenancy = async function (config) {
-    const connectionURI = await module.exports.startST(config);
-    const OPAQUE_KEY_WITH_MULTITENANCY_FEATURE =
-        "ijaleljUd2kU9XXWLiqFYv5br8nutTxbyBqWypQdv2N-BocoNriPrnYQd0NXPm8rVkeEocN9ayq0B7c3Pv-BTBIhAZSclXMlgyfXtlwAOJk=9BfESEleW6LyTov47dXu";
-
-    await fetch(`${connectionURI}/ee/license`, {
-        method: "PUT",
-        headers: {
-            "content-type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify({
-            licenseKey: OPAQUE_KEY_WITH_MULTITENANCY_FEATURE,
-        }),
-    });
-    return connectionURI;
-};
-
-module.exports.startSTWithMultitenancyAndAccountLinking = async function (config) {
-    const connectionURI = await module.exports.startST(config);
-
-    const OPAQUE_KEY_WITH_FEATURES =
-        "N2yITHflaFS4BPm7n0bnfFCjP4sJoTERmP0J=kXQ5YONtALeGnfOOe2rf2QZ0mfOh0aO3pBqfF-S0jb0ABpat6pySluTpJO6jieD6tzUOR1HrGjJO=50Ob3mHi21tQHJ";
-
-    await fetch(`${connectionURI}/ee/license`, {
-        method: "PUT",
-        headers: {
-            "content-type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify({
-            licenseKey: OPAQUE_KEY_WITH_FEATURES,
-        }),
-    });
-
-    return connectionURI;
 };
 
 module.exports.createTenant = async function (connectionURI, appId, coreConfig = {}) {
@@ -542,267 +454,6 @@ const consoleOptions = {
     blue: 34,
     purple: 35,
     cyan: 36,
-};
-
-module.exports.signUPRequest = async function (app, email, password) {
-    return new Promise(function (resolve) {
-        request(app)
-            .post("/auth/signup")
-            .set("st-auth-mode", "cookie")
-            .send({
-                formFields: [
-                    {
-                        id: "password",
-                        value: password,
-                    },
-                    {
-                        id: "email",
-                        value: email,
-                    },
-                ],
-            })
-            .end((err, res) => {
-                if (err) {
-                    resolve(undefined);
-                } else {
-                    resolve(res);
-                }
-            });
-    });
-};
-
-module.exports.signUPRequestEmptyJSON = async function (app) {
-    return new Promise(function (resolve) {
-        request(app)
-            .post("/auth/signup")
-            .send({})
-            .end((err, res) => {
-                if (err) {
-                    resolve(undefined);
-                } else {
-                    resolve(res);
-                }
-            });
-    });
-};
-
-module.exports.signUPRequestNoBody = async function (app) {
-    return new Promise(function (resolve) {
-        request(app)
-            .post("/auth/signup")
-            .end((err, res) => {
-                if (err) {
-                    resolve(undefined);
-                } else {
-                    resolve(res);
-                }
-            });
-    });
-};
-
-module.exports.signInUPCustomRequest = async function (app, email, id) {
-    nock("https://test.com").post("/oauth/token").reply(200, {
-        id,
-        email,
-    });
-    return new Promise(function (resolve) {
-        request(app)
-            .post("/auth/signinup")
-            .send({
-                thirdPartyId: "custom",
-                redirectURIInfo: {
-                    redirectURIOnProviderDashboard: "http://127.0.0.1/callback",
-                    redirectURIQueryParams: {
-                        code: "abcdefghj",
-                    },
-                },
-            })
-            .end((err, res) => {
-                if (err) {
-                    resolve(undefined);
-                } else {
-                    resolve(res);
-                }
-            });
-    });
-};
-
-module.exports.emailVerifyTokenRequest = async function (app, accessToken, antiCsrf, userId) {
-    let result = await new Promise(function (resolve) {
-        request(app)
-            .post("/auth/user/email/verify/token")
-            .set("Cookie", ["sAccessToken=" + accessToken])
-            .set("anti-csrf", antiCsrf)
-            .send({
-                userId: typeof userId === "string" ? userId : userId.getAsString(),
-            })
-            .end((err, res) => {
-                if (err) {
-                    resolve(undefined);
-                } else {
-                    resolve(res);
-                }
-            });
-    });
-
-    // wait for the callback to be called...
-    await new Promise((res) => setTimeout(res, 500));
-
-    return result;
-};
-
-module.exports.mockLambdaProxyEvent = function (path, httpMethod, headers, body, proxy) {
-    return {
-        path,
-        httpMethod,
-        headers,
-        body,
-        requestContext: {
-            path: `${proxy}${path}`,
-        },
-    };
-};
-
-module.exports.mockLambdaProxyEventV2 = function (path, httpMethod, headers, body, proxy, cookies, queryParams) {
-    return {
-        version: "2.0",
-        httpMethod,
-        headers,
-        body,
-        cookies,
-        requestContext: {
-            http: {
-                path: `${proxy}${path}`,
-            },
-            stage: proxy.slice(1),
-        },
-        queryStringParameters: queryParams,
-    };
-};
-
-module.exports.isCDIVersionCompatible = async function (compatibleCDIVersion) {
-    let currCDIVersion = await Querier.getNewInstanceOrThrowError(undefined).getAPIVersion();
-
-    if (
-        maxVersion(currCDIVersion, compatibleCDIVersion) === compatibleCDIVersion &&
-        currCDIVersion !== compatibleCDIVersion
-    ) {
-        return false;
-    }
-    return true;
-};
-
-module.exports.generateRandomCode = function (size) {
-    let characters = "ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
-    let randomString = "";
-
-    //loop to select a new character in each iteration
-    for (let i = 0; i < size; i++) {
-        let randdomNumber = Math.floor(Math.random() * characters.length);
-        randomString += characters.substring(randdomNumber, randdomNumber + 1);
-    }
-    return randomString;
-};
-module.exports.delay = async function (time) {
-    await new Promise((r) => setTimeout(r, time * 1000));
-};
-
-module.exports.areArraysEqual = function (arr1, arr2) {
-    if (arr1.length !== arr2.length) {
-        return false;
-    }
-
-    arr1.sort();
-    arr2.sort();
-
-    for (let index in arr1) {
-        if (arr1[index] !== arr2[index]) {
-            return false;
-        }
-    }
-
-    return true;
-};
-
-/**
- *
- * @returns {import("express").Response}
- */
-module.exports.mockResponse = () => {
-    const headers = {};
-    const res = {
-        getHeaders: () => headers,
-        getHeader: (key) => headers[key],
-        setHeader: (key, val) => (headers[key] = val),
-    };
-    return res;
-};
-
-/**
- *
- * @returns {import("express").Request}
- */
-module.exports.mockRequest = () => {
-    const headers = {};
-    const req = {
-        headers,
-        get: (key) => headers[key],
-        header: (key) => headers[key],
-    };
-    return req;
-};
-
-module.exports.getAllFilesInDirectory = (path) => {
-    return fs
-        .readdirSync(path, {
-            withFileTypes: true,
-        })
-        .flatMap((file) => {
-            if (file.isDirectory()) {
-                return this.getAllFilesInDirectory(join(path, file.name));
-            } else {
-                return join(path, file.name);
-            }
-        });
-};
-
-module.exports.createUsers = async (emailpassword = null, passwordless = null, thirdparty = null) => {
-    const usersArray = users.users;
-    for (let i = 0; i < usersArray.length; i++) {
-        const user = usersArray[i];
-        if (user.recipe === "emailpassword" && emailpassword !== null) {
-            await emailpassword.signUp("public", user.email, user.password);
-        }
-        if (user.recipe === "passwordless" && passwordless !== null) {
-            if (user.email !== undefined) {
-                const codeResponse = await passwordless.createCode({
-                    tenantId: "public",
-                    email: user.email,
-                });
-                await passwordless.consumeCode({
-                    tenantId: "public",
-                    preAuthSessionId: codeResponse.preAuthSessionId,
-                    deviceId: codeResponse.deviceId,
-                    userInputCode: codeResponse.userInputCode,
-                });
-            } else {
-                const codeResponse = await passwordless.createCode({
-                    tenantId: "public",
-                    phoneNumber: user.phone,
-                });
-                await passwordless.consumeCode({
-                    tenantId: "public",
-                    preAuthSessionId: codeResponse.preAuthSessionId,
-                    deviceId: codeResponse.deviceId,
-                    userInputCode: codeResponse.userInputCode,
-                });
-            }
-        }
-
-        if (user.recipe === "thirdparty" && thirdparty !== null) {
-            await thirdparty.manuallyCreateOrUpdateUser("public", user.provider, user.userId, user.email, false);
-        }
-    }
 };
 
 module.exports.assertJSONEquals = (actual, expected) => {

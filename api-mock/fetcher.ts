@@ -18,6 +18,7 @@ type Callback = (
 ) => void;
 interface ChainedRequest {
     post: (path: string) => ChainedRequest;
+    put: (path: string) => ChainedRequest;
     get: (path: string) => ChainedRequest;
     set: (header: string, value: string) => ChainedRequest;
     send: (data: any) => ChainedRequest;
@@ -27,7 +28,7 @@ interface ChainedRequest {
 
 export function request(): ChainedRequest {
     let path: string = "";
-    let method: "get" | "post" = "get";
+    let method: "get" | "post" | "put" = "get";
     let headers: Record<string, string> = {
         "Content-Type": "application/json",
     };
@@ -81,6 +82,12 @@ export function request(): ChainedRequest {
         return this;
     }
 
+    function put(pathValue: string): ChainedRequest {
+        path = pathValue;
+        method = "put";
+        return this;
+    }
+
     function get(pathValue: string): ChainedRequest {
         path = pathValue;
         method = "get";
@@ -112,6 +119,7 @@ export function request(): ChainedRequest {
 
     return {
         post,
+        put,
         get,
         set,
         send,

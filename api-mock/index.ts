@@ -10,6 +10,7 @@ import { SessionMock } from "./mocks/SessionMock";
 import { SuperTokensMock } from "./mocks/SuperTokensMock";
 import { TOTPMock } from "./mocks/TOTP";
 import { ThirdPartyMock } from "./mocks/ThirdPartyMock";
+import { UserMetadataMock } from "./mocks/UserMetadataMock";
 import { randomString } from "./utils";
 
 const recipesMock = {
@@ -25,6 +26,7 @@ const recipesMock = {
     Multitenancy: MultitenancyMock,
     Passwordless: PasswordlessMock,
     MultiFactorAuth: MultiFactorAuthMock,
+    UserMetadata: UserMetadataMock,
     TOTP: TOTPMock,
 };
 

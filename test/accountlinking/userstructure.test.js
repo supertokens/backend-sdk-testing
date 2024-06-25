@@ -18,7 +18,7 @@ const {
     killAllST,
     cleanST,
     assertJSONEquals,
-    startSTWithMultitenancyAndAccountLinking: globalStartSTWithMultitenancyAndAccountLinking,
+    startST: globalStartST,
     createTenant,
     extractInfoFromResponse,
 } = require("../utils");
@@ -29,14 +29,14 @@ const { AccountLinking, EmailPassword, Session, supertokens, ThirdParty, Passwor
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.test.js]")}`, function () {
     let globalConnectionURI;
 
-    const startSTWithMultitenancyAndAccountLinking = async () => {
+    const startST = async () => {
         return createTenant(globalConnectionURI, randomString());
     };
 
     before(async function () {
         await killAllST();
         await setupST();
-        globalConnectionURI = await globalStartSTWithMultitenancyAndAccountLinking();
+        globalConnectionURI = await globalStartST();
     });
 
     after(async function () {
@@ -45,7 +45,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("hasSameEmailAs function in user object work", async function () {
-        const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        const connectionURI = await startST();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -67,7 +67,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("toJson works as expected", async function () {
-        const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        const connectionURI = await startST();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -89,7 +89,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("hasSameThirdPartyInfoAs function in user object work", async function () {
-        const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        const connectionURI = await startST();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -178,7 +178,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("hasSamePhoneNumberAs function in user object work", async function () {
-        const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        const connectionURI = await startST();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -212,7 +212,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("user structure FDI 1.17 is correctly returned even if session does not match logged in user", async function () {
-        const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        const connectionURI = await startST();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -311,7 +311,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("user structure FDI 1.18 is correctly returned even if session does not match logged in user", async function () {
-        const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        const connectionURI = await startST();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -407,7 +407,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("user structure FDI 2.0 is correctly returned even if session does not match logged in user", async function () {
-        const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        const connectionURI = await startST();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -506,7 +506,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("user structure FDI 1.18,2.0 is correctly returned even if session does not match logged in user", async function () {
-        const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        const connectionURI = await startST();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -605,7 +605,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("user structure FDI 3.0 is correctly returned even if session does not match logged in user", async function () {
-        const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        const connectionURI = await startST();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -701,7 +701,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("user structure FDI 2.0,3.0 is correctly returned even if session does not match logged in user", async function () {
-        const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        const connectionURI = await startST();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -797,7 +797,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("user structure no FDI is correctly returned even if session does not match logged in user", async function () {
-        const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        const connectionURI = await startST();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -891,7 +891,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("user structure FDI 1.17 is correctly returned based on session user ID", async function () {
-        const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        const connectionURI = await startST();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -947,7 +947,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("user structure FDI 1.16,1.17 is correctly returned even if session does not match logged in user", async function () {
-        const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        const connectionURI = await startST();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -1085,7 +1085,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("user structure FDI 1.17,1.18 is correctly returned even if session does not match logged in user", async function () {
-        const connectionURI = await startSTWithMultitenancyAndAccountLinking();
+        const connectionURI = await startST();
         supertokens.init({
             supertokens: {
                 connectionURI,
