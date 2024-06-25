@@ -134,37 +134,77 @@ module.exports.epSignIn = async function (email, password, accessToken) {
 
 module.exports.plessCreateCode = async function ({ email, phoneNumber }, accessToken) {
     if (accessToken === undefined) {
-        return request().post("/auth/signinup/code").send({
-            email,
-            phoneNumber,
+        return await new Promise((resolve) => {
+            request()
+                .post("/auth/signinup/code")
+                .send({
+                    email,
+                    phoneNumber,
+                })
+                .end((err, res) => {
+                    if (err) {
+                        resolve(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
         });
     } else {
-        return request()
-            .post("/auth/signinup/code")
-            .set("Authorization", `Bearer ${accessToken}`)
-            .send({
-                email,
-                phoneNumber,
-            })
-            .expect(200);
+        return await new Promise((resolve) => {
+            request()
+                .post("/auth/signinup/code")
+                .set("Authorization", `Bearer ${accessToken}`)
+                .send({
+                    email,
+                    phoneNumber,
+                })
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        resolve(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
+        });
     }
 };
 
 module.exports.plessResendCode = async function (code, accessToken) {
     if (accessToken === undefined) {
-        return request().post("/auth/signinup/code/resend").send({
-            preAuthSessionId: code.preAuthSessionId,
-            deviceId: code.deviceId,
+        return await new Promise((resolve) => {
+            request()
+                .post("/auth/signinup/code/resend")
+                .send({
+                    preAuthSessionId: code.preAuthSessionId,
+                    deviceId: code.deviceId,
+                })
+                .end((err, res) => {
+                    if (err) {
+                        resolve(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
         });
     } else {
-        return request()
-            .post("/auth/signinup/code/resend")
-            .set("Authorization", `Bearer ${accessToken}`)
-            .send({
-                preAuthSessionId: code.preAuthSessionId,
-                deviceId: code.deviceId,
-            })
-            .expect(200);
+        return await new Promise((resolve) => {
+            request()
+                .post("/auth/signinup/code/resend")
+                .set("Authorization", `Bearer ${accessToken}`)
+                .send({
+                    preAuthSessionId: code.preAuthSessionId,
+                    deviceId: code.deviceId,
+                })
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        resolve(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
+        });
     }
 };
 

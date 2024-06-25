@@ -20,6 +20,17 @@ export const PasswordlessMock: Partial<typeof Passwordless> = {
                           },
                       }
                     : {}),
+                ...(config?.smsDelivery?.service?.sendSms
+                    ? {
+                          smsDelivery: {
+                              ...config?.smsDelivery,
+                              service: {
+                                  ...config?.smsDelivery?.service,
+                                  sendSms: minify(config?.smsDelivery?.service?.sendSms.toString()),
+                              },
+                          },
+                      }
+                    : {}),
             }),
             recipeId: "passwordless",
         } as any;
