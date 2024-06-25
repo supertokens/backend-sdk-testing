@@ -40,7 +40,7 @@ module.exports.epSignUp = async function (email, password, accessToken) {
                     } else {
                         resolve(res);
                     }
-                })
+                });
         });
     } else {
         return await new Promise((resolve) => {
@@ -66,7 +66,7 @@ module.exports.epSignUp = async function (email, password, accessToken) {
                     } else {
                         resolve(res);
                     }
-                })
+                });
         });
     }
 };
@@ -81,36 +81,54 @@ module.exports.validateUserEmail = async (id) => {
 
 module.exports.epSignIn = async function (email, password, accessToken) {
     if (accessToken === undefined) {
-        return request()
-            .post("/auth/signin")
-            .send({
-                formFields: [
-                    {
-                        id: "password",
-                        value: password,
-                    },
-                    {
-                        id: "email",
-                        value: email,
-                    },
-                ],
-            })
+        return await new Promise((resolve) => {
+            request()
+                .post("/auth/signin")
+                .send({
+                    formFields: [
+                        {
+                            id: "password",
+                            value: password,
+                        },
+                        {
+                            id: "email",
+                            value: email,
+                        },
+                    ],
+                })
+                .end((err, res) => {
+                    if (err) {
+                        resolve(undefined);
+                    } else {
+                        resolve(res);
+                    }
+                });
+        });
     } else {
-        return request()
-            .post("/auth/signin")
-            .set("Authorization", `Bearer ${accessToken}`)
-            .send({
-                formFields: [
-                    {
-                        id: "password",
-                        value: password,
-                    },
-                    {
-                        id: "email",
-                        value: email,
-                    },
-                ],
-            });
+        return await new Promise((resolve) => {
+            request()
+                .post("/auth/signin")
+                .set("Authorization", `Bearer ${accessToken}`)
+                .send({
+                    formFields: [
+                        {
+                            id: "password",
+                            value: password,
+                        },
+                        {
+                            id: "email",
+                            value: email,
+                        },
+                    ],
+                })
+                .end((err, res) => {
+                    if (err) {
+                        resolve(undefined);
+                    } else {
+                        resolve(res);
+                    }
+                });
+        });
     }
 };
 
@@ -158,18 +176,20 @@ module.exports.plessEmailSignInUp = async function (email, accessToken) {
 
     if (accessToken === undefined) {
         return await new Promise((resolve) => {
-            request().post("/auth/signinup/code/consume").send({
-                preAuthSessionId: code.preAuthSessionId,
-                userInputCode: code.userInputCode,
-                deviceId: code.deviceId,
-            })
+            request()
+                .post("/auth/signinup/code/consume")
+                .send({
+                    preAuthSessionId: code.preAuthSessionId,
+                    userInputCode: code.userInputCode,
+                    deviceId: code.deviceId,
+                })
                 .end((err, res) => {
                     if (err) {
                         resolve(undefined);
                     } else {
                         resolve(res);
                     }
-                })
+                });
         });
     } else {
         return await new Promise((resolve) => {
@@ -188,7 +208,7 @@ module.exports.plessEmailSignInUp = async function (email, accessToken) {
                     } else {
                         resolve(res);
                     }
-                })
+                });
         });
     }
 };
@@ -234,7 +254,7 @@ module.exports.tpSignInUp = async function (thirdPartyId, email, accessToken) {
                     } else {
                         resolve(res);
                     }
-                })
+                });
         });
     } else {
         return await new Promise((resolve) => {
@@ -256,13 +276,25 @@ module.exports.tpSignInUp = async function (thirdPartyId, email, accessToken) {
                     } else {
                         resolve(res);
                     }
-                })
-        })
+                });
+        });
     }
 };
 
 module.exports.getMfaInfo = async function (accessToken, statusCode = 200) {
-    return request().put("/auth/mfa/info").set("Authorization", `Bearer ${accessToken}`).expect(statusCode);
+    return await new Promise((resolve) => {
+        request()
+            .put("/auth/mfa/info")
+            .set("Authorization", `Bearer ${accessToken}`)
+            .expect(statusCode)
+            .end((err, res) => {
+                if (err) {
+                    resolve(undefined);
+                } else {
+                    resolve(res);
+                }
+            });
+    });
 };
 
 exports.getTestEmail = function getTestEmail(suffix) {

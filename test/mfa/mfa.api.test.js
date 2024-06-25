@@ -72,7 +72,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
             },
             appInfo: {
                 apiDomain: "api.supertokens.io",
-                appName: "SuperTokens",
+                appName: "supertokens",
                 websiteDomain: "supertokens.io",
             },
             recipeList: [
@@ -161,80 +161,78 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
         assert.equal("OK", res.body.status);
     });
 
-    // it("test mfa info after first factor", async function () {
-    //     const connectionURI = await startST();
-    //     SuperTokens.init({
-    //         supertokens: {
-    //             connectionURI,
-    //         },
-    //         appInfo: {
-    //             apiDomain: "api.supertokens.io",
-    //             appName: "SuperTokens",
-    //             websiteDomain: "supertokens.io",
-    //         },
-    //         recipeList: [
-    //             EmailPassword.init(),
-    //             Passwordless.init({
-    //                 contactMethod: "EMAIL",
-    //                 flowType: "USER_INPUT_CODE",
-    //             }),
-    //             ThirdParty.init(),
-    //             Totp.init(),
-    //             AccountLinking.init({
-    //                 shouldDoAutomaticAccountLinking: async () => ({
-    //                     shouldAutomaticallyLink: true,
-    //                     shouldRequireVerification: true,
-    //                 }),
-    //             }),
-    //             EmailVerification.init({ mode: "OPTIONAL" }),
-    //             MultiFactorAuth.init(),
-    //             Session.init(),
-    //         ],
-    //     });
+    it("test mfa info after first factor", async function () {
+        const connectionURI = await startST();
+        supertokens.init({
+            supertokens: {
+                connectionURI,
+            },
+            appInfo: {
+                apiDomain: "api.supertokens.io",
+                appName: "supertokens",
+                websiteDomain: "supertokens.io",
+            },
+            recipeList: [
+                EmailPassword.init(),
+                Passwordless.init({
+                    contactMethod: "EMAIL",
+                    flowType: "USER_INPUT_CODE",
+                }),
+                ThirdParty.init(),
+                TOTP.init(),
+                AccountLinking.init({
+                    shouldDoAutomaticAccountLinking: async () => ({
+                        shouldAutomaticallyLink: true,
+                        shouldRequireVerification: true,
+                    }),
+                }),
+                EmailVerification.init({ mode: "OPTIONAL" }),
+                MultiFactorAuth.init(),
+                Session.init(),
+            ],
+        });
 
-    //     const app = getTestExpressApp();
+        const signUpUser = await EmailPassword.signUp("public", "test@example.com", "password");
+        await validateUserEmail(signUpUser.recipeUserId.getAsString());
 
-    //     const signUpUser = await EmailPassword.signUp("public", "test@example.com", "password");
-    //     await validateUserEmail(signUpUser.recipeUserId.getAsString());
+        let res = await epSignIn("test@example.com", "password");
+        assert.equal("OK", res.body.status);
 
-    //     let res = await epSignIn(app, "test@example.com", "password");
-    //     assert.equal("OK", res.body.status);
+        let cookies = extractInfoFromResponse(res);
+        const accessToken = cookies.accessTokenFromAny;
 
-    //     let cookies = extractInfoFromResponse(res);
-    //     const accessToken = cookies.accessTokenFromAny;
+        res = await getMfaInfo(accessToken);
+        assert.equal("OK", res.body.status);
+        assert.deepEqual(res.body.emails.emailpassword, ["test@example.com"]);
+        assert.deepEqual([], res.body.factors.next);
+        assert.deepEqual(["emailpassword", "otp-email", "totp"], res.body.factors.allowedToSetup);
 
-    //     res = await getMfaInfo(app, accessToken);
-    //     assert.equal("OK", res.body.status);
-    //     assert.deepEqual(res.body.emails.emailpassword, ["test@example.com"]);
-    //     assert.deepEqual([], res.body.factors.next);
-    //     assert.deepEqual(["emailpassword", "otp-email", "totp"], res.body.factors.allowedToSetup);
+        res = await plessEmailSignInUp("test@example.com", accessToken);
+        assert.equal("OK", res.body.status);
+        // the users must have been account linked now
+        assert.equal(true, res.body.user.isPrimaryUser);
+        assert.equal(2, res.body.user.loginMethods.length);
 
-    //     res = await plessEmailSignInUp(app, "test@example.com", accessToken);
-    //     assert.equal("OK", res.body.status);
-    //     // the users must have been account linked now
-    //     assert.equal(true, res.body.user.isPrimaryUser);
-    //     assert.equal(2, res.body.user.loginMethods.length);
+        res = await getMfaInfo(accessToken);
+        assert.equal("OK", res.body.status);
+        assert.deepEqual(res.body.emails.emailpassword, ["test@example.com"]);
+        assert.deepEqual(res.body.emails["otp-email"], ["test@example.com"]);
 
-    //     res = await getMfaInfo(app, accessToken);
-    //     assert.equal("OK", res.body.status);
-    //     assert.deepEqual(res.body.emails.emailpassword, ["test@example.com"]);
-    //     assert.deepEqual(res.body.emails["otp-email"], ["test@example.com"]);
-
-    //     assert.deepEqual([], res.body.factors.next);
-    //     assert.deepEqual(["emailpassword", "otp-email", "totp"], res.body.factors.allowedToSetup);
-    // });
+        assert.deepEqual([], res.body.factors.next);
+        assert.deepEqual(["emailpassword", "otp-email", "totp"], res.body.factors.allowedToSetup);
+    });
 
     // it("mfa info errors if the user is stuck", async function () {
     //     const connectionURI = await startST();
     //     let requireFactor = false;
 
-    //     SuperTokens.init({
+    //     supertokens.init({
     //         supertokens: {
     //             connectionURI,
     //         },
     //         appInfo: {
     //             apiDomain: "api.supertokens.io",
-    //             appName: "SuperTokens",
+    //             appName: "supertokens",
     //             websiteDomain: "supertokens.io",
     //         },
     //         recipeList: [
@@ -284,13 +282,13 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
 
     // it("test that only a valid first factor is allowed to login", async function () {
     //     const connectionURI = await startST();
-    //     SuperTokens.init({
+    //     supertokens.init({
     //         supertokens: {
     //             connectionURI,
     //         },
     //         appInfo: {
     //             apiDomain: "api.supertokens.io",
-    //             appName: "SuperTokens",
+    //             appName: "supertokens",
     //             websiteDomain: "supertokens.io",
     //         },
     //         recipeList: [
@@ -300,7 +298,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     //                 flowType: "USER_INPUT_CODE",
     //             }),
     //             ThirdParty.init(),
-    //             Totp.init(),
+    //             TOTP.init(),
     //             MultiFactorAuth.init({
     //                 firstFactors: ["emailpassword"],
     //             }),
@@ -321,13 +319,13 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
 
     // it("test that only a valid first factor is allowed to login and tenant config is prioritised", async function () {
     //     const connectionURI = await startST();
-    //     SuperTokens.init({
+    //     supertokens.init({
     //         supertokens: {
     //             connectionURI,
     //         },
     //         appInfo: {
     //             apiDomain: "api.supertokens.io",
-    //             appName: "SuperTokens",
+    //             appName: "supertokens",
     //             websiteDomain: "supertokens.io",
     //         },
     //         recipeList: [
@@ -337,7 +335,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     //                 flowType: "USER_INPUT_CODE",
     //             }),
     //             ThirdParty.init(),
-    //             Totp.init(),
+    //             TOTP.init(),
     //             MultiFactorAuth.init({
     //                 firstFactors: ["emailpassword"],
     //             }),
@@ -362,13 +360,13 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
 
     // it("test that once user has more than one factor setup, they need 2FA to setup a new factor", async function () {
     //     const connectionURI = await startST();
-    //     SuperTokens.init({
+    //     supertokens.init({
     //         supertokens: {
     //             connectionURI,
     //         },
     //         appInfo: {
     //             apiDomain: "api.supertokens.io",
-    //             appName: "SuperTokens",
+    //             appName: "supertokens",
     //             websiteDomain: "supertokens.io",
     //         },
     //         recipeList: [
@@ -378,7 +376,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     //                 flowType: "USER_INPUT_CODE",
     //             }),
     //             ThirdParty.init(),
-    //             Totp.init(),
+    //             TOTP.init(),
     //             AccountLinking.init({
     //                 shouldDoAutomaticAccountLinking: async () => ({
     //                     shouldAutomaticallyLink: true,
@@ -424,13 +422,13 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
 
     // it("test that existing user sign in links the user to the current one if allowed", async function () {
     //     const connectionURI = await startST();
-    //     SuperTokens.init({
+    //     supertokens.init({
     //         supertokens: {
     //             connectionURI,
     //         },
     //         appInfo: {
     //             apiDomain: "api.supertokens.io",
-    //             appName: "SuperTokens",
+    //             appName: "supertokens",
     //             websiteDomain: "supertokens.io",
     //         },
     //         recipeList: [
@@ -440,7 +438,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     //                 flowType: "USER_INPUT_CODE",
     //             }),
     //             ThirdParty.init(),
-    //             Totp.init(),
+    //             TOTP.init(),
     //             AccountLinking.init({
     //                 shouldDoAutomaticAccountLinking: async () => ({
     //                     shouldAutomaticallyLink: true,
@@ -481,13 +479,13 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
 
     // it("test that the factor doesn't get completed if signing in with another primary user", async function () {
     //     const connectionURI = await startST();
-    //     SuperTokens.init({
+    //     supertokens.init({
     //         supertokens: {
     //             connectionURI,
     //         },
     //         appInfo: {
     //             apiDomain: "api.supertokens.io",
-    //             appName: "SuperTokens",
+    //             appName: "supertokens",
     //             websiteDomain: "supertokens.io",
     //         },
     //         recipeList: [
@@ -497,7 +495,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     //                 flowType: "USER_INPUT_CODE",
     //             }),
     //             ThirdParty.init(),
-    //             Totp.init(),
+    //             TOTP.init(),
     //             AccountLinking.init({
     //                 shouldDoAutomaticAccountLinking: async () => ({
     //                     shouldAutomaticallyLink: true,
