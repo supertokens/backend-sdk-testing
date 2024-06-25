@@ -185,7 +185,7 @@ module.exports.plessEmailSignInUp = async function (email, accessToken) {
                 })
                 .end((err, res) => {
                     if (err) {
-                        resolve(undefined);
+                        resolve(err);
                     } else {
                         resolve(res);
                     }
@@ -204,7 +204,7 @@ module.exports.plessEmailSignInUp = async function (email, accessToken) {
                 .expect(200)
                 .end((err, res) => {
                     if (err) {
-                        resolve(undefined);
+                        resolve(err);
                     } else {
                         resolve(res);
                     }
@@ -220,16 +220,39 @@ module.exports.plessPhoneSigninUp = async function (phoneNumber, accessToken) {
     });
 
     if (accessToken === undefined) {
-        return request().post("/auth/signinup/code/consume").send({
-            preAuthSessionId: code.preAuthSessionId,
-            userInputCode: code.userInputCode,
-            deviceId: code.deviceId,
+        return await new Promise((resolve) => {
+            request()
+                .post("/auth/signinup/code/consume")
+                .send({
+                    preAuthSessionId: code.preAuthSessionId,
+                    userInputCode: code.userInputCode,
+                    deviceId: code.deviceId,
+                })
+                .end((err, res) => {
+                    if (err) {
+                        resolve(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
         });
     } else {
-        return request().post("/auth/signinup/code/consume").set("Authorization", `Bearer ${accessToken}`).send({
-            preAuthSessionId: code.preAuthSessionId,
-            userInputCode: code.userInputCode,
-            deviceId: code.deviceId,
+        return await new Promise((resolve) => {
+            request()
+                .post("/auth/signinup/code/consume")
+                .set("Authorization", `Bearer ${accessToken}`)
+                .send({
+                    preAuthSessionId: code.preAuthSessionId,
+                    userInputCode: code.userInputCode,
+                    deviceId: code.deviceId,
+                })
+                .end((err, res) => {
+                    if (err) {
+                        resolve(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
         });
     }
 };
