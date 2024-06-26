@@ -26,14 +26,22 @@ export const EmailVerificationMock: Partial<typeof EmailVerification> = {
                           emailDelivery: {
                               ...config?.emailDelivery,
                               ...(config?.emailDelivery.override
-                                  ? { override: minify(config.emailDelivery.override.toString()) }
+                                  ? {
+                                        override: minify(
+                                            "emailverification.init.emailDelivery.override",
+                                            config.emailDelivery.override.toString()
+                                        ),
+                                    }
                                   : {}),
                           },
                       }
                     : {}),
                 ...(config?.getEmailForRecipeUserId
                     ? {
-                          getEmailForRecipeUserId: minify(config.getEmailForRecipeUserId.toString()),
+                          getEmailForRecipeUserId: minify(
+                              "emailverification.init.getEmailForRecipeUserId",
+                              config.getEmailForRecipeUserId.toString()
+                          ),
                       }
                     : {}),
 
@@ -43,7 +51,10 @@ export const EmailVerificationMock: Partial<typeof EmailVerification> = {
                               ...config.override,
                               ...(config.override.functions
                                   ? {
-                                        functions: minify(config.override.functions.toString()),
+                                        functions: minify(
+                                            "emailverification.init.override.functions",
+                                            config.override.functions.toString()
+                                        ),
                                     }
                                   : {}),
                           },
