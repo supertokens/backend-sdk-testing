@@ -14,7 +14,12 @@ export const EmailPasswordMock: Partial<typeof EmailPassword> = {
                           emailDelivery: {
                               ...config?.emailDelivery,
                               ...(config?.emailDelivery.override
-                                  ? { override: minify(config.emailDelivery.override.toString()) }
+                                  ? {
+                                        override: minify(
+                                            "emailpassword.init.emailDelivery.override",
+                                            config.emailDelivery.override.toString()
+                                        ),
+                                    }
                                   : {}),
                           },
                       }
@@ -25,7 +30,10 @@ export const EmailPasswordMock: Partial<typeof EmailPassword> = {
                               ...config.override,
                               ...(config.override.apis
                                   ? {
-                                        apis: minify(config?.override?.apis.toString()),
+                                        apis: minify(
+                                            "emailpassword.init.override.apis",
+                                            config?.override?.apis.toString()
+                                        ),
                                     }
                                   : {}),
                           },

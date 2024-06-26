@@ -15,12 +15,18 @@ export const UserMetadataMock: Partial<typeof UserMetadata> = {
                               ...config.override,
                               ...(config.override.apis
                                   ? {
-                                        apis: minify(config?.override?.apis.toString()),
+                                        apis: minify(
+                                            "usermetadata.init.override.apis",
+                                            config?.override?.apis.toString()
+                                        ),
                                     }
                                   : {}),
                               ...(config.override.functions
                                   ? {
-                                        functions: minify(config?.override?.functions.toString()),
+                                        functions: minify(
+                                            "usermetadata.init.override.functions",
+                                            config?.override?.functions.toString()
+                                        ),
                                     }
                                   : {}),
                           },

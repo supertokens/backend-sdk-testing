@@ -15,7 +15,7 @@ export const ThirdPartyMock: Partial<typeof ThirdParty> = {
                               ...config.override,
                               ...(config.override.apis
                                   ? {
-                                        apis: minify(config.override.apis.toString()),
+                                        apis: minify("thirdparty.init.override.apis", config.override.apis.toString()),
                                     }
                                   : {}),
                           },
@@ -31,7 +31,12 @@ export const ThirdPartyMock: Partial<typeof ThirdParty> = {
                                             ...p,
                                             ...(p.override
                                                 ? {
-                                                      override: minify(p.override.toString()),
+                                                      override: minify(
+                                                          "thirdparty.init.signInAndUpFeature.providers." +
+                                                              p.config.thirdPartyId +
+                                                              ".override",
+                                                          p.override.toString()
+                                                      ),
                                                   }
                                                 : {}),
                                         })),

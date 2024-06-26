@@ -34,7 +34,10 @@ export const SessionMock: Partial<typeof Session> = {
                               ...config.override,
                               ...(config.override.functions
                                   ? {
-                                        functions: minify(config.override.functions.toString()),
+                                        functions: minify(
+                                            "session.override.functions",
+                                            config.override.functions.toString()
+                                        ),
                                     }
                                   : {}),
                           },
@@ -155,7 +158,7 @@ export const SessionMock: Partial<typeof Session> = {
     },
     fetchAndSetClaim: async (sessionHandle, claim, userContext) => {
         // @ts-ignore
-        claim.fetchValue = minify(claim.fetchValue.toString());
+        claim.fetchValue = minify("session.fetchAndSetClaim", claim.fetchValue.toString());
 
         const response = await queryAPI({
             method: "post",
@@ -175,7 +178,7 @@ export const SessionMock: Partial<typeof Session> = {
             input: {
                 sessionHandle,
                 overrideGlobalClaimValidators: overrideGlobalClaimValidators
-                    ? minify(overrideGlobalClaimValidators?.toString())
+                    ? minify("getSession.overrideGlobalClaimValidators", overrideGlobalClaimValidators?.toString())
                     : undefined,
                 userContext,
             },

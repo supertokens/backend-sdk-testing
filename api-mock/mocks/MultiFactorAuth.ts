@@ -28,12 +28,18 @@ export let MultiFactorAuthMock: Partial<typeof MultiFactorAuth> = {
                               ...config.override,
                               ...(config.override.apis
                                   ? {
-                                        apis: minify(config?.override?.apis.toString()),
+                                        apis: minify(
+                                            "multifactorauth.init.override.apis",
+                                            config?.override?.apis.toString()
+                                        ),
                                     }
                                   : {}),
                               ...(config.override.functions
                                   ? {
-                                        functions: minify(config?.override?.functions.toString()),
+                                        functions: minify(
+                                            "multifactorauth.init.override.functions",
+                                            config?.override?.functions.toString()
+                                        ),
                                     }
                                   : {}),
                           },

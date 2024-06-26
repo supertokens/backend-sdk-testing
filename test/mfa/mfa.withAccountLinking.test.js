@@ -84,7 +84,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
                         providers: [
                             {
                                 config: {
-                                    thirdPartyId: "custom",
+                                    thirdPartyId: "custom3",
                                     clients: [
                                         {
                                             clientId: "clientid1",
@@ -120,7 +120,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
         let res = await epSignUp("test1@example.com", "password1", undefined);
         assert.strictEqual("OK", res.body.status);
 
-        res = await tpSignInUp("custom", "test1@example.com", undefined);
+        res = await tpSignInUp("custom3", "test1@example.com", undefined);
         assert.strictEqual("SIGN_IN_UP_NOT_ALLOWED", res.body.status);
     });
 
@@ -147,7 +147,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
                         providers: [
                             {
                                 config: {
-                                    thirdPartyId: "custom",
+                                    thirdPartyId: "custom3",
                                     clients: [
                                         {
                                             clientId: "clientid1",
@@ -183,7 +183,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
             ],
         });
 
-        let res = await tpSignInUp("custom", "test1@example.com", undefined);
+        let res = await tpSignInUp("custom3", "test1@example.com", undefined);
         assert.strictEqual("OK", res.body.status);
 
         res = await epSignUp("test2@example.com", "password1", undefined);
@@ -231,7 +231,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
                         providers: [
                             {
                                 config: {
-                                    thirdPartyId: "custom",
+                                    thirdPartyId: "custom3",
                                     clients: [
                                         {
                                             clientId: "clientid1",
@@ -264,7 +264,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
             ],
         });
 
-        let res = await tpSignInUp("custom", "test1@example.com", undefined);
+        let res = await tpSignInUp("custom3", "test1@example.com", undefined);
         assert.strictEqual("OK", res.body.status);
 
         res = await epSignUp("test2@example.com", "password1", undefined);
@@ -320,7 +320,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
                         providers: [
                             {
                                 config: {
-                                    thirdPartyId: "custom",
+                                    thirdPartyId: "custom3",
                                     clients: [
                                         {
                                             clientId: "clientid1",
@@ -353,7 +353,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
             ],
         });
 
-        let res = await tpSignInUp("custom", "test1@example.com", undefined);
+        let res = await tpSignInUp("custom3", "test1@example.com", undefined);
         assert.strictEqual("OK", res.body.status);
 
         res = await epSignUp("test2@example.com", "password1", undefined);
@@ -409,7 +409,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
                         providers: [
                             {
                                 config: {
-                                    thirdPartyId: "custom",
+                                    thirdPartyId: "custom3",
                                     clients: [
                                         {
                                             clientId: "clientid1",
@@ -467,7 +467,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
             ],
         });
 
-        let res = await tpSignInUp("custom", "test1@example.com", undefined);
+        let res = await tpSignInUp("custom3", "test1@example.com", undefined);
         assert.strictEqual("OK", res.body.status);
 
         res = await epSignUp("test2@example.com", "password1", undefined);
@@ -478,7 +478,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
         let cookies = extractInfoFromResponse(res);
         let accessToken = cookies.accessTokenFromAny;
 
-        res = await tpSignInUp("custom", "test2@example.com", accessToken);
+        res = await tpSignInUp("custom3", "test2@example.com", accessToken);
         assert.strictEqual("OK", res.body.status);
 
         res = await tpSignInUp("custom2", "test1@example.com", accessToken);
@@ -517,7 +517,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
                         providers: [
                             {
                                 config: {
-                                    thirdPartyId: "custom",
+                                    thirdPartyId: "custom3",
                                     clients: [
                                         {
                                             clientId: "clientid1",
@@ -550,7 +550,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
             ],
         });
 
-        let res = await tpSignInUp("custom", "test@example.com", undefined);
+        let res = await tpSignInUp("custom3", "test@example.com", undefined);
         assert.strictEqual("OK", res.body.status);
 
         let cookies = extractInfoFromResponse(res);
@@ -625,7 +625,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
                         providers: [
                             {
                                 config: {
-                                    thirdPartyId: "custom",
+                                    thirdPartyId: "custom3",
                                     clients: [
                                         {
                                             clientId: "clientid1",
@@ -660,10 +660,10 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
             ],
         });
 
-        let res = await tpSignInUp("custom", "test2@example.com");
+        let res = await tpSignInUp("custom3", "test2@example.com");
         assert.strictEqual("OK", res.body.status);
 
-        res = await tpSignInUp("custom", "test1@example.com", {
+        res = await tpSignInUp("custom3", "test1@example.com", {
             DO_LINK: true,
         });
         assert.strictEqual("OK", res.body.status);
@@ -680,7 +680,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
             res.body.reason
         );
 
-        res = await tpSignInUp("custom", "test2@example.com", undefined, {
+        res = await tpSignInUp("custom3", "test2@example.com", undefined, {
             DO_LINK: true,
         });
         assert.strictEqual("OK", res.body.status);
@@ -763,7 +763,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
                         providers: [
                             {
                                 config: {
-                                    thirdPartyId: "custom",
+                                    thirdPartyId: "custom3",
                                     clients: [
                                         {
                                             clientId: "clientid1",
@@ -798,10 +798,10 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
             ],
         });
 
-        let res = await tpSignInUp("custom", "test2@example.com");
+        let res = await tpSignInUp("custom3", "test2@example.com");
         assert.strictEqual("OK", res.body.status);
 
-        res = await tpSignInUp("custom", "test1@example.com", {
+        res = await tpSignInUp("custom3", "test1@example.com", {
             DO_LINK: true,
         });
         assert.strictEqual("OK", res.body.status);
@@ -814,7 +814,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
         });
         assert.strictEqual("OK", res.body.status);
 
-        res = await tpSignInUp("custom", "test2@example.com", undefined, {
+        res = await tpSignInUp("custom3", "test2@example.com", undefined, {
             DO_LINK: true,
         });
         assert.strictEqual("OK", res.body.status);
