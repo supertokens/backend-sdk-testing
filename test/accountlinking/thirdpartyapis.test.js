@@ -707,7 +707,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             ).user;
             assert(tpUser2.isPrimaryUser === true);
 
-            let response = await new Promise((resolve) =>
+            let response = await new Promise((resolve, reject) =>
                 request()
                     .post("/auth/signinup")
                     .send({
@@ -722,7 +722,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                     .expect(200)
                     .end((err, res) => {
                         if (err) {
-                            resolve(undefined);
+                            reject(err);
                         } else {
                             resolve(res);
                         }
@@ -819,13 +819,14 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             assert.strictEqual(response.body.status, "SIGN_IN_UP_NOT_ALLOWED");
             assert.strictEqual(
                 response.body.reason,
-                "Cannot sign in / up because new email cannot be applied to existing account. Please contact support. (ERR_CODE_005)"
+                "Cannot sign in / up due to security reasons. Please try a different login method or contact support. (ERR_CODE_004)"
             );
-            assert(
-                (await ProcessState.getInstance().waitForEvent(PROCESS_STATE.IS_SIGN_UP_ALLOWED_CALLED)) === undefined
+            assert.strictEqual(
+                (await ProcessState.getInstance().waitForEvent(PROCESS_STATE.IS_SIGN_UP_ALLOWED_CALLED)), undefined
             );
-            assert(
-                (await ProcessState.getInstance().waitForEvent(PROCESS_STATE.IS_SIGN_IN_ALLOWED_CALLED)) === undefined
+            // We check if the email change is allowed after we check if the sign in would be allowed.
+            assert.notStrictEqual(
+                (await ProcessState.getInstance().waitForEvent(PROCESS_STATE.IS_SIGN_IN_ALLOWED_CALLED)), undefined
             );
         });
 
@@ -1300,6 +1301,77 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                 await ProcessState.getInstance().waitForEvent(PROCESS_STATE.IS_SIGN_IN_ALLOWED_CALLED),
                 undefined
             );
+        });
+
+        it("should not allow account takeover by updating to an unverified email address matching another user", async function () {
+            let date = Date.now();
+            let email = `john.doe+${date}+a@supertokens.com`;
+            let email2 = `email@test.com`;
+            const connectionURI = await startST();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    EmailPassword.init(),
+                    EmailVerification.init({
+                        mode: "OPTIONAL",
+                    }),
+                    Session.init(),
+                    ThirdParty.init({
+                        signInAndUpFeature: {
+                            providers: [
+                                this.customProviderWithEmailNotVerified,
+                            ],
+                        },
+                    }),
+                    AccountLinking.init({
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
+                    }),
+                ],
+            });
+
+            let epUser = (await EmailPassword.signUp("public", email, "differentvalidpass123")).user;
+            await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
+
+            let tpUser = (await ThirdParty.manuallyCreateOrUpdateUser("public", "custom-no-ev", "user" + date, email, true))
+                .user;
+
+            const linkRes = await AccountLinking.linkAccounts(tpUser.loginMethods[0].recipeUserId, epUser.id);
+            assert.strictEqual(linkRes.status, "OK");
+
+            const epSignUp2 = (await EmailPassword.signUp("public", email2, "differentvalidpass123"));
+            assert.strictEqual(epSignUp2.status, "OK");
+
+            let response = await new Promise((resolve, reject) =>
+                request()
+                    .post("/auth/signinup")
+                    .send({
+                        thirdPartyId: "custom-no-ev",
+                        redirectURIInfo: {
+                            redirectURIOnProviderDashboard: "http://127.0.0.1/callback",
+                            redirectURIQueryParams: {
+                                code: "abcdefghj",
+                            },
+                        },
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(res);
+                        }
+                    })
+            );
+            assert.strictEqual(response.body.status, "SIGN_IN_UP_NOT_ALLOWED");
+            assert.strictEqual(response.body.reason, "Cannot sign in / up due to security reasons. Please try a different login method or contact support. (ERR_CODE_006)");
         });
 
         describe("with primary user that has both unverified and verified login methods", () => {

@@ -16,7 +16,7 @@ const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTe
 let assert = require("assert");
 const { recipesMock, randomString } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
-const { AccountLinking, EmailVerification, Session, supertokens, ThirdParty } = recipesMock;
+const { AccountLinking, EmailVerification, Session, supertokens, ThirdParty, EmailPassword } = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test.js]")}`, function () {
     let globalConnectionURI;
@@ -396,7 +396,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
             assert.strictEqual(resp.reason, "Email already associated with another primary user.");
         });
 
-        it("sign up in succeeds when changed email belongs to a recipe user even though the new email is already associated with another primary user", async function () {
+        it("sign up fails when changed email belongs to a recipe user even though the new email is already associated with another primary user", async function () {
             const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
@@ -453,10 +453,70 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 "test@example.com",
                 false
             );
+            assert.strictEqual(resp.status, "EMAIL_CHANGE_NOT_ALLOWED_ERROR");
+        });
+
+        it("sign up in succeeds when changed email belongs to a primary user even though the new email is already associated with another recipe user user if the email is verified", async function () {
+            const connectionURI = await startST();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    AccountLinking.init({
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
+                    }),
+                    EmailVerification.init({
+                        mode: "OPTIONAL",
+                    }),
+                    Session.init(),
+                    ThirdParty.init({
+                        signInAndUpFeature: {
+                            providers: [
+                                {
+                                    config: {
+                                        thirdPartyId: "google",
+                                        clients: [
+                                            {
+                                                clientId: "",
+                                                clientSecret: "",
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    }),
+                ],
+            });
+
+            let user1 = (
+                await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "abcd", "test@example.com", false)
+            ).user;
+            assert(user1.isPrimaryUser === false);
+
+            let user2 = (
+                await ThirdParty.manuallyCreateOrUpdateUser("public", "github", "abcd", "test2@example.com", true)
+            ).user;
+            assert(user2.isPrimaryUser === true);
+
+            let resp = await ThirdParty.manuallyCreateOrUpdateUser(
+                "public",
+                "github",
+                "abcd",
+                "test@example.com",
+                true
+            );
             assert(resp.status === "OK");
         });
 
-        it("sign up in succeeds when changed email belongs to a primary user even though the new email is already associated with another recipe user user", async function () {
+        it("sign up in fails when changed email belongs to a primary user if the new email is already associated with another recipe user user and is not verified", async function () {
             const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
@@ -513,7 +573,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
                 "test@example.com",
                 false
             );
-            assert(resp.status === "OK");
+            assert.strictEqual(resp.status, "EMAIL_CHANGE_NOT_ALLOWED_ERROR");
         });
 
         it("sign up change email succeeds when email is changed to another recipe user's account", async function () {
@@ -1313,6 +1373,68 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdparty.test
             user = (await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "abcd", "test@example.com", true))
                 .user;
             assert(user.isPrimaryUser);
+        });
+
+        it("should not allow account takeover by updating to an unverified email address matching another user", async function () {
+            let date = Date.now();
+            let email = `john.doe+${date}+a@supertokens.com`;
+            let email2 = `john.doe+${date}+v@supertokens.com`;
+            const connectionURI = await startST();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    EmailPassword.init(),
+                    EmailVerification.init({
+                        mode: "OPTIONAL",
+                    }),
+                    Session.init(),
+                    ThirdParty.init({
+                        signInAndUpFeature: {
+                            providers: [
+                                {
+                                    config: {
+                                        thirdPartyId: "google",
+                                        clients: [
+                                            {
+                                                clientId: "",
+                                                clientSecret: "",
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    }),
+                    AccountLinking.init({
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
+                    }),
+                ],
+            });
+
+            let epUser = (await EmailPassword.signUp("public", email, "differentvalidpass123")).user;
+            await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
+
+            let tpUser = (await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "abcd2" + date, email, true))
+                .user;
+
+            const linkRes = await AccountLinking.linkAccounts(tpUser.loginMethods[0].recipeUserId, epUser.id);
+            assert.strictEqual(linkRes.status, "OK");
+
+            const epSignUp2 = (await EmailPassword.signUp("public", email2, "differentvalidpass123"));
+            assert.strictEqual(epSignUp2.status, "OK");
+
+            const tpUpdateRes = (await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "abcd2" + date, email2, false));
+
+            assert.strictEqual(tpUpdateRes.status, "EMAIL_CHANGE_NOT_ALLOWED_ERROR");
+            assert.strictEqual(tpUpdateRes.reason, "New email cannot be applied to existing account because of account takeover risks.");
         });
     });
 });

@@ -557,7 +557,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(sendEmailCallbackCalled === false);
         });
 
-        it("calling generatePasswordResetTokenPOST with primary user existing, and email password user existing, where both accounts are linked, should send email if account linking is enabled", async function () {
+        it("calling generatePasswordResetTokenPOST with primary user existing, and email password user existing, where both accounts are linked, should fail if email is unverified and account linking is enabled", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
             const connectionURI = await startST();
@@ -642,17 +642,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                     })
             );
             assert(res !== undefined);
-            assert(res.body.status === "OK");
-
-            let overrideParams = await getOverrideParams();
-            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
-            sendEmailToUserId = overrideParams.sendEmailToUserId;
-
-            assert(sendEmailToUserEmail === "test@example.com");
-            assert(sendEmailToUserId === tpUser.id);
+            assert.strictEqual(res.body.status, "PASSWORD_RESET_NOT_ALLOWED");
         });
 
-        it("calling generatePasswordResetTokenPOST with primary user existing, and email password user existing, where both accounts are linked, should send email if account linking is disabled", async function () {
+        it("calling generatePasswordResetTokenPOST with primary user existing, and email password user existing, where both accounts are linked, should fail if email is unverified even if account linking is disabled", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
             const connectionURI = await startST();
@@ -715,6 +708,98 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.id));
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
+            await AccountLinking.linkAccounts(epUser.user.loginMethods[0].recipeUserId, tpUser.id);
+
+            let res = await new Promise((resolve) =>
+                request()
+                    .post("/auth/user/password/reset/token")
+                    .send({
+                        formFields: [
+                            {
+                                id: "email",
+                                value: "test@example.com",
+                            },
+                        ],
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            resolve(undefined);
+                        } else {
+                            resolve(res);
+                        }
+                    })
+            );
+            assert(res !== undefined);
+            assert.strictEqual(res.body.status, "PASSWORD_RESET_NOT_ALLOWED");
+        });
+
+        it("calling generatePasswordResetTokenPOST with primary user existing, and email password user existing, where both accounts are linked, should send email if email is verified", async function () {
+            let sendEmailToUserId = undefined;
+            let sendEmailToUserEmail = undefined;
+            const connectionURI = await startST();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    EmailPassword.init({
+                        emailDelivery: {
+                            override: (oI) => {
+                                return {
+                                    ...oI,
+                                    sendEmail: async function (input) {
+                                        sendEmailToUserId = input.user.id;
+                                        sendEmailToUserEmail = input.user.email;
+                                    },
+                                };
+                            },
+                        },
+                    }),
+                    EmailVerification.init({ mode: "OPTIONAL" }),
+                    Session.init(),
+                    ThirdParty.init({
+                        signInAndUpFeature: {
+                            providers: [
+                                {
+                                    config: {
+                                        thirdPartyId: "google",
+                                        clients: [
+                                            {
+                                                clientId: "",
+                                                clientSecret: "",
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    }),
+                    AccountLinking.init({
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
+                    }),
+                ],
+            });
+
+            let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
+                "public",
+                "google",
+                "abc",
+                "test2@example.com",
+                false
+            );
+            await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.id));
+
+            let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
+            const evToken = await EmailVerification.createEmailVerificationToken("public", epUser.recipeUserId, "test@example.com");
+            assert.strictEqual(evToken.status, "OK");
+            await EmailVerification.verifyEmailUsingToken("public", evToken.token, false);
             await AccountLinking.linkAccounts(epUser.user.loginMethods[0].recipeUserId, tpUser.id);
 
             let res = await new Promise((resolve) =>
@@ -2993,7 +3078,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             }
         });
 
-        it("calling passwordResetPOST with primary user existing, and email password user existing, where both accounts are linked, should change existing email password account's password if account linking is enabled, and mark the EP one as verified", async function () {
+        it("calling passwordResetPOST with primary user existing, and email password user existing, where both accounts are linked, should change existing email password account's password if account linking is enabled, and leave the EP one as verified", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
             let token = undefined;
@@ -3078,6 +3163,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.id));
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
+            const evToken = await EmailVerification.createEmailVerificationToken("public", epUser.recipeUserId, "test@example.com");
+            assert.strictEqual(evToken.status, "OK");
+            await EmailVerification.verifyEmailUsingToken("public", evToken.token, false);
             await AccountLinking.linkAccounts(epUser.user.loginMethods[0].recipeUserId, tpUser.id);
 
             let res = await new Promise((resolve) =>
@@ -3162,7 +3250,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(signInResp.user.id === tpUser.id);
         });
 
-        it("calling passwordResetPOST with primary user existing, and email password user existing, where both accounts are linked but linking is now disabled, should change existing email password account's password if account linking is disabled, and mark the EP one as verified", async function () {
+        it("calling passwordResetPOST with primary user existing, and email password user existing, where both accounts are linked but linking is now disabled, should change existing email password account's password if account linking is disabled, and leave the EP one as verified", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
             let token = undefined;
@@ -3247,6 +3335,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.id));
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
+            const evToken = await EmailVerification.createEmailVerificationToken("public", epUser.recipeUserId, "test@example.com");
+            assert.strictEqual(evToken.status, "OK");
+            await EmailVerification.verifyEmailUsingToken("public", evToken.token, false);
             await AccountLinking.linkAccounts(epUser.user.loginMethods[0].recipeUserId, tpUser.id);
 
             let res = await new Promise((resolve) =>
@@ -3331,7 +3422,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(signInResp.user.id === tpUser.id);
         });
 
-        it("calling passwordResetPOST with primary user existing, and multiple email password user existing, where all accounts are linked, should change the right email password account's password, and only mark the right one as verified", async function () {
+        it("calling passwordResetPOST with primary user existing, and multiple email password user existing, where all accounts are linked, should change the right email password account's password, and leave the right one as verified", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
             let token = undefined;
@@ -3414,6 +3505,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.id));
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
+            const evToken = await EmailVerification.createEmailVerificationToken("public", epUser.recipeUserId, "test@example.com");
+            assert.strictEqual(evToken.status, "OK");
+            await EmailVerification.verifyEmailUsingToken("public", evToken.token, false);
             await AccountLinking.linkAccounts(epUser.user.loginMethods[0].recipeUserId, tpUser.id);
 
             let epUser2 = await EmailPassword.signUp("public", "test2@example.com", "password1234");
@@ -3448,11 +3542,12 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let overrideParams = await getOverrideParams();
             sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
             sendEmailToUserId = overrideParams.sendEmailToUserId;
+            token = overrideParams.token;
 
             assert(sendEmailToUserEmail === "test@example.com");
             assert(sendEmailToUserId === tpUser.id);
 
-            let res2 = await new Promise((resolve) =>
+            let res2 = await new Promise((resolve, reject) =>
                 request()
                     .post("/auth/user/password/reset")
                     .send({
@@ -3467,7 +3562,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                     .expect(200)
                     .end((err, res) => {
                         if (err) {
-                            resolve(undefined);
+                            reject(err);
                         } else {
                             resolve(JSON.parse(res.text));
                         }
@@ -3516,7 +3611,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             }
         });
 
-        it("calling passwordResetPOST with primary user existing, and email password user existing, where both accounts are linked, when the token was created, but then get unlinked right before token consumption, should result in OK, but no linking done", async function () {
+        it("calling passwordResetPOST with primary user existing, and email password user existing, where both accounts are linked, when the token was created, but then get unlinked right before token consumption, should result in OK", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
             let token = undefined;
@@ -3562,6 +3657,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                             },
                         },
                     }),
+                    EmailVerification.init({ mode: "OPTIONAL" }),
                     Session.init(),
                     ThirdParty.init({
                         signInAndUpFeature: {
@@ -3598,6 +3694,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.id));
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
+            const evToken = await EmailVerification.createEmailVerificationToken("public", epUser.recipeUserId, "test@example.com");
+            assert.strictEqual(evToken.status, "OK");
+            await EmailVerification.verifyEmailUsingToken("public", evToken.token, false);
             await AccountLinking.linkAccounts(epUser.user.loginMethods[0].recipeUserId, tpUser.id);
 
             let res = await new Promise((resolve) =>
@@ -3672,7 +3771,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(signInResp.status === "OK");
             assert(signInResp.user.id === epUser.user.id);
             assert(signInResp.user.loginMethods.length === 1);
-            assert(signInResp.user.isPrimaryUser === false);
+            assert(signInResp.user.isPrimaryUser === true);
         });
 
         it("should create a linked user if a primary user exists with a verified and an unverified thirdparty sign in method with the same email", async function () {
