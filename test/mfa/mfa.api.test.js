@@ -87,7 +87,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
                         providers: [
                             {
                                 config: {
-                                    thirdPartyId: "custom",
+                                    thirdPartyId: "custom3",
                                     clients: [
                                         {
                                             clientId: "clientid1",
@@ -155,7 +155,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
         assert.equal("OK", res.body.status);
         await validateUserEmail(res.body.user.id);
 
-        res = await tpSignInUp("custom", "test@example.com");
+        res = await tpSignInUp("custom3", "test@example.com");
         assert.equal("OK", res.body.status);
 
         res = await plessEmailSignInUp("test@example.com");
