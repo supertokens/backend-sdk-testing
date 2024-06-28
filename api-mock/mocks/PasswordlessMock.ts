@@ -15,7 +15,10 @@ export const PasswordlessMock: Partial<typeof Passwordless> = {
                               ...config?.emailDelivery,
                               service: {
                                   ...config?.emailDelivery?.service,
-                                  sendEmail: minify(config?.emailDelivery?.service?.sendEmail.toString()),
+                                  sendEmail: minify(
+                                      "passwordless.init.emailDelivery.service.sendEmail",
+                                      config?.emailDelivery?.service?.sendEmail.toString()
+                                  ),
                               },
                           },
                       }
@@ -26,7 +29,10 @@ export const PasswordlessMock: Partial<typeof Passwordless> = {
                               ...config?.smsDelivery,
                               service: {
                                   ...config?.smsDelivery?.service,
-                                  sendSms: minify(config?.smsDelivery?.service?.sendSms.toString()),
+                                  sendSms: minify(
+                                      "passwordless.init.smsDelivery.service.sendSms",
+                                      config?.smsDelivery?.service?.sendSms.toString()
+                                  ),
                               },
                           },
                       }
@@ -37,7 +43,10 @@ export const PasswordlessMock: Partial<typeof Passwordless> = {
                               ...config.override,
                               ...(config.override.apis
                                   ? {
-                                        apis: minify(config?.override?.apis.toString()),
+                                        apis: minify(
+                                            "passwordless.init.override.apis",
+                                            config?.override?.apis.toString()
+                                        ),
                                     }
                                   : {}),
                           },

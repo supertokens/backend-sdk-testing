@@ -12,7 +12,10 @@ export const SuperTokensMock: Partial<typeof SuperTokens> = {
                     ? {
                           supertokens: {
                               ...config.supertokens,
-                              networkInterceptor: minify(config.supertokens.networkInterceptor.toString()),
+                              networkInterceptor: minify(
+                                  "supertokens.init.supertokens.networkInterceptor",
+                                  config.supertokens.networkInterceptor.toString()
+                              ),
                           },
                       }
                     : {}),

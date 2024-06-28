@@ -11,13 +11,19 @@ export const AccountLinkingMock: Partial<typeof AccountLinking> = {
                 ...config,
                 ...(config?.shouldDoAutomaticAccountLinking
                     ? {
-                          shouldDoAutomaticAccountLinking: minify(config.shouldDoAutomaticAccountLinking.toString()),
+                          shouldDoAutomaticAccountLinking: minify(
+                              "accountlinking.init.shouldDoAutomaticAccountLinking",
+                              config.shouldDoAutomaticAccountLinking.toString()
+                          ),
                       }
                     : {}),
 
                 ...(config?.onAccountLinked
                     ? {
-                          onAccountLinked: minify(config.onAccountLinked.toString()),
+                          onAccountLinked: minify(
+                              "accountlinking.init.onAccountLinked",
+                              config.onAccountLinked.toString()
+                          ),
                       }
                     : {}),
             }),
