@@ -2,7 +2,7 @@ import { fetch } from "cross-fetch";
 import { PROCESS_STATE } from "supertokens-node/lib/build/processState";
 import { deserializeOverrideParams } from "./utils";
 
-const API_PORT = Number(process.env.API_PORT || 3030);
+export const API_PORT = Number(process.env.API_PORT || 3030);
 
 let apiStatus: "NOT_READY" | "OK" = "NOT_READY";
 let stConfig: string;

@@ -51,6 +51,7 @@
         "prettier": "2.0.5",
         "pretty-quick": "^3.1.1",
         "react": "^18.2.0",
+        "set-cookie-parser": "^2.6.0",
         "sinon": "^14.0.0",
         "supertest": "4.0.2",
         "supertokens-node": "git+https://github.com:supertokens/supertokens-node#feat/oauth2/initial_apis",
