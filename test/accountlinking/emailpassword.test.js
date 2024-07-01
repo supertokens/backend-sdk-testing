@@ -715,5 +715,66 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpassword.t
             let isVerified = await EmailVerification.isEmailVerified(recipeUserId);
             assert(isVerified);
         });
+
+        it("should not allow account takeover by updating to an unverified email address matching another user", async function () {
+            let date = Date.now();
+            let email = `john.doe+${date}+a@supertokens.com`;
+            let email2 = `john.doe+${date}+v@supertokens.com`;
+            const connectionURI = await startST();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    EmailPassword.init(),
+                    EmailVerification.init({
+                        mode: "OPTIONAL",
+                    }),
+                    Session.init(),
+                    ThirdParty.init({
+                        signInAndUpFeature: {
+                            providers: [
+                                {
+                                    config: {
+                                        thirdPartyId: "google",
+                                        clients: [
+                                            {
+                                                clientId: "",
+                                                clientSecret: "",
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    }),
+                    AccountLinking.init({
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
+                    }),
+                ],
+            });
+
+            let tpUserV = (await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "abcd2" + date, email2, true, undefined, { DO_NOT_LINK: true}));
+            assert(!tpUserV.user.isPrimaryUser)
+
+            let epUser = (await EmailPassword.signUp("public", email, "differentvalidpass123")).user;
+            await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
+
+            const emailUpdateRes = await EmailPassword.updateEmailOrPassword({
+                recipeUserId: epUser.loginMethods[0].recipeUserId,
+                email: email2,
+                applyPasswordPolicy: false,
+                password: "differentvalidpass123",
+             });
+
+            assert.strictEqual(emailUpdateRes.status, "EMAIL_CHANGE_NOT_ALLOWED_ERROR");
+            assert.strictEqual(emailUpdateRes.reason, "New email cannot be applied to existing account because of account takeover risks.");
+        });
     });
 });
