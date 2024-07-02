@@ -1748,11 +1748,6 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             );
             await EmailVerification.verifyEmailUsingToken("public", token.token);
 
-            let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234", undefined, {
-                DO_NOT_LINK: true,
-            });
-            assert(epUser.user.isPrimaryUser === false);
-
             let res = await new Promise((resolve) =>
                 request()
                     .post("/auth/user/password/reset/token")
