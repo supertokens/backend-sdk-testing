@@ -76,6 +76,13 @@ export const PasswordlessMock: Partial<typeof Passwordless> = {
                 : {}),
         };
     },
+    updateUser: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/passwordless/updateuser",
+            input: { ...input, recipeUserId: input.recipeUserId.getAsString() },
+        });
+    },
     createCode: async (input) => {
         return await queryAPI({
             method: "post",
