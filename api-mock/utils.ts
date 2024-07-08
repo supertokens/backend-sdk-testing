@@ -2,6 +2,9 @@ import { minify_sync } from "terser";
 import fs = require("fs");
 import SuperTokens from "supertokens-node";
 import { User as UserClass } from "supertokens-node/lib/build/user";
+import { SessionClaim, SessionClaimValidator } from "supertokens-node/lib/build/recipe/session/types";
+import { UserContext } from "supertokens-node/lib/build/types";
+import { JSONObject } from "supertokens-node/recipe/usermetadata";
 
 const uniqueFn = new Map<string, string>();
 
@@ -74,4 +77,25 @@ export function deserializeOverrideParams(vars) {
         vars.recipeUserIdInCallback = SuperTokens.convertToRecipeUserId(vars.recipeUserIdInCallback);
     }
     return vars;
+}
+
+export function makeBuiltInClaimSerializable<
+    T extends SessionClaim<any> & {
+        validators: { [ind: string]: ((...args: any[]) => SessionClaimValidator) | undefined };
+    }
+>(origClaim: T): T {
+    const serializableClaim = {
+        ...origClaim,
+    };
+
+    for (const validatorName in origClaim.validators) {
+        serializableClaim.validators[validatorName] = (...args: any[]) =>
+            ({
+                key: origClaim.key,
+                validatorName,
+                args,
+            } as any);
+    }
+
+    return serializableClaim;
 }

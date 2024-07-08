@@ -188,6 +188,22 @@ export async function initApp() {
     setMockStatus("OK");
 }
 
+export async function resetOverrideLogs() {
+    const logs = await queryAPI({
+        method: "get",
+        path: "/test/getoverridelogs",
+    });
+    return logs;
+}
+
+export async function getOverrideLogs() {
+    const {logs} = await queryAPI({
+        method: "get",
+        path: "/test/getoverridelogs",
+    });
+    return logs;
+}
+
 export async function getOverrideParams() {
     const overrideParams = await queryAPI({
         method: "get",
