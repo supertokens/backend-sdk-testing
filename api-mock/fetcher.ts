@@ -2,7 +2,7 @@ import { fetch } from "cross-fetch";
 import { PROCESS_STATE } from "supertokens-node/lib/build/processState";
 import { deserializeOverrideParams } from "./utils";
 
-const API_PORT = Number(process.env.API_PORT || 3030);
+export const API_PORT = Number(process.env.API_PORT || 3030);
 
 let apiStatus: "NOT_READY" | "OK" = "NOT_READY";
 let stConfig: string;
@@ -186,6 +186,22 @@ export async function initApp() {
         input: { config: stConfig },
     });
     setMockStatus("OK");
+}
+
+export async function resetOverrideLogs() {
+    const logs = await queryAPI({
+        method: "get",
+        path: "/test/getoverridelogs",
+    });
+    return logs;
+}
+
+export async function getOverrideLogs() {
+    const {logs} = await queryAPI({
+        method: "get",
+        path: "/test/getoverridelogs",
+    });
+    return logs;
 }
 
 export async function getOverrideParams() {
