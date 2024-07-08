@@ -74,7 +74,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri: redirectUri + "/subpath", state })
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri: redirectUri + "/subpath", state, scope: "profile" });
             // Start the OAuth Flow
             let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
 
@@ -113,7 +113,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri: redirectUri.replace("localhost", "localhost.org"), state })
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri: redirectUri.replace("localhost", "localhost.org"), state, scope: "profile" });
 
             // Start the OAuth Flow
             let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
@@ -153,7 +153,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri: redirectUri.replace("localhost", "127.1"), state })
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri: redirectUri.replace("localhost", "127.1"), state, scope: "profile" });
 
             // Start the OAuth Flow
             let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
@@ -192,7 +192,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri: redirectUri.replace("localhost", "2130706433"), state })            // Start the OAuth Flow
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri: redirectUri.replace("localhost", "2130706433"), state, scope: "profile" });
             let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
 
             let nextUrl = res.headers.get("Location");
@@ -232,7 +232,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state });
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope });
 
             const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
@@ -277,7 +277,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state });
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope });
             const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
             let url = `${apiDomain}/auth/oauth2/token`;
@@ -339,7 +339,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state });
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope });
             const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
             let url = `${apiDomain}/auth/oauth2/token`;
@@ -388,7 +388,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
             const state = new Buffer.from("some-random-string", "base64").toString();
             const { code_challenge, code_verifier } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state });
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope });
 
             const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
@@ -435,7 +435,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
             const state = new Buffer.from("some-random-string", "base64").toString();
             const { code_challenge, code_verifier } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, extraQueryParams: {
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope, extraQueryParams: {
                 code_challenge,
                 code_challenge_method: "S256",
             } });
@@ -485,14 +485,14 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
             const { code_challenge, code_verifier } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
             const { code_challenge: code_challenge2 } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, extraQueryParams: {
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope, extraQueryParams: {
                 code_challenge,
                 code_challenge_method: "S256",
             } });
 
             const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
-            const authorisationUrl2 = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, extraQueryParams: {
+            const authorisationUrl2 = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope, extraQueryParams: {
                 code_challenge: code_challenge2,
                 code_challenge_method: "S256",
             } });

@@ -26,12 +26,12 @@ exports.getAuthorizationUrlFromAPI = async function ({ redirectUri, scope, state
   return authUrlObj.toString();
 };
 
-exports.createAuthorizationUrl = function ({ apiDomain, clientId, redirectUri, state, extraQueryParams = {}}) {
+exports.createAuthorizationUrl = function ({ apiDomain, clientId, redirectUri, state, scope, extraQueryParams = {}}) {
   const queryParams = {
     client_id: clientId,
     redirect_uri: redirectUri,
     response_type: "code",
-    scope: "profile",
+    scope,
     state,
     ...extraQueryParams,
 };
