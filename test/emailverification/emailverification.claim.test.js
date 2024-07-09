@@ -84,30 +84,6 @@ describe(`EmailverificationTests: ${printPath(
 
                 assert.strictEqual(claimValidator.shouldRefetch(payload, {}), true);
             }
-
-            // claim value is false and timestamp is within maxAgeInSeconds
-            {
-                payload = {
-                    "st-ev": {
-                        v: false,
-                        t: new Date().getTime(),
-                    },
-                };
-
-                assert.strictEqual(claimValidator.shouldRefetch(payload, {}), false);
-            }
-
-            // claim value is false and timestamp is expired
-            {
-                payload = {
-                    "st-ev": {
-                        v: false,
-                        t: new Date().getTime() - 300000, // 5 minutes ago
-                    },
-                };
-
-                assert.strictEqual(claimValidator.shouldRefetch(payload, {}), true);
-            }
         });
 
         it("shouldRefetch should use the default maxAgeInSeconds if it's not provided and the claim value is false", async function () {
@@ -133,6 +109,64 @@ describe(`EmailverificationTests: ${printPath(
                     "st-ev": {
                         v: false,
                         t: new Date().getTime() - 600000, // 10 minutes ago
+                    },
+                };
+
+                assert.strictEqual(claimValidator.shouldRefetch(payload, {}), true);
+            }
+        });
+
+        it("shouldRefetch should return values as per the refetchTimeOnFalseInSeconds if it is provided", async function () {
+            const claimValidator = EmailVerification.EmailVerificationClaim.validators.isVerified(30, 200);
+
+            // claim value is true and timestamp is within refetchTimeOnFalseInSeconds
+            {
+                let payload = {
+                    "st-ev": {
+                        v: false,
+                        t: new Date().getTime(),
+                    },
+                };
+
+                assert.strictEqual(claimValidator.shouldRefetch(payload, {}), false);
+            }
+
+            // claim value is true and timestamp is expired
+            {
+                payload = {
+                    "st-ev": {
+                        v: false,
+                        t: new Date().getTime() - 31000, // 31 seconds ago
+                    },
+                };
+
+                assert.strictEqual(claimValidator.shouldRefetch(payload, {}), true);
+            }
+        });
+
+        it("shouldRefetch should use the default refetchTimeOnFalseInSeconds if it's not provided", async function () {
+            const claimValidator = EmailVerification.EmailVerificationClaim.validators.isVerified();
+
+            // NOTE: the default refetchTimeOnFalseInSeconds is 10 seconds
+
+            // claim value is false and timestamp is within refetchTimeOnFalseInSeconds
+            {
+                let payload = {
+                    "st-ev": {
+                        v: false,
+                        t: new Date().getTime(),
+                    },
+                };
+
+                assert.strictEqual(claimValidator.shouldRefetch(payload, {}), false);
+            }
+
+            // claim value is false and timestamp is expired
+            {
+                payload = {
+                    "st-ev": {
+                        v: false,
+                        t: new Date().getTime() - 11000, // 11 seconds ago
                     },
                 };
 
