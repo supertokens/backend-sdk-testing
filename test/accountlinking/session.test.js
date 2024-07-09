@@ -22,10 +22,9 @@ const {
     createTenant,
 } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString, request, getOverrideParams } = require("../../api-mock");
-const { AccountLinking, EmailPassword, Session, supertokens, EmailVerification } = recipesMock;
+const { recipesMock, randomString, request, getOverrideParams, getOverrideLogs } = require("../../api-mock");
+const { AccountLinking, EmailPassword, Session, supertokens, EmailVerification, TestPrimitiveClaim } = recipesMock;
 let { protectedProps } = require("supertokens-node/lib/build/recipe/session/constants");
-let { PrimitiveClaim } = require("supertokens-node/lib/build/recipe/session/claimBaseClasses/primitiveClaim");
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js]")}`, function () {
     let globalConnectionURI;
@@ -596,7 +595,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js
 
             info = await Session.getSessionInformation(session.getHandle());
 
-            assert(info.userId === info.recipeUserId.getAsString());
+            assert.strictEqual(info.userId, info.recipeUserId.getAsString());
         });
 
         it("getSessionInformation with linked accounts should have different user id and recipe id", async function () {
@@ -628,8 +627,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js
             info = await Session.getSessionInformation(session.getHandle());
 
             assert(info.userId !== info.recipeUserId.getAsString());
-            assert(session.userId === epUser.id);
-            assert(session.recipeUserId.getAsString() === epUser2.id);
+            assert(session.getUserId(), epUser.id);
+            assert(session.getRecipeUserId(), epUser2.id);
         });
 
         it("getSessionInformation with no linked and no auth recipe accounts should have same user id and recipe id", async function () {
@@ -654,7 +653,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js
             info = await Session.getSessionInformation(session.getHandle());
 
             assert(info.userId === info.recipeUserId.getAsString());
-            assert(session.userId === "random");
+            assert(session.getUserId() === "random");
         });
     });
 
@@ -1206,17 +1205,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js
                 recipeList: [EmailPassword.init(), Session.init()],
             });
 
-            let userIdInCallback;
-            let recipeUserIdInCallback;
-
-            let primitiveClaim = new PrimitiveClaim({
-                key: "some-key",
-                fetchValue: async (userId, recipeUserId) => {
-                    userIdInCallback = userId;
-                    recipeUserIdInCallback = recipeUserId;
-                    return undefined;
-                },
-            });
+            let primitiveClaim = new TestPrimitiveClaim("some-key", undefined);
 
             let epUser = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
             await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
@@ -1232,8 +1221,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js
 
             await session.fetchAndSetClaim(primitiveClaim);
 
-            assert(userIdInCallback === epUser.id);
-            assert(recipeUserIdInCallback.getAsString() === epUser2.loginMethods[0].recipeUserId.getAsString());
+            const logs = await getOverrideLogs();
+            const callLogs = logs.filter(l => l.type === "CALL" && l.name === `claim-some-key.fetchValue`)
+            assert.strictEqual(callLogs.length, 1);
+            assert.strictEqual(callLogs[0].data.userId, epUser.id);
+            assert.strictEqual(callLogs[0].data.recipeUserId, epUser2.loginMethods[0].recipeUserId.getAsString());
         });
 
         it("fetch callback in claim gets right recipeUserId and userId when using fetch and set claim with session handle", async function () {
@@ -1250,17 +1242,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js
                 recipeList: [EmailPassword.init(), Session.init()],
             });
 
-            let userIdInCallback;
-            let recipeUserIdInCallback;
-
-            let primitiveClaim = new PrimitiveClaim({
-                key: "some-key",
-                fetchValue: async (userId, recipeUserId) => {
-                    userIdInCallback = userId;
-                    recipeUserIdInCallback = recipeUserId;
-                    return undefined;
-                },
-            });
+            let primitiveClaim = new TestPrimitiveClaim("some-key", undefined);
 
             let epUser = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
             await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
@@ -1276,12 +1258,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js
 
             await Session.fetchAndSetClaim(session.getHandle(), primitiveClaim);
 
-            let overrideParams = await getOverrideParams();
-            userIdInCallback = overrideParams.userIdInCallback;
-            recipeUserIdInCallback = overrideParams.recipeUserIdInCallback;
-
-            assert(userIdInCallback === epUser.id);
-            assert(recipeUserIdInCallback.getAsString() === epUser2.loginMethods[0].recipeUserId.getAsString());
+            const logs = await getOverrideLogs();
+            const callLogs = logs.filter(l => l.type === "CALL" && l.name === `claim-some-key.fetchValue`)
+            assert.strictEqual(callLogs.length, 1);
+            assert.strictEqual(callLogs[0].data.userId, epUser.id);
+            assert.strictEqual(callLogs[0].data.recipeUserId, epUser2.loginMethods[0].recipeUserId.getAsString());
         });
 
         it("fetch callback in claim gets right recipeUserId and userId when creating a new session", async function () {

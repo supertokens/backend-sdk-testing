@@ -1,8 +1,8 @@
 import SuperTokens from "supertokens-node";
 import EmailPasswordRecipe from "supertokens-node/lib/build/recipe/emailverification/recipe";
-import EmailVerification from "supertokens-node/recipe/emailverification";
+import EmailVerification, { EmailVerificationClaim } from "supertokens-node/recipe/emailverification";
 import { queryAPI } from "../fetcher";
-import { minify } from "../utils";
+import { makeBuiltInClaimSerializable, minify } from "../utils";
 
 export const EmailVerificationRecipeMock: Partial<EmailPasswordRecipe> = {
     // @ts-ignore
@@ -129,5 +129,5 @@ export const EmailVerificationMock: Partial<typeof EmailVerification> = {
             },
         });
     },
-    EmailVerificationClaim: EmailVerification.EmailVerificationClaim,
+    EmailVerificationClaim: makeBuiltInClaimSerializable(EmailVerificationClaim),
 };
