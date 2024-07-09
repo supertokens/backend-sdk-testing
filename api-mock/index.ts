@@ -1,4 +1,12 @@
-import { getOverrideParams, mockExternalAPI, queryAPI, request, resetOverrideParams } from "./fetcher";
+import {
+    getOverrideParams,
+    getOverrideLogs,
+    mockExternalAPI,
+    queryAPI,
+    request,
+    resetOverrideParams,
+    API_PORT,
+} from "./fetcher";
 import { AccountLinkingMock, AccountLinkingRecipeMock } from "./mocks/AccountLinkingMock";
 import { EmailPasswordMock } from "./mocks/EmailPasswordMock";
 import { EmailVerificationMock, EmailVerificationRecipeMock } from "./mocks/EmailVerificationMock";
@@ -6,7 +14,7 @@ import { MultiFactorAuthMock } from "./mocks/MultiFactorAuth";
 import { MultitenancyMock } from "./mocks/MultitenancyMock";
 import { PasswordlessMock } from "./mocks/PasswordlessMock";
 import { ProcessStateMock } from "./mocks/ProcessStateMock";
-import { SessionMock } from "./mocks/SessionMock";
+import { SessionMock, TestPrimitiveArrayClaim, TestPrimitiveClaim } from "./mocks/SessionMock";
 import { SuperTokensMock } from "./mocks/SuperTokensMock";
 import { TOTPMock } from "./mocks/TOTP";
 import { ThirdPartyMock } from "./mocks/ThirdPartyMock";
@@ -28,6 +36,18 @@ const recipesMock = {
     MultiFactorAuth: MultiFactorAuthMock,
     UserMetadata: UserMetadataMock,
     TOTP: TOTPMock,
+    TestPrimitiveClaim,
+    TestPrimitiveArrayClaim,
 };
 
-export { getOverrideParams, mockExternalAPI, queryAPI, randomString, recipesMock, request, resetOverrideParams };
+export {
+    getOverrideParams,
+    getOverrideLogs,
+    mockExternalAPI,
+    queryAPI,
+    randomString,
+    recipesMock,
+    request,
+    resetOverrideParams,
+    API_PORT,
+};
