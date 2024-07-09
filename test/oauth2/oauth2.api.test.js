@@ -86,7 +86,10 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
 
         const res = await fetch(`${apiDomain}/auth/oauth2/token`, {
             method: "POST",
-            body: new URLSearchParams({
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
                 code: authorizationCode,
                 client_id: client.clientId,
                 client_secret: client.clientSecret,
@@ -150,7 +153,10 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
 
         const res = await fetch(`${apiDomain}/auth/oauth2/token`, {
             method: "POST",
-            body: new URLSearchParams({
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
                 code: authorizationCode,
                 client_id: client.clientId,
                 client_secret: client.clientSecret,
@@ -166,6 +172,27 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
         assert(tokenResp.id_token !== undefined);
         assert.strictEqual(tokenResp.token_type, "bearer");
         assert.strictEqual(tokenResp.scope, scope);
+
+        let refreshTokenRes = await fetch(`${apiDomain}/auth/oauth2/token`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                client_id: client.clientId,
+                client_secret: client.clientSecret,
+                refresh_token: tokenResp.refresh_token,
+                grant_type: "refresh_token",
+            }),
+        });
+
+        refreshTokenRes = await refreshTokenRes.json();
+
+        assert(refreshTokenRes.access_token !== undefined);
+        assert(refreshTokenRes.refresh_token !== undefined);
+        assert(refreshTokenRes.id_token !== undefined);
+        assert.strictEqual(refreshTokenRes.token_type, "bearer");
+        assert.strictEqual(refreshTokenRes.scope, scope);
     });
 
     it("should simulate a successful OAuth2 login flow with PKCE", async function () {
@@ -228,7 +255,10 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
 
         const res = await fetch(`${apiDomain}/auth/oauth2/token`, {
             method: "POST",
-            body: new URLSearchParams({
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
                 code: authorizationCode,
                 client_id: client.clientId,
                 client_secret: client.clientSecret,
@@ -244,4 +274,114 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
         assert.strictEqual(tokenResp.token_type, "bearer");
         assert.strictEqual(tokenResp.scope, scope);
     });
+
+    it("should simulate a successful OAuth2 login flow (client_credentials)", async function () {
+        const connectionURI = await startST();
+
+        const apiDomain = `http://localhost:${API_PORT}`;
+        const websiteDomain = "http://supertokens.io";
+        const scope = "profile";
+
+        SuperTokens.init({
+            supertokens: {
+                connectionURI,
+            },
+            appInfo: {
+                apiDomain,
+                appName: "SuperTokens",
+                websiteDomain,
+            },
+            recipeList: [OAuth2.init()],
+        });
+
+        const redirectUri = "http://localhost:4000/redirect-url";
+        const { client } = await OAuth2.createOAuth2Client(
+            {
+                redirectUris: [redirectUri],
+                scope,
+                skipConsent: true,
+                grantTypes: ["client_credentials"],
+                responseTypes: ["code", "id_token"],
+                tokenEndpointAuthMethod: "client_secret_post",
+            },
+            {}
+        );
+
+        const res = await fetch(`${apiDomain}/auth/oauth2/token`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                client_id: client.clientId,
+                client_secret: client.clientSecret,
+                grant_type: "client_credentials",
+                scope
+            }),
+        });
+
+        const tokenResp = await res.json();
+
+        assert.strictEqual(res.status, 200);
+        assert(tokenResp.access_token !== undefined);
+        assert.strictEqual(tokenResp.token_type, "bearer");
+        assert.strictEqual(tokenResp.scope, scope);
+    });
+
+    it("should return an error for Resource Owner Password Credentials Flow", async function (){
+        const connectionURI = await startST();
+
+        const apiDomain = `http://localhost:${API_PORT}`;
+        const websiteDomain = "http://supertokens.io";
+        const scope = "profile";
+
+        SuperTokens.init({
+            supertokens: {
+                connectionURI,
+            },
+            appInfo: {
+                apiDomain,
+                appName: "SuperTokens",
+                websiteDomain,
+            },
+            recipeList: [EmailPassword.init(), OAuth2.init()],
+        });
+
+        const redirectUri = "http://localhost:4000/redirect-url";
+        const { client } = await OAuth2.createOAuth2Client(
+            {
+                redirectUris: [redirectUri],
+                scope,
+                skipConsent: true,
+                grantTypes: ["password"],
+                responseTypes: ["code", "id_token"],
+                tokenEndpointAuthMethod: "client_secret_post",
+            },
+            {}
+        );
+
+        const { status } = await EmailPassword.signUp("public", "test@example.com", "password123");
+
+        assert.strictEqual(status, "OK");
+
+        const res = await fetch(`${apiDomain}/auth/oauth2/token`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                client_id: client.clientId,
+                client_secret: client.clientSecret,
+                grant_type: "password",
+                username: "test@example.com",
+                password: "password123",
+                scope
+            }),
+        });
+
+        const tokenResp = await res.json();
+
+        assert.strictEqual(res.status, 200);
+        assert.strictEqual(tokenResp.error, "invalid_request");
+    })
 });
