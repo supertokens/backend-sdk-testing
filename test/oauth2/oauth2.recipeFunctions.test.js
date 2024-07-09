@@ -15,7 +15,7 @@
 
 const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTenant } = require("../utils");
 let assert = require("assert");
-const { recipesMock, getOverrideParams, randomString } = require("../../api-mock");
+const { recipesMock, randomString } = require("../../api-mock");
 const { OAuth2, supertokens: SuperTokens } = recipesMock;
 
 describe(`OAuth2-recipeFunctions: ${printPath("[test/oauth2/oauth2.recipeFunctions.test.js]")}`, function () {
@@ -25,7 +25,7 @@ describe(`OAuth2-recipeFunctions: ${printPath("[test/oauth2/oauth2.recipeFunctio
         return createTenant(globalConnectionURI, randomString());
     };
 
-    // TODO: Remove this once we've stopped calling Hydra directly from 
+    // TODO: Remove this once we've stopped calling Hydra directly from
     // the SDK and found an alternate way to clear clients before each test run.
     beforeEach(async function () {
         const allClients = await fetch(`http://localhost:4445/admin/clients`).then((res) => res.json());

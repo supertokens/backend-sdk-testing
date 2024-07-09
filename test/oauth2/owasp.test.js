@@ -17,8 +17,8 @@ const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTe
 let assert = require("assert");
 const { recipesMock, randomString, API_PORT } = require("../../api-mock");
 const { OAuth2, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
-const setCookieParser = require("set-cookie-parser");
 const { default: generatePKCEChallenge} = require("pkce-challenge");
+const { createAuthorizationUrl, testOAuthFlowAndGetAuthCode } = require("../oauth2/utils");
 
 describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, function () {
     let globalConnectionURI;
@@ -51,123 +51,6 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
     const apiDomain = `http://localhost:${API_PORT}`;
     const websiteDomain = "http://supertokens.io";
 
-    // This will be used to store all Set-Cookie headers in the subsequent requests
-    let allSetCookieHeaders = [];
-
-    function saveCookies(res) {
-        const cookieStr = setCookieParser.splitCookiesString(res.headers.get("Set-Cookie"));
-        const cookies = setCookieParser.parse(cookieStr);
-        allSetCookieHeaders.push(...cookies);
-    }
-
-    function getCookieHeader() {
-        return allSetCookieHeaders.map((cookie) => `${cookie.name}=${cookie.value}`).join("; ");
-    }
-
-    async function oauthFlowUntilCode(client, state, extraQueryParams = {}, useSignIn = false) {
-        const queryParams = {
-            client_id: client.clientId,
-            redirect_uri: redirectUri,
-            response_type: "code",
-            scope: "profile",
-            state,
-            ...extraQueryParams,
-        };
-
-        let url = `${apiDomain}/auth/oauth2/auth?${new URLSearchParams(queryParams)}`;
-        let res = await fetch(url, { method: "GET", redirect: "manual" });
-        saveCookies(res);
-
-        let nextUrl = res.headers.get("Location");
-        let nextUrlObj = new URL(nextUrl);
-        const loginChallenge = nextUrlObj.searchParams.get("login_challenge");
-
-        assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, apiDomain + "/auth/oauth2/login");
-        assert(loginChallenge !== null);
-
-        res = await fetch(nextUrl, {
-            method: "GET",
-            redirect: "manual",
-            headers: {
-                Cookie: getCookieHeader(),
-            },
-        });
-
-        saveCookies(res);
-
-        nextUrl = res.headers.get("Location");
-        nextUrlObj = new URL(nextUrl);
-
-        assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, `${websiteDomain}/auth`);
-        assert.strictEqual(nextUrlObj.searchParams.get("loginChallenge"), loginChallenge);
-
-        // We have been redirected to the frontend login page. We will create the session manually to simulate login.
-        const createSessionUser = useSignIn ? await EmailPassword.signIn("public", "test@example.com", "password123") : await EmailPassword.signUp("public", "test@example.com", "password123");
-        const session = await Session.createNewSessionWithoutRequestResponse(
-            "public",
-            createSessionUser.recipeUserId
-        );
-
-        res = await fetch(`${apiDomain}/auth/oauth2/login?loginChallenge=${loginChallenge}`, {
-            method: "GET",
-            redirect: "manual",
-            headers: {
-                Authorization: `Bearer ${session.getAccessToken()}`,
-                Cookie: getCookieHeader(),
-            },
-        });
-
-        saveCookies(res);
-
-        nextUrl = res.headers.get("Location");
-        nextUrlObj = new URL(nextUrl);
-
-        assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, `${apiDomain}/auth/oauth2/auth`);
-        assert.strictEqual(nextUrlObj.searchParams.get("client_id"), client.clientId);
-        assert.strictEqual(nextUrlObj.searchParams.get("redirect_uri"), redirectUri);
-        assert.strictEqual(nextUrlObj.searchParams.get("response_type"), "code");
-        assert.strictEqual(nextUrlObj.searchParams.get("scope"), "profile");
-        assert.strictEqual(nextUrlObj.searchParams.get("state"), state);
-        assert(nextUrlObj.searchParams.get("login_verifier") !== null);
-
-        res = await fetch(nextUrl, {
-            method: "GET",
-            redirect: "manual",
-            headers: {
-                Authorization: `Bearer ${session.getAccessToken()}`,
-                Cookie: getCookieHeader(),
-            },
-        });
-
-        saveCookies(res);
-
-            nextUrl = res.headers.get("Location");
-            nextUrlObj = new URL(nextUrl);
-
-            assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, `${apiDomain}/auth/oauth2/auth`);
-            assert.strictEqual(nextUrlObj.searchParams.get("client_id"), client.clientId);
-            assert.strictEqual(nextUrlObj.searchParams.get("redirect_uri"), redirectUri);
-            assert.strictEqual(nextUrlObj.searchParams.get("response_type"), "code");
-            assert.strictEqual(nextUrlObj.searchParams.get("scope"), "profile");
-            assert.strictEqual(nextUrlObj.searchParams.get("state"), state);
-            assert(nextUrlObj.searchParams.get("consent_verifier") !== null);
-
-            res = await fetch(nextUrl, {
-                method: "GET",
-                redirect: "manual",
-                headers: {
-                    Authorization: `Bearer ${session.getAccessToken()}`,
-                    Cookie: getCookieHeader(),
-                },
-            });
-
-            saveCookies(res);
-
-        nextUrl = res.headers.get("Location");
-        nextUrlObj = new URL(nextUrl);
-        return nextUrlObj;
-    }
-
     describe("redirect uri validation when starting the auth flow", () => {
         it("should reject changed path", async () => {
             const connectionURI = await startST();
@@ -191,17 +74,9 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const queryParams = {
-                client_id: client.clientId,
-                redirect_uri: redirectUri + "/subpath",
-                response_type: "code",
-                scope: "profile",
-                state,
-            };
-
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri: redirectUri + "/subpath", state, scope: "profile" });
             // Start the OAuth Flow
-            let url = `${apiDomain}/auth/oauth2/auth?${new URLSearchParams(queryParams)}`;
-            let res = await fetch(url, { method: "GET", redirect: "manual" });
+            let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
 
             let nextUrl = res.headers.get("Location");
             let nextUrlObj = new URL(nextUrl);
@@ -238,17 +113,10 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const queryParams = {
-                client_id: client.clientId,
-                redirect_uri: redirectUri.replace("localhost", "localhost.org"),
-                response_type: "code",
-                scope: "profile",
-                state,
-            };
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri: redirectUri.replace("localhost", "localhost.org"), state, scope: "profile" });
 
             // Start the OAuth Flow
-            let url = `${apiDomain}/auth/oauth2/auth?${new URLSearchParams(queryParams)}`;
-            let res = await fetch(url, { method: "GET", redirect: "manual" });
+            let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
 
             let nextUrl = res.headers.get("Location");
             let nextUrlObj = new URL(nextUrl);
@@ -285,18 +153,10 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const queryParams = {
-                client_id: client.clientId,
-                redirect_uri: redirectUri.replace("localhost", "127.1"),
-                response_type: "code",
-                scope: "profile",
-                state,
-            };
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri: redirectUri.replace("localhost", "127.1"), state, scope: "profile" });
 
             // Start the OAuth Flow
-            let url = `${apiDomain}/auth/oauth2/auth?${new URLSearchParams(queryParams)}`;
-            let res = await fetch(url, { method: "GET", redirect: "manual" });
-
+            let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
             let nextUrl = res.headers.get("Location");
             let nextUrlObj = new URL(nextUrl);
             // TODO: check host & path
@@ -332,17 +192,8 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const queryParams = {
-                client_id: client.clientId,
-                redirect_uri: redirectUri.replace("localhost", "2130706433"),
-                response_type: "code",
-                scope: "profile",
-                state,
-            };
-
-            // Start the OAuth Flow
-            let url = `${apiDomain}/auth/oauth2/auth?${new URLSearchParams(queryParams)}`;
-            let res = await fetch(url, { method: "GET", redirect: "manual" });
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri: redirectUri.replace("localhost", "2130706433"), state, scope: "profile" });
+            let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
 
             let nextUrl = res.headers.get("Location");
             let nextUrlObj = new URL(nextUrl);
@@ -375,25 +226,21 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
             });
 
             const redirectUri = "http://localhost:4000/redirect-url";
+            const scope = "profile";
             const { client } = await OAuth2.createOAuth2Client(defaultClientConf, {});
             const { client: client2 } = await OAuth2.createOAuth2Client(defaultClientConf, {});
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            // Start the OAuth Flow
-            let nextUrlObj = await oauthFlowUntilCode(client, state);
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope });
 
-            assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, redirectUri);
-            assert.strictEqual(nextUrlObj.searchParams.get("scope"), "profile");
-            assert.strictEqual(nextUrlObj.searchParams.get("state"), state);
-
-            const code = nextUrlObj.searchParams.get("code");
+            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
             let url = `${apiDomain}/auth/oauth2/token`;
             const res = await fetch(url, {
                 method: "POST",
                 body: new URLSearchParams({
-                    code,
+                    code: authorizationCode,
                     client_id: client2.clientId,
                     client_secret: client2.clientSecret,
                     grant_type: "authorization_code",
@@ -425,25 +272,20 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
             });
 
             const redirectUri = "http://localhost:4000/redirect-url";
+            const scope = "profile";
             const { client } = await OAuth2.createOAuth2Client(defaultClientConf, {});
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            // Start the OAuth Flow
-            let nextUrlObj = await oauthFlowUntilCode(client, state);
-
-            assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, redirectUri);
-            assert.strictEqual(nextUrlObj.searchParams.get("scope"), "profile");
-            assert.strictEqual(nextUrlObj.searchParams.get("state"), state);
-
-            const code = nextUrlObj.searchParams.get("code");
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope });
+            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
             let url = `${apiDomain}/auth/oauth2/token`;
             // The first call consumes the code
             await fetch(url, {
                 method: "POST",
                 body: new URLSearchParams({
-                    code,
+                    code: authorizationCode,
                     client_id: client.clientId,
                     client_secret: client.clientSecret,
                     grant_type: "authorization_code",
@@ -455,7 +297,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
             const res = await fetch(url, {
                 method: "POST",
                 body: new URLSearchParams({
-                    code,
+                    code: authorizationCode,
                     client_id: client.clientId,
                     client_secret: client.clientSecret,
                     grant_type: "authorization_code",
@@ -487,6 +329,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
                 recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
             });
 
+            const scope = "profile";
             const redirectUri = "http://localhost:4000/redirect-url";
             const redirectUri2 = "http://localhost:4000/redirect-url2";
             const { client } = await OAuth2.createOAuth2Client(
@@ -496,21 +339,15 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            // Start the OAuth Flow
-            let nextUrlObj = await oauthFlowUntilCode(client, state);
-
-            assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, redirectUri);
-            assert.strictEqual(nextUrlObj.searchParams.get("scope"), "profile");
-            assert.strictEqual(nextUrlObj.searchParams.get("state"), state);
-
-            const code = nextUrlObj.searchParams.get("code");
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope });
+            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
             let url = `${apiDomain}/auth/oauth2/token`;
             // then we check for errors
             const res = await fetch(url, {
                 method: "POST",
                 body: new URLSearchParams({
-                    code,
+                    code: authorizationCode,
                     client_id: client.clientId,
                     client_secret: client.clientSecret,
                     grant_type: "authorization_code",
@@ -544,27 +381,22 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
                 recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
             });
 
+            const scope = "profile";
             const redirectUri = "http://localhost:4000/redirect-url";
             const { client } = await OAuth2.createOAuth2Client({...defaultClientConf, }, {});
 
             const state = new Buffer.from("some-random-string", "base64").toString();
             const { code_challenge, code_verifier } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
 
-            // Start the OAuth Flow
-            let nextUrlObj = await oauthFlowUntilCode(client, state, {
-            });
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope });
 
-            assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, redirectUri);
-            assert.strictEqual(nextUrlObj.searchParams.get("scope"), "profile");
-            assert.strictEqual(nextUrlObj.searchParams.get("state"), state);
-
-            const code = nextUrlObj.searchParams.get("code");
+            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
             let url = `${apiDomain}/auth/oauth2/token`;
             const res = await fetch(url, {
                 method: "POST",
                 body: new URLSearchParams({
-                    code,
+                    code: authorizationCode,
                     client_id: client.clientId,
                     client_secret: client.clientSecret,
                     grant_type: "authorization_code",
@@ -596,29 +428,25 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
                 recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
             });
 
+            const scope = "profile";
             const redirectUri = "http://localhost:4000/redirect-url";
             const { client } = await OAuth2.createOAuth2Client({...defaultClientConf, }, {});
 
             const state = new Buffer.from("some-random-string", "base64").toString();
             const { code_challenge, code_verifier } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
 
-            // Start the OAuth Flow
-            let nextUrlObj = await oauthFlowUntilCode(client, state, {
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope, extraQueryParams: {
                 code_challenge,
                 code_challenge_method: "S256",
-            });
+            } });
 
-            assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, redirectUri);
-            assert.strictEqual(nextUrlObj.searchParams.get("scope"), "profile");
-            assert.strictEqual(nextUrlObj.searchParams.get("state"), state);
-
-            const code = nextUrlObj.searchParams.get("code");
+            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
             let url = `${apiDomain}/auth/oauth2/token`;
             const res = await fetch(url, {
                 method: "POST",
                 body: new URLSearchParams({
-                    code,
+                    code: authorizationCode,
                     client_id: client.clientId,
                     client_secret: client.clientSecret,
                     grant_type: "authorization_code",
@@ -649,6 +477,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
                 recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
             });
 
+            const scope = "profile";
             const redirectUri = "http://localhost:4000/redirect-url";
             const { client } = await OAuth2.createOAuth2Client({...defaultClientConf, }, {});
 
@@ -656,28 +485,25 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
             const { code_challenge, code_verifier } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
             const { code_challenge: code_challenge2 } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
 
-            await oauthFlowUntilCode(client, state, {
-                code_challenge: code_challenge,
+            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope, extraQueryParams: {
+                code_challenge,
                 code_challenge_method: "S256",
-            });
-            allSetCookieHeaders = [];
-            // Start the OAuth Flow
-            let nextUrlObj = await oauthFlowUntilCode(client, state, {
+            } });
+
+            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
+
+            const authorisationUrl2 = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope, extraQueryParams: {
                 code_challenge: code_challenge2,
                 code_challenge_method: "S256",
-            }, true);
+            } });
 
-            assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, redirectUri);
-            assert.strictEqual(nextUrlObj.searchParams.get("scope"), "profile");
-            assert.strictEqual(nextUrlObj.searchParams.get("state"), state);
-
-            const code = nextUrlObj.searchParams.get("code");
+            const { authorizationCode: authorizationCode2 } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl: authorisationUrl2, redirectUri, scope, state, useSignIn: true });
 
             let url = `${apiDomain}/auth/oauth2/token`;
             const res = await fetch(url, {
                 method: "POST",
                 body: new URLSearchParams({
-                    code,
+                    code: authorizationCode2,
                     client_id: client.clientId,
                     client_secret: client.clientSecret,
                     grant_type: "authorization_code",

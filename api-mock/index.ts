@@ -12,6 +12,8 @@ import { TOTPMock } from "./mocks/TOTP";
 import { ThirdPartyMock } from "./mocks/ThirdPartyMock";
 import { UserMetadataMock } from "./mocks/UserMetadataMock";
 import { OAuth2Mock } from "./mocks/OAuth2Mock";
+import { OAuth2ClientMock } from "./mocks/OAuth2ClientMock";
+import { OpenIdMock } from "./mocks/OpenIdMock";
 import { randomString } from "./utils";
 
 const recipesMock = {
@@ -30,6 +32,8 @@ const recipesMock = {
     UserMetadata: UserMetadataMock,
     TOTP: TOTPMock,
     OAuth2: OAuth2Mock,
+    OAuth2Client: OAuth2ClientMock,
+    OpenId: OpenIdMock,
 };
 
 export {
