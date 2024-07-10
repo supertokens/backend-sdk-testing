@@ -14,7 +14,7 @@
  */
 const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString } = require("../../api-mock");
+const { recipesMock, randomString, getOverrideLogs, resetOverrideParams } = require("../../api-mock");
 const { EmailPassword, EmailVerification, Session, supertokens } = recipesMock;
 
 describe(`EmailverificationTests: ${printPath(
@@ -38,139 +38,211 @@ describe(`EmailverificationTests: ${printPath(
     });
 
     describe("EmailVerification Claim", function () {
-        it("shouldRefetch should return false if the claim value is true and maxAgeInSeconds is not provided", async function () {
-            const claimValidator = EmailVerification.EmailVerificationClaim.validators.isVerified();
-
-            const oneYearAgo = new Date();
-            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
-            const payload = {
-                "st-ev": {
-                    v: true,
-                    // timestamp of the claim value shouldn't matter if
-                    // maxAgeInSeconds is not provided and the claim value is true
-                    t: oneYearAgo.getTime(),
+        it("claim value should be fetched if it is undefined", async function () {
+            const connectionURI = await startST();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
                 },
-            };
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    EmailPassword.init(),
+                    EmailVerification.init(),
+                    Session.init(),
+                ],
+            });
+            const { user } = await EmailPassword.signUp("public", "test@example.com", "password123");
 
-            const shouldRefetch = claimValidator.shouldRefetch(payload, {});
+            const session = await Session.createNewSessionWithoutRequestResponse("public", user.loginMethods[0].recipeUserId);
 
-            assert.strictEqual(shouldRefetch, false);
+            await session.mergeIntoAccessTokenPayload({ "st-ev": null });
+
+            await resetOverrideParams();
+
+            await assert.rejects(async () => {
+                await session.assertClaims([EmailVerification.EmailVerificationClaim.validators.isVerified()], {});
+            });
+
+            const logs = await getOverrideLogs();
+            const isEmailVerifiedCalledLogs = logs.filter(log => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified");
+
+            assert.strictEqual(isEmailVerifiedCalledLogs.length, 1);
         });
 
-        it("shouldRefetch should return values as per the maxAgeInSeconds if it is provided", async function () {
-            const claimValidator = EmailVerification.EmailVerificationClaim.validators.isVerified(10, 200);
+        it("claim value should be fetched as per maxAgeInSeconds if it is provided", async function () {
+            const connectionURI = await startST();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    EmailPassword.init(),
+                    EmailVerification.init(),
+                    Session.init(),
+                ],
+            });
+            const { user } = await EmailPassword.signUp("public", "test@example.com", "password123");
+            const session = await Session.createNewSessionWithoutRequestResponse("public", user.loginMethods[0].recipeUserId);
 
-            // claim value is true and timestamp is within maxAgeInSeconds
             {
-                let payload = {
-                    "st-ev": {
-                        v: true,
-                        t: new Date().getTime(),
-                    },
-                };
+                await session.mergeIntoAccessTokenPayload({ "st-ev": { 
+                    v: true, 
+                    t: Date.now(),
+                } });
+    
+                await resetOverrideParams();
+                await session.assertClaims([EmailVerification.EmailVerificationClaim.validators.isVerified(10, 200)], {});
+    
+    
+                let logs = await getOverrideLogs();
+                let isEmailVerifiedCalledLogs = logs.filter(log => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified");
+    
+                assert.strictEqual(isEmailVerifiedCalledLogs.length, 0);
 
-                assert.strictEqual(claimValidator.shouldRefetch(payload, {}), false);
             }
 
-            // claim value is true and timestamp is expired
+
             {
-                payload = {
-                    "st-ev": {
-                        v: true,
-                        t: new Date().getTime() - 300000, // 5 minutes ago
-                    },
-                };
+                await session.mergeIntoAccessTokenPayload({ "st-ev": { 
+                    v: true, 
+                    t: Date.now() - 201 * 1000 // 201 seconds ago
+                } });
+    
+                await resetOverrideParams();
+                
+                await assert.rejects(async () => {
+                    await session.assertClaims([EmailVerification.EmailVerificationClaim.validators.isVerified(10, 200)], {});
+                });
 
-                assert.strictEqual(claimValidator.shouldRefetch(payload, {}), true);
-            }
-        });
-
-        it("shouldRefetch should use the default maxAgeInSeconds if it's not provided and the claim value is false", async function () {
-            const claimValidator = EmailVerification.EmailVerificationClaim.validators.isVerified();
-
-            // NOTE: the default maxAgeInSeconds is 300 seconds
-
-            // claim value is false and timestamp is within maxAgeInSeconds
-            {
-                let payload = {
-                    "st-ev": {
-                        v: false,
-                        t: new Date().getTime(),
-                    },
-                };
-
-                assert.strictEqual(claimValidator.shouldRefetch(payload, {}), false);
-            }
-
-            // claim value is false and timestamp is expired
-            {
-                payload = {
-                    "st-ev": {
-                        v: false,
-                        t: new Date().getTime() - 600000, // 10 minutes ago
-                    },
-                };
-
-                assert.strictEqual(claimValidator.shouldRefetch(payload, {}), true);
-            }
-        });
-
-        it("shouldRefetch should return values as per the refetchTimeOnFalseInSeconds if it is provided", async function () {
-            const claimValidator = EmailVerification.EmailVerificationClaim.validators.isVerified(30, 200);
-
-            // claim value is true and timestamp is within refetchTimeOnFalseInSeconds
-            {
-                let payload = {
-                    "st-ev": {
-                        v: false,
-                        t: new Date().getTime(),
-                    },
-                };
-
-                assert.strictEqual(claimValidator.shouldRefetch(payload, {}), false);
-            }
-
-            // claim value is true and timestamp is expired
-            {
-                payload = {
-                    "st-ev": {
-                        v: false,
-                        t: new Date().getTime() - 31000, // 31 seconds ago
-                    },
-                };
-
-                assert.strictEqual(claimValidator.shouldRefetch(payload, {}), true);
+                let logs = await getOverrideLogs();
+                let isEmailVerifiedCalledLogs = logs.filter(log => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified");
+    
+                assert.strictEqual(isEmailVerifiedCalledLogs.length, 1);
             }
         });
 
-        it("shouldRefetch should use the default refetchTimeOnFalseInSeconds if it's not provided", async function () {
-            const claimValidator = EmailVerification.EmailVerificationClaim.validators.isVerified();
+        it("claim value should be fetched as per refetchTimeOnFalseInSeconds if it is provided", async function () {
+            const connectionURI = await startST();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    EmailPassword.init(),
+                    EmailVerification.init(),
+                    Session.init(),
+                ],
+            });
+            const { user } = await EmailPassword.signUp("public", "test@example.com", "password123");
+            const session = await Session.createNewSessionWithoutRequestResponse("public", user.loginMethods[0].recipeUserId);
 
-            // NOTE: the default refetchTimeOnFalseInSeconds is 10 seconds
-
-            // claim value is false and timestamp is within refetchTimeOnFalseInSeconds
             {
-                let payload = {
-                    "st-ev": {
-                        v: false,
-                        t: new Date().getTime(),
-                    },
-                };
+                await session.mergeIntoAccessTokenPayload({ "st-ev": { 
+                    v: false, 
+                    t: Date.now(),
+                } });
+    
+                await resetOverrideParams();
 
-                assert.strictEqual(claimValidator.shouldRefetch(payload, {}), false);
+                await assert.rejects(async () => {
+                    await session.assertClaims([EmailVerification.EmailVerificationClaim.validators.isVerified(5)], {});
+                });    
+    
+                let logs = await getOverrideLogs();
+                let isEmailVerifiedCalledLogs = logs.filter(log => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified");
+    
+                assert.strictEqual(isEmailVerifiedCalledLogs.length, 0);
+
             }
 
-            // claim value is false and timestamp is expired
             {
-                payload = {
-                    "st-ev": {
-                        v: false,
-                        t: new Date().getTime() - 11000, // 11 seconds ago
-                    },
-                };
+                await session.mergeIntoAccessTokenPayload({ "st-ev": { 
+                    v: false, 
+                    t: Date.now() - 6 * 1000 // 6 seconds ago
+                } });
+    
+                await resetOverrideParams();
+                
+                await assert.rejects(async () => {
+                    await session.assertClaims([EmailVerification.EmailVerificationClaim.validators.isVerified(5)], {});
+                });
 
-                assert.strictEqual(claimValidator.shouldRefetch(payload, {}), true);
+                let logs = await getOverrideLogs();
+                let isEmailVerifiedCalledLogs = logs.filter(log => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified");
+    
+                assert.strictEqual(isEmailVerifiedCalledLogs.length, 1);
+            }
+        });
+
+        it("claim value should be fetched as per default the refetchTimeOnFalseInSeconds if it is not provided", async function () {
+            const connectionURI = await startST();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    EmailPassword.init(),
+                    EmailVerification.init(),
+                    Session.init(),
+                ],
+            });
+            const { user } = await EmailPassword.signUp("public", "test@example.com", "password123");
+            const session = await Session.createNewSessionWithoutRequestResponse("public", user.loginMethods[0].recipeUserId);
+
+            // NOTE: the default value of refetchTimeOnFalseInSeconds is 10 seconds
+            {
+                await session.mergeIntoAccessTokenPayload({ "st-ev": { 
+                    v: false, 
+                    t: Date.now() - 9 * 1000 // 9 seconds ago
+                } });
+    
+                await resetOverrideParams();
+
+                await assert.rejects(async () => {
+                    await session.assertClaims([EmailVerification.EmailVerificationClaim.validators.isVerified()], {});
+                });    
+    
+                let logs = await getOverrideLogs();
+                let isEmailVerifiedCalledLogs = logs.filter(log => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified");
+    
+                assert.strictEqual(isEmailVerifiedCalledLogs.length, 0);
+            }
+
+            {
+                await session.mergeIntoAccessTokenPayload({ "st-ev": { 
+                    v: false, 
+                    t: Date.now() - 11 * 1000 // 11 seconds ago
+                } });
+    
+                await resetOverrideParams();
+                
+                await assert.rejects(async () => {
+                    await session.assertClaims([EmailVerification.EmailVerificationClaim.validators.isVerified(5)], {});
+                });
+
+                let logs = await getOverrideLogs();
+                let isEmailVerifiedCalledLogs = logs.filter(log => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified");
+    
+                assert.strictEqual(isEmailVerifiedCalledLogs.length, 1);
             }
         });
     });
