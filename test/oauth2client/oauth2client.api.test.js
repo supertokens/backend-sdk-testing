@@ -16,8 +16,8 @@
 const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTenant } = require("../utils");
 let assert = require("assert");
 const { recipesMock, randomString, API_PORT, request } = require("../../api-mock");
-const { OAuth2, OAuth2Client, OpenId, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
-const { testOAuthFlowAndGetAuthCode, getAuthorizationUrlFromAPI } = require('../oauth2/utils');
+const { OAuth2, OAuth2Client, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
+const { testOAuthFlowAndGetAuthCode, getAuthorizationUrlFromAPI } = require("../oauth2/utils");
 
 describe(`OAuth2Client-API: ${printPath("[test/oauth2client/oauth2client.api.test.js]")}`, function () {
     let globalConnectionURI;
@@ -98,7 +98,6 @@ describe(`OAuth2Client-API: ${printPath("[test/oauth2client/oauth2client.api.tes
                     },
                 }),
                 Session.init(),
-                OpenId.init(),
             ],
         });
 
@@ -172,7 +171,6 @@ describe(`OAuth2Client-API: ${printPath("[test/oauth2client/oauth2client.api.tes
                     },
                 }),
                 Session.init(),
-                OpenId.init(),
                 EmailPassword.init(),
             ],
         });
@@ -188,7 +186,7 @@ describe(`OAuth2Client-API: ${printPath("[test/oauth2client/oauth2client.api.tes
             clientId: client.clientId,
             redirectUri,
             scope,
-            state
+            state,
         });
 
         let signInRes = await new Promise((resolve) =>
@@ -215,8 +213,8 @@ describe(`OAuth2Client-API: ${printPath("[test/oauth2client/oauth2client.api.tes
         assert.strictEqual(signInRes.body.status, "OK");
         assert.strictEqual(signInRes.body.user.id, userId);
 
-        assert(signInRes.headers['front-token'] !== undefined);
-        assert(signInRes.headers['st-access-token'] !== undefined);
-        assert(signInRes.headers['st-refresh-token'] !== undefined);
+        assert(signInRes.headers["front-token"] !== undefined);
+        assert(signInRes.headers["st-access-token"] !== undefined);
+        assert(signInRes.headers["st-refresh-token"] !== undefined);
     });
 });
