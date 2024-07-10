@@ -38,7 +38,7 @@ describe(`EmailverificationTests: ${printPath(
     });
 
     describe("EmailVerification Claim", function () {
-        it("claim value should be fetched if it is undefined", async function () {
+        it("value should be fetched if it is undefined", async function () {
             const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
@@ -73,7 +73,7 @@ describe(`EmailverificationTests: ${printPath(
             assert.strictEqual(isEmailVerifiedCalledLogs.length, 1);
         });
 
-        it("claim value should be fetched as per maxAgeInSeconds if it is provided", async function () {
+        it("value should be fetched as per maxAgeInSeconds if it is provided", async function () {
             const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
@@ -119,6 +119,7 @@ describe(`EmailverificationTests: ${printPath(
     
                 await resetOverrideParams();
                 
+                // The email is not verified. The expired claim value will be refetched and updated to false, causing session.assertClaims to throw an error.
                 await assert.rejects(async () => {
                     await session.assertClaims([EmailVerification.EmailVerificationClaim.validators.isVerified(10, 200)], {});
                 });
@@ -130,7 +131,7 @@ describe(`EmailverificationTests: ${printPath(
             }
         });
 
-        it("claim value should be fetched as per refetchTimeOnFalseInSeconds if it is provided", async function () {
+        it("value should be fetched as per refetchTimeOnFalseInSeconds if it is provided", async function () {
             const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
@@ -188,7 +189,7 @@ describe(`EmailverificationTests: ${printPath(
             }
         });
 
-        it("claim value should be fetched as per default the refetchTimeOnFalseInSeconds if it is not provided", async function () {
+        it("value should be fetched as per default the refetchTimeOnFalseInSeconds if it is not provided", async function () {
             const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
