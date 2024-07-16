@@ -305,16 +305,13 @@ module.exports.startST = async function (config = {}) {
                         await module.exports.removeAppAndTenants(appId);
 
                         // Create app
-                        const createAppResp = await fetch(`http://${host}:${port}/recipe/multitenancy/app`, {
+                        const createAppResp = await fetch(`http://${host}:${port}/recipe/multitenancy/app/v2`, {
                             method: "PUT",
                             headers: {
                                 "Content-Type": "application/json",
                             },
                             body: JSON.stringify({
                                 appId,
-                                emailPasswordEnabled: true,
-                                thirdPartyEnabled: true,
-                                passwordlessEnabled: true,
                                 coreConfig: config.coreConfig,
                             }),
                         });
@@ -335,16 +332,13 @@ module.exports.startST = async function (config = {}) {
 };
 
 module.exports.createTenant = async function (connectionURI, appId, coreConfig = {}) {
-    const createAppResp = await fetch(`${connectionURI}/recipe/multitenancy/app`, {
+    const createAppResp = await fetch(`${connectionURI}/recipe/multitenancy/app/v2`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
             appId,
-            emailPasswordEnabled: true,
-            thirdPartyEnabled: true,
-            passwordlessEnabled: true,
             coreConfig,
         }),
     });
@@ -355,9 +349,9 @@ module.exports.createTenant = async function (connectionURI, appId, coreConfig =
 };
 
 module.exports.removeAppAndTenants = async function (appId) {
-    const tenantsResp = await fetch(`http://localhost:8080/appid-${appId}/recipe/multitenancy/tenant/list`);
+    const tenantsResp = await fetch(`http://localhost:8080/appid-${appId}/recipe/multitenancy/tenant/list/v2`);
     if (tenantsResp.status === 401) {
-        const updateAppResp = await fetch(`http://localhost:8080/recipe/multitenancy/app`, {
+        const updateAppResp = await fetch(`http://localhost:8080/recipe/multitenancy/app/v2`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
