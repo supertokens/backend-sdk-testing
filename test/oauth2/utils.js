@@ -4,42 +4,60 @@ const { request, recipesMock } = require("../../api-mock");
 const { EmailPassword, Session } = recipesMock;
 
 exports.getAuthorizationUrlFromAPI = async function ({ redirectUri, scope, state }) {
-  const response = await new Promise((resolve) =>
-    request()
-      .get(`/auth/oauth2client/authorisationurl?redirectURIOnProviderDashboard=${redirectUri}`)
-      .expect(200)
-      .end((err, res) => {
-        if (err) {
-          resolve(undefined);
-        } else {
-          resolve(res);
-        }
-      })
-  );
-  assert(response !== undefined);
-  const authUrl = new URL(response.body.urlWithQueryParams);
+    const response = await new Promise((resolve) =>
+        request()
+            .get(`/auth/oauth2client/authorisationurl?redirectURIOnProviderDashboard=${redirectUri}`)
+            .expect(200)
+            .end((err, res) => {
+                if (err) {
+                    resolve(undefined);
+                } else {
+                    resolve(res);
+                }
+            })
+    );
+    assert(response !== undefined);
+    const authUrl = new URL(response.body.urlWithQueryParams);
 
-  let authUrlObj = new URL(authUrl);
+    let authUrlObj = new URL(authUrl);
 
-  authUrlObj.searchParams.set("scope", scope);
-  authUrlObj.searchParams.set("state", state);
-  return authUrlObj.toString();
+    authUrlObj.searchParams.set("scope", scope);
+    authUrlObj.searchParams.set("state", state);
+    return authUrlObj.toString();
 };
 
-exports.createAuthorizationUrl = function ({ apiDomain, clientId, redirectUri, state, scope, extraQueryParams = {}}) {
-  const queryParams = {
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    response_type: "code",
+exports.createAuthorizationUrl = function ({
+    apiDomain,
+    clientId,
+    redirectUri,
+    state,
+    scope,
+    responseType = "code",
+    extraQueryParams = {},
+}) {
+    const queryParams = {
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        response_type: responseType,
+        scope,
+        state,
+        ...extraQueryParams,
+    };
+
+    return `${apiDomain}/auth/oauth2/auth?${new URLSearchParams(queryParams)}`;
+};
+
+exports.testOAuthFlowAndGetAuthCode = async function ({
+    apiDomain,
+    websiteDomain,
+    clientId,
+    authorisationUrl,
+    redirectUri,
     scope,
     state,
-    ...extraQueryParams,
-};
-
-  return `${apiDomain}/auth/oauth2/auth?${new URLSearchParams(queryParams)}`;
-}
-
-exports.testOAuthFlowAndGetAuthCode = async function ({ apiDomain, websiteDomain, clientId, authorisationUrl, redirectUri, scope, state, useSignIn = false }) {
+    responseType = "code",
+    useSignIn = false,
+}) {
     // This will be used to store all Set-Cookie headers in the subsequent requests
     const allSetCookieHeaders = [];
 
@@ -81,7 +99,9 @@ exports.testOAuthFlowAndGetAuthCode = async function ({ apiDomain, websiteDomain
     assert.strictEqual(nextUrlObj.searchParams.get("loginChallenge"), loginChallenge);
 
     // We have been redirected to the frontend login page. We will create the session manually to simulate login.
-    const createSessionUser = useSignIn ? await EmailPassword.signIn("public", "test@example.com", "password123") : await EmailPassword.signUp("public", "test@example.com", "password123");
+    const createSessionUser = useSignIn
+        ? await EmailPassword.signIn("public", "test@example.com", "password123")
+        : await EmailPassword.signUp("public", "test@example.com", "password123");
 
     const session = await Session.createNewSessionWithoutRequestResponse("public", createSessionUser.recipeUserId);
 
@@ -102,10 +122,13 @@ exports.testOAuthFlowAndGetAuthCode = async function ({ apiDomain, websiteDomain
     assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, `${apiDomain}/auth/oauth2/auth`);
     assert.strictEqual(nextUrlObj.searchParams.get("client_id"), clientId);
     assert.strictEqual(nextUrlObj.searchParams.get("redirect_uri"), redirectUri);
-    assert.strictEqual(nextUrlObj.searchParams.get("response_type"), "code");
+    assert.strictEqual(nextUrlObj.searchParams.get("response_type"), responseType);
     assert.strictEqual(nextUrlObj.searchParams.get("scope"), scope);
-    assert.strictEqual(nextUrlObj.searchParams.get("state"), state);
     assert(nextUrlObj.searchParams.get("login_verifier") !== null);
+
+    if (state !== undefined) {
+        assert.strictEqual(nextUrlObj.searchParams.get("state"), state);
+    }
 
     res = await fetch(nextUrl, {
         method: "GET",
@@ -124,10 +147,13 @@ exports.testOAuthFlowAndGetAuthCode = async function ({ apiDomain, websiteDomain
     assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, `${apiDomain}/auth/oauth2/auth`);
     assert.strictEqual(nextUrlObj.searchParams.get("client_id"), clientId);
     assert.strictEqual(nextUrlObj.searchParams.get("redirect_uri"), redirectUri);
-    assert.strictEqual(nextUrlObj.searchParams.get("response_type"), "code");
+    assert.strictEqual(nextUrlObj.searchParams.get("response_type"), responseType);
     assert.strictEqual(nextUrlObj.searchParams.get("scope"), scope);
-    assert.strictEqual(nextUrlObj.searchParams.get("state"), state);
     assert(nextUrlObj.searchParams.get("consent_verifier") !== null);
+
+    if (state !== undefined) {
+        assert.strictEqual(nextUrlObj.searchParams.get("state"), state);
+    }
 
     res = await fetch(nextUrl, {
         method: "GET",
@@ -142,11 +168,37 @@ exports.testOAuthFlowAndGetAuthCode = async function ({ apiDomain, websiteDomain
 
     nextUrl = res.headers.get("Location");
     nextUrlObj = new URL(nextUrl);
-    const authorizationCode = nextUrlObj.searchParams.get("code");
+    const redirectUriObj = new URL(redirectUri);
 
-    assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, redirectUri);
-    assert.strictEqual(nextUrlObj.searchParams.get("scope"), scope);
-    assert.strictEqual(nextUrlObj.searchParams.get("state"), state);
+    // Assert that all the search params in the original redirect URI are preserved in the redirected URL
+    redirectUriObj.searchParams.forEach((value, key) => {
+        assert.strictEqual(nextUrlObj.searchParams.get(key), value);
+    });
 
-    return { authorizationCode, userId: session.getUserId()};
-}
+    assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, redirectUriObj.origin + redirectUriObj.pathname);
+
+    if (responseType === "code") {
+        const authorizationCode = nextUrlObj.searchParams.get("code");
+
+        assert.strictEqual(nextUrlObj.searchParams.get("scope"), scope);
+
+        if (state !== undefined) {
+            assert.strictEqual(nextUrlObj.searchParams.get("state"), state);
+        }
+
+        return { authorizationCode, userId: session.getUserId() };
+    } else if (responseType === "id_token") {
+        const params = new URLSearchParams(nextUrlObj.hash.substring(1));
+
+        const idToken = params.get("id_token");
+        assert(idToken !== null);
+
+        if (state !== undefined) {
+            assert.strictEqual(params.get("state"), state);
+        }
+
+        return { idToken, userId: session.getUserId() };
+    }
+
+    throw new Error(`Unexpected response type ${responseType}`);
+};
