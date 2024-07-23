@@ -97,6 +97,33 @@ describe(`OAuth2-recipeFunctions: ${printPath("[test/oauth2/oauth2.recipeFunctio
         assert.strictEqual(client.clientSecret, "client_secret");
     });
 
+    it("should not allow creating a client with a redirect URI containing a URL fragment", async function () {
+        // NOTE: Url fragments are not allowed in redirect URIs as per https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.2
+        const connectionURI = await startST();
+        SuperTokens.init({
+            supertokens: {
+                connectionURI,
+            },
+            appInfo: {
+                apiDomain: "api.supertokens.io",
+                appName: "SuperTokens",
+                websiteDomain: "supertokens.io",
+            },
+            recipeList: [OAuth2.init()],
+        });
+
+        const { error } = await OAuth2.createOAuth2Client(
+            {
+                client_id: "client_id",
+                client_secret: "client_secret",
+                redirect_uris: ["http://localhost:3000/#fragment"],
+            },
+            {}
+        );
+
+        assert.strictEqual(error, "invalid_redirect_uri");
+    });
+
     it("should update the OAuth2Client", async function () {
         const connectionURI = await startST();
         SuperTokens.init({
