@@ -2117,6 +2117,136 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
 
             assert(response === true);
         });
+
+        it("isEmailChangeAllowed returns false if it'd lead to primary user conflict on a tenant", async function () {
+            const connectionURI = await startST();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                debug: true,
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    Multitenancy.init(),
+                    EmailPassword.init(),
+                    Session.init(),
+                    EmailVerification.init({
+                        mode: "OPTIONAL",
+                    }),
+                    AccountLinking.init({
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
+                    }),
+                ],
+            });
+
+            await Multitenancy.createOrUpdateTenant("tenant1", {
+                firstFactors: null,
+            });
+
+            await Multitenancy.createOrUpdateTenant("tenant2", {
+                firstFactors: null,
+            });
+
+            let { user: conflictingUser } = await EmailPassword.signUp(
+                "tenant1",
+                "conflict@example.com",
+                "password123"
+            );
+            let createPrimaryResult = await AccountLinking.createPrimaryUser(
+                conflictingUser.loginMethods[0].recipeUserId
+            );
+            assert(createPrimaryResult.status === "OK");
+
+            let { user: user1 } = await EmailPassword.signUp("tenant1", "test@example.com", "password123");
+            assert(user1.isPrimaryUser === false);
+
+            let { user: user2 } = await EmailPassword.signUp("tenant2", "test2@example.com", "password123");
+            assert(user2.isPrimaryUser === false);
+
+            createPrimaryResult = await AccountLinking.createPrimaryUser(user2.loginMethods[0].recipeUserId);
+            assert(createPrimaryResult.status === "OK");
+
+            let linkResult = await AccountLinking.linkAccounts(user1.loginMethods[0].recipeUserId, user2.id);
+            assert(linkResult.status === "OK");
+
+            let isAllowed = await AccountLinking.isEmailChangeAllowed(
+                user1.loginMethods[0].recipeUserId,
+                "conflict@example.com",
+                false
+            );
+
+            assert(!isAllowed);
+        });
+
+        it("isEmailChangeAllowed returns false if it'd lead to primary user conflict on another tenant", async function () {
+            const connectionURI = await startST();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                debug: true,
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    Multitenancy.init(),
+                    EmailPassword.init(),
+                    Session.init(),
+                    EmailVerification.init({
+                        mode: "OPTIONAL",
+                    }),
+                    AccountLinking.init({
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
+                    }),
+                ],
+            });
+
+            await Multitenancy.createOrUpdateTenant("tenant1", {
+                firstFactors: null,
+            });
+
+            await Multitenancy.createOrUpdateTenant("tenant2", {
+                firstFactors: null,
+            });
+
+            let { user: conflictingUser } = await EmailPassword.signUp(
+                "tenant2",
+                "conflict@example.com",
+                "password123"
+            );
+            let createPrimaryResult = await AccountLinking.createPrimaryUser(
+                conflictingUser.loginMethods[0].recipeUserId
+            );
+            assert(createPrimaryResult.status === "OK");
+
+            let { user: user1 } = await EmailPassword.signUp("tenant1", "test@example.com", "password123");
+            assert(user1.isPrimaryUser === false);
+
+            let { user: user2 } = await EmailPassword.signUp("tenant2", "test2@example.com", "password123");
+            assert(user2.isPrimaryUser === false);
+
+            createPrimaryResult = await AccountLinking.createPrimaryUser(user1.loginMethods[0].recipeUserId);
+            assert(createPrimaryResult.status === "OK");
+
+            let linkResult = await AccountLinking.linkAccounts(user2.loginMethods[0].recipeUserId, user1.id);
+            assert.strictEqual(linkResult.status, "OK");
+
+            let isAllowed = await AccountLinking.isEmailChangeAllowed(
+                user2.loginMethods[0].recipeUserId,
+                "conflict@example.com",
+                false
+            );
+
+            assert(!isAllowed);
+        });
     });
 
     describe("isSignInAllowed tests", function () {
