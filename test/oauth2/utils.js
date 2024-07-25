@@ -75,28 +75,11 @@ exports.testOAuthFlowAndGetAuthCode = async function ({
     let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
     saveCookies(res);
 
-    let nextUrl = res.headers.get("Location");
-    let nextUrlObj = new URL(nextUrl);
-    const loginChallenge = nextUrlObj.searchParams.get("login_challenge");
-
-    assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, apiDomain + "/auth/oauth2/login");
-    assert(loginChallenge !== null);
-
-    res = await fetch(nextUrl, {
-        method: "GET",
-        redirect: "manual",
-        headers: {
-            Cookie: getCookieHeader(),
-        },
-    });
-
-    saveCookies(res);
-
     nextUrl = res.headers.get("Location");
     nextUrlObj = new URL(nextUrl);
+    const loginChallenge = nextUrlObj.searchParams.get("loginChallenge");
 
     assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, `${websiteDomain}/auth`);
-    assert.strictEqual(nextUrlObj.searchParams.get("loginChallenge"), loginChallenge);
 
     // We have been redirected to the frontend login page. We will create the session manually to simulate login.
     const createSessionUser = useSignIn
@@ -106,56 +89,6 @@ exports.testOAuthFlowAndGetAuthCode = async function ({
     const session = await Session.createNewSessionWithoutRequestResponse("public", createSessionUser.recipeUserId);
 
     res = await fetch(`${apiDomain}/auth/oauth2/login?loginChallenge=${loginChallenge}`, {
-        method: "GET",
-        redirect: "manual",
-        headers: {
-            Authorization: `Bearer ${session.getAccessToken()}`,
-            Cookie: getCookieHeader(),
-        },
-    });
-
-    saveCookies(res);
-
-    nextUrl = res.headers.get("Location");
-    nextUrlObj = new URL(nextUrl);
-
-    assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, `${apiDomain}/auth/oauth2/auth`);
-    assert.strictEqual(nextUrlObj.searchParams.get("client_id"), clientId);
-    assert.strictEqual(nextUrlObj.searchParams.get("redirect_uri"), redirectUri);
-    assert.strictEqual(nextUrlObj.searchParams.get("response_type"), responseType);
-    assert.strictEqual(nextUrlObj.searchParams.get("scope"), scope);
-    assert(nextUrlObj.searchParams.get("login_verifier") !== null);
-
-    if (state !== undefined) {
-        assert.strictEqual(nextUrlObj.searchParams.get("state"), state);
-    }
-
-    res = await fetch(nextUrl, {
-        method: "GET",
-        redirect: "manual",
-        headers: {
-            Authorization: `Bearer ${session.getAccessToken()}`,
-            Cookie: getCookieHeader(),
-        },
-    });
-
-    saveCookies(res);
-
-    nextUrl = res.headers.get("Location");
-    nextUrlObj = new URL(nextUrl);
-
-    assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, `${apiDomain}/auth/oauth2/auth`);
-    assert.strictEqual(nextUrlObj.searchParams.get("client_id"), clientId);
-    assert.strictEqual(nextUrlObj.searchParams.get("redirect_uri"), redirectUri);
-    assert.strictEqual(nextUrlObj.searchParams.get("response_type"), responseType);
-    assert.strictEqual(nextUrlObj.searchParams.get("scope"), scope);
-    assert(nextUrlObj.searchParams.get("consent_verifier") !== null);
-
-    if (state !== undefined) {
-        assert.strictEqual(nextUrlObj.searchParams.get("state"), state);
-    }
-
-    res = await fetch(nextUrl, {
         method: "GET",
         redirect: "manual",
         headers: {
