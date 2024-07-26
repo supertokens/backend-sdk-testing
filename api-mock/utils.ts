@@ -1,10 +1,6 @@
 import { minify_sync } from "terser";
 import fs = require("fs");
-import SuperTokens from "supertokens-node";
-import { User as UserClass } from "supertokens-node/lib/build/user";
 import { SessionClaim, SessionClaimValidator } from "supertokens-node/lib/build/recipe/session/types";
-import { UserContext } from "supertokens-node/lib/build/types";
-import { JSONObject } from "supertokens-node/recipe/usermetadata";
 
 const uniqueFn = new Map<string, string>();
 
@@ -46,36 +42,7 @@ export function randomString(length = 30) {
 }
 
 export function deserializeOverrideParams(vars) {
-    if (vars.sendEmailToRecipeUserId) {
-        vars.sendEmailToRecipeUserId = SuperTokens.convertToRecipeUserId(vars.sendEmailToRecipeUserId.recipeUserId);
-    }
-    if (vars.userPostPasswordReset) {
-        vars.userPostPasswordReset = new UserClass({
-            ...vars.userPostPasswordReset,
-            // @ts-ignore
-            loginMethods: vars.userPostPasswordReset.loginMethods.map((lm) => ({
-                ...lm,
-                // @ts-ignore
-                recipeUserId: lm.recipeUserId.recipeUserId,
-            })),
-        } as any);
-    }
-    if (vars.userInCallback) {
-        vars.userInCallback = {
-            ...vars.userInCallback,
-            recipeUserId:
-                // @ts-ignore
-                vars.userInCallback.recipeUserId?.recipeUserId &&
-                // @ts-ignore
-                SuperTokens.convertToRecipeUserId(vars.userInCallback.recipeUserId.recipeUserId),
-        };
-    }
-    if (vars.primaryUserInCallback) {
-        vars.primaryUserInCallback = new UserClass(vars.primaryUserInCallback as any);
-    }
-    if (typeof vars.recipeUserIdInCallback === "string") {
-        vars.recipeUserIdInCallback = SuperTokens.convertToRecipeUserId(vars.recipeUserIdInCallback);
-    }
+    // TODO: check if any conversions are needed
     return vars;
 }
 

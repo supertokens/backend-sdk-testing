@@ -1,5 +1,4 @@
 import SuperTokens from "supertokens-node";
-import { User as UserClass } from "supertokens-node/lib/build/user";
 import UserMetadata from "supertokens-node/recipe/usermetadata";
 import { queryAPI } from "../fetcher";
 import { minify } from "../utils";

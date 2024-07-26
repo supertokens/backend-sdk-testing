@@ -49,15 +49,11 @@ describe(`EmailverificationTests: ${printPath(
                     appName: "SuperTokens",
                     websiteDomain: "supertokens.io",
                 },
-                recipeList: [
-                    EmailPassword.init(),
-                    EmailVerification.init(),
-                    Session.init(),
-                ],
+                recipeList: [EmailPassword.init(), EmailVerification.init(), Session.init()],
             });
             const { user } = await EmailPassword.signUp("public", "test@example.com", "password123");
 
-            const session = await Session.createNewSessionWithoutRequestResponse("public", user.loginMethods[0].recipeUserId);
+            const session = await Session.createNewSessionWithoutRequestResponse("public", user.id);
 
             await session.mergeIntoAccessTokenPayload({ "st-ev": null });
 
@@ -68,7 +64,9 @@ describe(`EmailverificationTests: ${printPath(
             });
 
             const logs = await getOverrideLogs();
-            const isEmailVerifiedCalledLogs = logs.filter(log => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified");
+            const isEmailVerifiedCalledLogs = logs.filter(
+                (log) => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified"
+            );
 
             assert.strictEqual(isEmailVerifiedCalledLogs.length, 1);
         });
@@ -84,49 +82,58 @@ describe(`EmailverificationTests: ${printPath(
                     appName: "SuperTokens",
                     websiteDomain: "supertokens.io",
                 },
-                recipeList: [
-                    EmailPassword.init(),
-                    EmailVerification.init(),
-                    Session.init(),
-                ],
+                recipeList: [EmailPassword.init(), EmailVerification.init(), Session.init()],
             });
             const { user } = await EmailPassword.signUp("public", "test@example.com", "password123");
-            const session = await Session.createNewSessionWithoutRequestResponse("public", user.loginMethods[0].recipeUserId);
+            const session = await Session.createNewSessionWithoutRequestResponse(
+                "public",
+                user.id
+            );
 
             {
-                await session.mergeIntoAccessTokenPayload({ "st-ev": { 
-                    v: true, 
-                    t: Date.now(),
-                } });
-    
-                await resetOverrideParams();
-                await session.assertClaims([EmailVerification.EmailVerificationClaim.validators.isVerified(10, 200)], {});
-    
-    
-                let logs = await getOverrideLogs();
-                let isEmailVerifiedCalledLogs = logs.filter(log => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified");
-    
-                assert.strictEqual(isEmailVerifiedCalledLogs.length, 0);
+                await session.mergeIntoAccessTokenPayload({
+                    "st-ev": {
+                        v: true,
+                        t: Date.now()+0,
+                    },
+                });
 
+                await resetOverrideParams();
+                await session.assertClaims(
+                    [EmailVerification.EmailVerificationClaim.validators.isVerified(10, 200)],
+                    {}
+                );
+
+                let logs = await getOverrideLogs();
+                let isEmailVerifiedCalledLogs = logs.filter(
+                    (log) => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified"
+                );
+                assert.strictEqual(isEmailVerifiedCalledLogs.length, 0);
             }
 
-
             {
-                await session.mergeIntoAccessTokenPayload({ "st-ev": { 
-                    v: true, 
-                    t: Date.now() - 201 * 1000 // 201 seconds ago
-                } });
-    
+                await session.mergeIntoAccessTokenPayload({
+                    "st-ev": {
+                        v: true,
+                        t: Date.now() - 201 * 1000, // 201 seconds ago
+                    },
+                });
+
                 await resetOverrideParams();
-                
+
                 // The email is not verified. The expired claim value will be refetched and updated to false, causing session.assertClaims to throw an error.
                 await assert.rejects(async () => {
-                    await session.assertClaims([EmailVerification.EmailVerificationClaim.validators.isVerified(10, 200)], {});
+                    await session.assertClaims(
+                        [EmailVerification.EmailVerificationClaim.validators.isVerified(10, 200)],
+                        {}
+                    );
                 });
 
                 let logs = await getOverrideLogs();
-                let isEmailVerifiedCalledLogs = logs.filter(log => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified");
-    
+                let isEmailVerifiedCalledLogs = logs.filter(
+                    (log) => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified"
+                );
+
                 assert.strictEqual(isEmailVerifiedCalledLogs.length, 1);
             }
         });
@@ -142,49 +149,55 @@ describe(`EmailverificationTests: ${printPath(
                     appName: "SuperTokens",
                     websiteDomain: "supertokens.io",
                 },
-                recipeList: [
-                    EmailPassword.init(),
-                    EmailVerification.init(),
-                    Session.init(),
-                ],
+                recipeList: [EmailPassword.init(), EmailVerification.init(), Session.init()],
             });
             const { user } = await EmailPassword.signUp("public", "test@example.com", "password123");
-            const session = await Session.createNewSessionWithoutRequestResponse("public", user.loginMethods[0].recipeUserId);
+            const session = await Session.createNewSessionWithoutRequestResponse(
+                "public",
+                user.id
+            );
 
             {
-                await session.mergeIntoAccessTokenPayload({ "st-ev": { 
-                    v: false, 
-                    t: Date.now(),
-                } });
-    
+                await session.mergeIntoAccessTokenPayload({
+                    "st-ev": {
+                        v: false,
+                        t: Date.now(),
+                    },
+                });
+
                 await resetOverrideParams();
 
-                await assert.rejects(async () => {
-                    await session.assertClaims([EmailVerification.EmailVerificationClaim.validators.isVerified(5)], {});
-                });    
-    
-                let logs = await getOverrideLogs();
-                let isEmailVerifiedCalledLogs = logs.filter(log => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified");
-    
-                assert.strictEqual(isEmailVerifiedCalledLogs.length, 0);
-
-            }
-
-            {
-                await session.mergeIntoAccessTokenPayload({ "st-ev": { 
-                    v: false, 
-                    t: Date.now() - 6 * 1000 // 6 seconds ago
-                } });
-    
-                await resetOverrideParams();
-                
                 await assert.rejects(async () => {
                     await session.assertClaims([EmailVerification.EmailVerificationClaim.validators.isVerified(5)], {});
                 });
 
                 let logs = await getOverrideLogs();
-                let isEmailVerifiedCalledLogs = logs.filter(log => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified");
-    
+                let isEmailVerifiedCalledLogs = logs.filter(
+                    (log) => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified"
+                );
+
+                assert.strictEqual(isEmailVerifiedCalledLogs.length, 0);
+            }
+
+            {
+                await session.mergeIntoAccessTokenPayload({
+                    "st-ev": {
+                        v: false,
+                        t: Date.now() - 6 * 1000, // 6 seconds ago
+                    },
+                });
+
+                await resetOverrideParams();
+
+                await assert.rejects(async () => {
+                    await session.assertClaims([EmailVerification.EmailVerificationClaim.validators.isVerified(5)], {});
+                });
+
+                let logs = await getOverrideLogs();
+                let isEmailVerifiedCalledLogs = logs.filter(
+                    (log) => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified"
+                );
+
                 assert.strictEqual(isEmailVerifiedCalledLogs.length, 1);
             }
         });
@@ -200,49 +213,56 @@ describe(`EmailverificationTests: ${printPath(
                     appName: "SuperTokens",
                     websiteDomain: "supertokens.io",
                 },
-                recipeList: [
-                    EmailPassword.init(),
-                    EmailVerification.init(),
-                    Session.init(),
-                ],
+                recipeList: [EmailPassword.init(), EmailVerification.init(), Session.init()],
             });
             const { user } = await EmailPassword.signUp("public", "test@example.com", "password123");
-            const session = await Session.createNewSessionWithoutRequestResponse("public", user.loginMethods[0].recipeUserId);
+            const session = await Session.createNewSessionWithoutRequestResponse(
+                "public",
+                user.id
+            );
 
             // NOTE: the default value of refetchTimeOnFalseInSeconds is 10 seconds
             {
-                await session.mergeIntoAccessTokenPayload({ "st-ev": { 
-                    v: false, 
-                    t: Date.now() - 9 * 1000 // 9 seconds ago
-                } });
-    
+                await session.mergeIntoAccessTokenPayload({
+                    "st-ev": {
+                        v: false,
+                        t: Date.now() - 9 * 1000, // 9 seconds ago
+                    },
+                });
+
                 await resetOverrideParams();
 
                 await assert.rejects(async () => {
                     await session.assertClaims([EmailVerification.EmailVerificationClaim.validators.isVerified()], {});
-                });    
-    
+                });
+
                 let logs = await getOverrideLogs();
-                let isEmailVerifiedCalledLogs = logs.filter(log => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified");
-    
+                let isEmailVerifiedCalledLogs = logs.filter(
+                    (log) => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified"
+                );
+
                 assert.strictEqual(isEmailVerifiedCalledLogs.length, 0);
             }
 
             {
-                await session.mergeIntoAccessTokenPayload({ "st-ev": { 
-                    v: false, 
-                    t: Date.now() - 11 * 1000 // 11 seconds ago
-                } });
-    
+                await session.mergeIntoAccessTokenPayload({
+                    "st-ev": {
+                        v: false,
+                        t: Date.now() - 11 * 1000, // 11 seconds ago
+                    },
+                });
+
                 await resetOverrideParams();
-                
+
                 await assert.rejects(async () => {
                     await session.assertClaims([EmailVerification.EmailVerificationClaim.validators.isVerified(5)], {});
                 });
 
                 let logs = await getOverrideLogs();
-                let isEmailVerifiedCalledLogs = logs.filter(log => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified");
-    
+                let isEmailVerifiedCalledLogs = logs.filter(
+                    (log) => log.type === "CALL" && log.name === "EmailVerification.override.functions.isEmailVerified"
+                );
+
                 assert.strictEqual(isEmailVerifiedCalledLogs.length, 1);
             }
         });

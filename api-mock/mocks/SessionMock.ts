@@ -28,19 +28,9 @@ type SerializedSession = {
 };
 
 class RemoteSessionObject implements SessionContainerInterface {
-    accessToken: string;
-    frontToken: string;
-    refreshToken: TokenInfo | undefined;
-    antiCsrfToken: string | undefined;
+    constructor(private data: SerializedSession) {}
 
-    constructor(private data: SerializedSession) {
-        this.accessToken = data.accessToken;
-        this.frontToken = data.frontToken;
-        this.refreshToken = data.refreshToken;
-        this.antiCsrfToken = data.antiCsrfToken;
-    }
-
-    async revokeSession(userContext?: Record<string, any> | undefined): Promise<void> {
+    async revokeSession(userContext?: any): Promise<void> {
         const { updatedSession } = await queryAPI({
             method: "post",
             path: "/test/session/sessionobject/revokesession",
@@ -51,7 +41,8 @@ class RemoteSessionObject implements SessionContainerInterface {
         });
         Object.assign(this.data, updatedSession);
     }
-    async getSessionDataFromDatabase(userContext?: Record<string, any> | undefined): Promise<any> {
+
+    async getSessionDataFromDatabase(userContext?: any): Promise<any> {
         const { retVal, updatedSession } = await queryAPI({
             method: "post",
             path: "/test/session/sessionobject/getsessiondatafromdatabase",
@@ -63,10 +54,8 @@ class RemoteSessionObject implements SessionContainerInterface {
         Object.assign(this.data, updatedSession);
         return retVal;
     }
-    async updateSessionDataInDatabase(
-        newSessionData: any,
-        userContext?: Record<string, any> | undefined
-    ): Promise<any> {
+
+    async updateSessionDataInDatabase(newSessionData: any, userContext?: any): Promise<any> {
         const { retVal, updatedSession } = await queryAPI({
             method: "post",
             path: "/test/session/sessionobject/updatesessiondataindatabase",
@@ -79,24 +68,24 @@ class RemoteSessionObject implements SessionContainerInterface {
         Object.assign(this.data, updatedSession);
         return retVal;
     }
-    getUserId(userContext?: Record<string, any> | undefined): string {
+
+    getUserId(userContext?: any): string {
         return this.data.userId;
     }
-    getRecipeUserId(userContext?: Record<string, any> | undefined): SuperTokens.RecipeUserId {
-        return SuperTokens.convertToRecipeUserId(this.data.recipeUserId.recipeUserId);
-    }
-    getTenantId(userContext?: Record<string, any> | undefined): string {
+
+    getTenantId(userContext?: any): string {
         return this.data.tenantId;
     }
-    getAccessTokenPayload(userContext?: Record<string, any> | undefined) {
+
+    getAccessTokenPayload(userContext?: any): any {
         return this.data.userDataInAccessToken;
     }
-    getHandle(userContext?: Record<string, any> | undefined): string {
+
+    getHandle(userContext?: any): string {
         return this.data.sessionHandle;
     }
-    getAllSessionTokensDangerously(
-        userContext?: Record<string, any> | undefined
-    ): {
+
+    getAllSessionTokensDangerously(): {
         accessToken: string;
         refreshToken: string | undefined;
         antiCsrfToken: string | undefined;
@@ -111,13 +100,12 @@ class RemoteSessionObject implements SessionContainerInterface {
             refreshToken: this.data.refreshToken?.token,
         };
     }
-    getAccessToken(userContext?: Record<string, any> | undefined): string {
+
+    getAccessToken(userContext?: any): string {
         return this.data.accessToken;
     }
-    async mergeIntoAccessTokenPayload(
-        accessTokenPayloadUpdate: JSONObject,
-        userContext?: Record<string, any> | undefined
-    ): Promise<void> {
+
+    async mergeIntoAccessTokenPayload(accessTokenPayloadUpdate: JSONObject, userContext?: any): Promise<void> {
         const { updatedSession } = await queryAPI({
             method: "post",
             path: "/test/session/sessionobject/mergeintoaccesstokenpayload",
@@ -129,10 +117,12 @@ class RemoteSessionObject implements SessionContainerInterface {
         });
         Object.assign(this.data, updatedSession);
     }
-    async getTimeCreated(userContext?: Record<string, any> | undefined): Promise<number> {
+
+    async getTimeCreated(userContext?: any): Promise<number> {
         return this.data.userDataInAccessToken.eat;
     }
-    async getExpiry(userContext?: Record<string, any> | undefined): Promise<number> {
+
+    async getExpiry(userContext?: any): Promise<number> {
         return queryAPI({
             method: "post",
             path: "/test/session/sessionobject/getexpiry",
@@ -142,10 +132,8 @@ class RemoteSessionObject implements SessionContainerInterface {
             },
         });
     }
-    async assertClaims(
-        claimValidators: Session.SessionClaimValidator[],
-        userContext?: Record<string, any> | undefined
-    ): Promise<void> {
+
+    async assertClaims(claimValidators: SessionClaimValidator[], userContext?: any): Promise<void> {
         const { updatedSession } = await queryAPI({
             method: "post",
             path: "/test/session/sessionobject/assertclaims",
@@ -157,7 +145,8 @@ class RemoteSessionObject implements SessionContainerInterface {
         });
         Object.assign(this.data, updatedSession);
     }
-    async fetchAndSetClaim<T>(claim: SessionClaim<T>, userContext?: Record<string, any> | undefined): Promise<void> {
+
+    async fetchAndSetClaim<T>(claim: SessionClaim<T>, userContext?: any): Promise<void> {
         const { updatedSession } = await queryAPI({
             method: "post",
             path: "/test/session/sessionobject/fetchandsetclaim",
@@ -169,11 +158,8 @@ class RemoteSessionObject implements SessionContainerInterface {
         });
         Object.assign(this.data, updatedSession);
     }
-    async setClaimValue<T>(
-        claim: SessionClaim<T>,
-        value: T,
-        userContext?: Record<string, any> | undefined
-    ): Promise<void> {
+
+    async setClaimValue<T>(claim: SessionClaim<T>, value: T, userContext?: any): Promise<void> {
         const { updatedSession } = await queryAPI({
             method: "post",
             path: "/test/session/sessionobject/setclaimvalue",
@@ -186,10 +172,8 @@ class RemoteSessionObject implements SessionContainerInterface {
         });
         Object.assign(this.data, updatedSession);
     }
-    async getClaimValue<T>(
-        claim: SessionClaim<T>,
-        userContext?: Record<string, any> | undefined
-    ): Promise<T | undefined> {
+
+    async getClaimValue<T>(claim: SessionClaim<T>, userContext?: any): Promise<T | undefined> {
         const { retVal, updatedSession } = await queryAPI({
             method: "post",
             path: "/test/session/sessionobject/getclaimvalue",
@@ -202,7 +186,8 @@ class RemoteSessionObject implements SessionContainerInterface {
         Object.assign(this.data, updatedSession);
         return retVal;
     }
-    async removeClaim(claim: SessionClaim<any>, userContext?: Record<string, any> | undefined): Promise<void> {
+
+    async removeClaim(claim: SessionClaim<any>, userContext?: any): Promise<void> {
         const { updatedSession } = await queryAPI({
             method: "post",
             path: "/test/session/sessionobject/removeclaim",
@@ -214,10 +199,8 @@ class RemoteSessionObject implements SessionContainerInterface {
         });
         Object.assign(this.data, updatedSession);
     }
-    attachToRequestResponse(
-        reqResInfo: ReqResInfo,
-        userContext?: Record<string, any> | undefined
-    ): void | Promise<void> {
+
+    attachToRequestResponse(reqResInfo: ReqResInfo): Promise<void> | void {
         throw new Error("Not implemented");
     }
 }
@@ -253,7 +236,7 @@ export const SessionMock: Partial<typeof Session> = {
     },
     createNewSessionWithoutRequestResponse: async (
         tenantId,
-        recipeUserId,
+        userId,
         accessTokenPayload,
         sessionDataInDatabase,
         disableAntiCsrf,
@@ -264,7 +247,7 @@ export const SessionMock: Partial<typeof Session> = {
             path: "/test/session/createnewsessionwithoutrequestresponse",
             input: {
                 tenantId,
-                recipeUserId: recipeUserId.getAsString(),
+                userId,
                 accessTokenPayload,
                 sessionDataInDatabase,
                 disableAntiCsrf,
@@ -300,20 +283,14 @@ export const SessionMock: Partial<typeof Session> = {
                 userContext,
             },
         });
-        if (response) {
-            response.recipeUserId = SuperTokens.convertToRecipeUserId(
-                response.recipeUserId.recipeUserId ?? response.recipeUserId
-            );
-        }
         return response;
     },
-    getAllSessionHandlesForUser: async (userId, fetchSessionsForAllLinkedAccounts, tenantId, userContext) => {
+    getAllSessionHandlesForUser: async (userId, tenantId, userContext) => {
         const response = await queryAPI({
             method: "post",
             path: "/test/session/getallsessionhandlesforuser",
             input: {
                 userId,
-                fetchSessionsForAllLinkedAccounts,
                 tenantId,
                 userContext,
             },
@@ -334,19 +311,15 @@ export const SessionMock: Partial<typeof Session> = {
             });
             return deserializeSession(response);
         } catch (error) {
-            if (error?.payload?.recipeUserId?.recipeUserId) {
-                error.payload.recipeUserId = SuperTokens.convertToRecipeUserId(error.payload.recipeUserId.recipeUserId);
-            }
             throw error;
         }
     },
-    revokeAllSessionsForUser: async (userId, revokeSessionsForLinkedAccounts, tenantId, userContext) => {
+    revokeAllSessionsForUser: async (userId, tenantId, userContext) => {
         const response = await queryAPI({
             method: "post",
             path: "/test/session/revokeallsessionsforuser",
             input: {
                 userId,
-                revokeSessionsForLinkedAccounts,
                 tenantId,
                 userContext,
             },
