@@ -94,7 +94,7 @@ describe(`EmailverificationTests: ${printPath(
                 await session.mergeIntoAccessTokenPayload({
                     "st-ev": {
                         v: true,
-                        t: Date.now()+0,
+                        t: Date.now(),
                     },
                 });
 
