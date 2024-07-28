@@ -1,19 +1,19 @@
-import OAuth2 from "supertokens-node/recipe/oauth2";
+import OAuth2Provider from "supertokens-node/recipe/oauth2provider";
 import { queryAPI } from "../fetcher";
 
-export const OAuth2Mock: Partial<typeof OAuth2> = {
+export const OAuth2ProviderMock: Partial<typeof OAuth2Provider> = {
     init: (config) => {
         return {
             config: JSON.stringify({
                 ...config,
             }),
-            recipeId: "oauth2",
+            recipeId: "oauth2provider",
         } as any;
     },
     getOAuth2Clients: async (input, userContext) => {
         const response = await queryAPI({
             method: "post",
-            path: "/test/oauth2/getoauth2clients",
+            path: "/test/oauth2provider/getoauth2clients",
             input: { input, userContext },
         });
         return {
@@ -23,7 +23,7 @@ export const OAuth2Mock: Partial<typeof OAuth2> = {
     createOAuth2Client: async (input, userContext) => {
         const response = await queryAPI({
             method: "post",
-            path: "/test/oauth2/createoauth2client",
+            path: "/test/oauth2provider/createoauth2client",
             input: { input, userContext },
         });
         return {
@@ -33,7 +33,7 @@ export const OAuth2Mock: Partial<typeof OAuth2> = {
     updateOAuth2Client: async (input, userContext) => {
         const response = await queryAPI({
             method: "post",
-            path: "/test/oauth2/updateoauth2client",
+            path: "/test/oauth2provider/updateoauth2client",
             input: { input, userContext },
         });
         return {
@@ -43,7 +43,7 @@ export const OAuth2Mock: Partial<typeof OAuth2> = {
     deleteOAuth2Client: async (input, userContext) => {
         const response = await queryAPI({
             method: "post",
-            path: "/test/oauth2/deleteoauth2client",
+            path: "/test/oauth2provider/deleteoauth2client",
             input: { input, userContext },
         });
         return {

@@ -4,13 +4,13 @@ const { request, recipesMock } = require("../../api-mock");
 const { EmailPassword, Session } = recipesMock;
 
 exports.getAuthorizationUrlFromAPI = async function ({ redirectUri, scope, state }) {
-    const response = await new Promise((resolve) =>
+    const response = await new Promise((resolve, reject) =>
         request()
             .get(`/auth/oauth2client/authorisationurl?redirectURIOnProviderDashboard=${redirectUri}`)
             .expect(200)
             .end((err, res) => {
                 if (err) {
-                    resolve(undefined);
+                    reject(err);
                 } else {
                     resolve(res);
                 }
@@ -44,7 +44,7 @@ exports.createAuthorizationUrl = function ({
         ...extraQueryParams,
     };
 
-    return `${apiDomain}/auth/oauth2/auth?${new URLSearchParams(queryParams)}`;
+    return `${apiDomain}/auth/oauth2provider/auth?${new URLSearchParams(queryParams)}`;
 };
 
 exports.testOAuthFlowAndGetAuthCode = async function ({
@@ -88,7 +88,7 @@ exports.testOAuthFlowAndGetAuthCode = async function ({
 
     const session = await Session.createNewSessionWithoutRequestResponse("public", createSessionUser.recipeUserId);
 
-    res = await fetch(`${apiDomain}/auth/oauth2/login?loginChallenge=${loginChallenge}`, {
+    res = await fetch(`${apiDomain}/auth/oauth2provider/login?loginChallenge=${loginChallenge}`, {
         method: "GET",
         redirect: "manual",
         headers: {
