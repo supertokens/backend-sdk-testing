@@ -7,7 +7,7 @@ export const API_PORT = Number(process.env.API_PORT || 3030);
 let apiStatus: "NOT_READY" | "OK" = "NOT_READY";
 let stConfig: string;
 
-const fdiVersion = '1.17';
+const fdiVersion = '2.0';
 
 type Callback = (
     error: any | null,
