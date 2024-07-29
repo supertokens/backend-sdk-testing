@@ -90,7 +90,7 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
             state,
         });
 
-        const res = await fetch(`${apiDomain}/auth/oauth2/token`, {
+        const res = await fetch(`${apiDomain}/auth/oauth2provider/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -163,7 +163,7 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
             state,
         });
 
-        const res = await fetch(`${apiDomain}/auth/oauth2/token`, {
+        const res = await fetch(`${apiDomain}/auth/oauth2provider/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -185,7 +185,7 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
         assert.strictEqual(tokenResp.token_type, "bearer");
         assert.strictEqual(tokenResp.scope, scope);
 
-        let refreshTokenRes = await fetch(`${apiDomain}/auth/oauth2/token`, {
+        let refreshTokenRes = await fetch(`${apiDomain}/auth/oauth2provider/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -265,7 +265,7 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
             state,
         });
 
-        const res = await fetch(`${apiDomain}/auth/oauth2/token`, {
+        const res = await fetch(`${apiDomain}/auth/oauth2provider/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -319,7 +319,7 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
             {}
         );
 
-        const res = await fetch(`${apiDomain}/auth/oauth2/token`, {
+        const res = await fetch(`${apiDomain}/auth/oauth2provider/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -376,7 +376,7 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
 
         assert.strictEqual(status, "OK");
 
-        const res = await fetch(`${apiDomain}/auth/oauth2/token`, {
+        const res = await fetch(`${apiDomain}/auth/oauth2provider/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -450,7 +450,7 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
             state,
         });
 
-        const res = await fetch(`${apiDomain}/auth/oauth2/token`, {
+        const res = await fetch(`${apiDomain}/auth/oauth2provider/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -523,7 +523,7 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
             state,
         });
 
-        const res = await fetch(`${apiDomain}/auth/oauth2/token`, {
+        const res = await fetch(`${apiDomain}/auth/oauth2provider/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

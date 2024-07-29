@@ -236,7 +236,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
-            let url = `${apiDomain}/auth/oauth2/token`;
+            let url = `${apiDomain}/auth/oauth2provider/token`;
             const res = await fetch(url, {
                 method: "POST",
                 body: new URLSearchParams({
@@ -280,7 +280,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
             const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope });
             const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
-            let url = `${apiDomain}/auth/oauth2/token`;
+            let url = `${apiDomain}/auth/oauth2provider/token`;
             // The first call consumes the code
             await fetch(url, {
                 method: "POST",
@@ -342,7 +342,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
             const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope });
             const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
-            let url = `${apiDomain}/auth/oauth2/token`;
+            let url = `${apiDomain}/auth/oauth2provider/token`;
             // then we check for errors
             const res = await fetch(url, {
                 method: "POST",
@@ -392,7 +392,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
-            let url = `${apiDomain}/auth/oauth2/token`;
+            let url = `${apiDomain}/auth/oauth2provider/token`;
             const res = await fetch(url, {
                 method: "POST",
                 body: new URLSearchParams({
@@ -442,7 +442,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
-            let url = `${apiDomain}/auth/oauth2/token`;
+            let url = `${apiDomain}/auth/oauth2provider/token`;
             const res = await fetch(url, {
                 method: "POST",
                 body: new URLSearchParams({
@@ -499,7 +499,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const { authorizationCode: authorizationCode2 } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl: authorisationUrl2, redirectUri, scope, state, useSignIn: true });
 
-            let url = `${apiDomain}/auth/oauth2/token`;
+            let url = `${apiDomain}/auth/oauth2provider/token`;
             const res = await fetch(url, {
                 method: "POST",
                 body: new URLSearchParams({
