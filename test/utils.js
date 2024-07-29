@@ -18,23 +18,19 @@ let fs = require("fs");
 const { default: fetch } = require("cross-fetch");
 let SuperTokens = require("supertokens-node/lib/build/supertokens").default;
 let SessionRecipe = require("supertokens-node/lib/build/recipe/session/recipe").default;
-let AccountLinkingRecipe = require("supertokens-node/lib/build/recipe/accountlinking/recipe").default;
 let ThirdPartyRecipe = require("supertokens-node/lib/build/recipe/thirdparty/recipe").default;
 let EmailPasswordRecipe = require("supertokens-node/lib/build/recipe/emailpassword/recipe").default;
 let DashboardRecipe = require("supertokens-node/lib/build/recipe/dashboard/recipe").default;
-let TotpRecipe = require("supertokens-node/lib/build/recipe/totp/recipe").default;
 const EmailVerificationRecipe = require("supertokens-node/lib/build/recipe/emailverification/recipe").default;
 let JWTRecipe = require("supertokens-node/lib/build/recipe/jwt/recipe").default;
 const UserMetadataRecipe = require("supertokens-node/lib/build/recipe/usermetadata/recipe").default;
 let PasswordlessRecipe = require("supertokens-node/lib/build/recipe/passwordless/recipe").default;
 let MultitenancyRecipe = require("supertokens-node/lib/build/recipe/multitenancy/recipe").default;
-let MultiFactorAuthRecipe = require("supertokens-node/lib/build/recipe/multifactorauth/recipe").default;
 const UserRolesRecipe = require("supertokens-node/lib/build/recipe/userroles/recipe").default;
 let { ProcessState } = require("supertokens-node/lib/build/processState");
 const { default: OpenIDRecipe } = require("supertokens-node/lib/build/recipe/openid/recipe");
 let debug = require("debug");
 let assert = require("assert");
-const { CollectingResponse } = require("supertokens-node/framework/custom");
 
 module.exports.printPath = function (path) {
     return `${createFormat([consoleOptions.yellow, consoleOptions.italic, consoleOptions.dim])}${path}${createFormat([
@@ -219,7 +215,6 @@ module.exports.stopST = async function (pid) {
 
 module.exports.resetAll = function (disableLogging = true) {
     SuperTokens.reset();
-    AccountLinkingRecipe.reset();
     SessionRecipe.reset();
     EmailPasswordRecipe.reset();
     ThirdPartyRecipe.reset();
@@ -232,8 +227,6 @@ module.exports.resetAll = function (disableLogging = true) {
     DashboardRecipe.reset();
     ProcessState.getInstance().reset();
     MultitenancyRecipe.reset();
-    TotpRecipe.reset();
-    MultiFactorAuthRecipe.reset();
     if (disableLogging) {
         debug.disable();
     }

@@ -36,15 +36,6 @@ export const EmailVerificationMock: Partial<typeof EmailVerification> = {
                           },
                       }
                     : {}),
-                ...(config?.getEmailForRecipeUserId
-                    ? {
-                          getEmailForRecipeUserId: minify(
-                              "emailverification.init.getEmailForRecipeUserId",
-                              config.getEmailForRecipeUserId.toString()
-                          ),
-                      }
-                    : {}),
-
                 ...(config?.override
                     ? {
                           override: {
@@ -64,12 +55,12 @@ export const EmailVerificationMock: Partial<typeof EmailVerification> = {
             recipeId: "emailverification",
         } as any;
     },
-    isEmailVerified: async (recipeUserId, email, userContext) => {
+    isEmailVerified: async (userId, email, userContext) => {
         return await queryAPI({
             method: "post",
             path: "/test/emailverification/isemailverified",
             input: {
-                recipeUserId: recipeUserId.getAsString(),
+                userId,
                 email,
                 userContext,
             },
@@ -77,7 +68,7 @@ export const EmailVerificationMock: Partial<typeof EmailVerification> = {
     },
     createEmailVerificationToken: async (
         tenantId: string,
-        recipeUserId: SuperTokens.RecipeUserId,
+        userId: string,
         email?: string | undefined,
         userContext?: Record<string, any> | undefined
     ) => {
@@ -86,44 +77,30 @@ export const EmailVerificationMock: Partial<typeof EmailVerification> = {
             path: "/test/emailverification/createemailverificationtoken",
             input: {
                 tenantId,
-                recipeUserId: recipeUserId.getAsString(),
+                userId,
                 email,
                 userContext,
             },
         });
     },
-    verifyEmailUsingToken: async (
-        tenantId: string,
-        token: string,
-        attemptAccountLinking?: boolean | undefined,
-        userContext?: Record<string, any> | undefined
-    ) => {
+    verifyEmailUsingToken: async (tenantId: string, token: string, userContext?: Record<string, any> | undefined) => {
         const response = await queryAPI({
             method: "post",
             path: "/test/emailverification/verifyemailusingtoken",
             input: {
+                tenantId,
                 token,
                 userContext,
-                attemptAccountLinking,
-                tenantId,
             },
         });
-        return "user" in response
-            ? {
-                  ...response,
-                  user: {
-                      ...response.user,
-                      recipeUserId: SuperTokens.convertToRecipeUserId(response.user.recipeUserId.recipeUserId),
-                  },
-              }
-            : response;
+        return response;
     },
-    unverifyEmail: async (recipeUserId, email, userContext) => {
+    unverifyEmail: async (userId, email, userContext) => {
         return await queryAPI({
             method: "post",
             path: "/test/emailverification/unverifyemail",
             input: {
-                recipeUserId: recipeUserId.getAsString(),
+                userId,
                 email,
                 userContext,
             },

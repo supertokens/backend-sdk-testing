@@ -1,6 +1,5 @@
 import SuperTokens from "supertokens-node";
-import { User as UserClass } from "supertokens-node/lib/build/user";
-import EmailPassword from "supertokens-node/recipe/emailpassword";
+import EmailPassword, { User } from "supertokens-node/recipe/emailpassword";
 import { queryAPI } from "../fetcher";
 import { minify } from "../utils";
 
@@ -43,59 +42,34 @@ export const EmailPasswordMock: Partial<typeof EmailPassword> = {
             recipeId: "emailpassword",
         } as any;
     },
-    createResetPasswordLink: async (tenantId, userId, email, userContext) => {
+    createResetPasswordLink: async (tenantId, userId, userContext) => {
         return await queryAPI({
             method: "post",
             path: "/test/emailpassword/createresetpasswordlink",
-            input: { tenantId, userId, email, userContext },
+            input: { tenantId, userId, userContext },
         });
     },
-    signUp: async (tenantId, email, password, session, userContext) => {
+    signUp: async (tenantId: string, email: string, password: string, userContext?: any) => {
         const response = await queryAPI({
             method: "post",
             path: "/test/emailpassword/signup",
-            input: { tenantId, email, password, session, userContext },
+            input: { tenantId, email, password, userContext },
         });
-        return {
-            ...response,
-            ...("user" in response
-                ? {
-                      user: new UserClass(response.user),
-                  }
-                : {}),
-            ...("recipeUserId" in response
-                ? {
-                      recipeUserId: SuperTokens.convertToRecipeUserId(response.recipeUserId),
-                  }
-                : {}),
-        };
+        return response as { status: "OK"; user: User } | { status: "EMAIL_ALREADY_EXISTS_ERROR" };
     },
-    signIn: async (tenantId, email, password, session, userContext) => {
+    signIn: async (tenantId: string, email: string, password: string, userContext?: any) => {
         const response = await queryAPI({
             method: "post",
             path: "/test/emailpassword/signin",
-            input: { tenantId, email, password, session, userContext },
+            input: { tenantId, email, password, userContext },
         });
-        return {
-            ...response,
-            ...("user" in response
-                ? {
-                      user: new UserClass(response.user),
-                  }
-                : {}),
-            ...("recipeUserId" in response
-                ? {
-                      recipeUserId: SuperTokens.convertToRecipeUserId(response.recipeUserId),
-                  }
-                : {}),
-        };
+        return response as { status: "OK"; user: User } | { status: "WRONG_CREDENTIALS_ERROR" };
     },
-    updateEmailOrPassword: async ({ recipeUserId, ...input }) => {
+    updateEmailOrPassword: async (input) => {
         return await queryAPI({
             method: "post",
             path: "/test/emailpassword/updateemailorpassword",
             input: {
-                recipeUserId: recipeUserId.getAsString(),
                 ...input,
             },
         });

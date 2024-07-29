@@ -22,11 +22,11 @@ export const MultitenancyMock: Partial<typeof Multitenancy> = {
             input: { tenantId, userContext },
         });
     },
-    associateUserToTenant: async (tenantId, recipeUserId, userContext) => {
+    associateUserToTenant: async (tenantId, userId, userContext) => {
         return await queryAPI({
             method: "post",
             path: "/test/multitenancy/associateusertotenant",
-            input: { tenantId, recipeUserId: recipeUserId.getAsString(), userContext },
+            input: { tenantId, userId, userContext },
         });
     },
     deleteTenant: async (tenantId, userContext) => {
@@ -57,11 +57,11 @@ export const MultitenancyMock: Partial<typeof Multitenancy> = {
             input: { tenantId, thirdPartyId, userContext },
         });
     },
-    disassociateUserFromTenant: async (tenantId, recipeUserId, userContext) => {
+    disassociateUserFromTenant: async (tenantId, userId, userContext) => {
         return await queryAPI({
             method: "post",
             path: "/test/multitenancy/disassociateuserfromtenant",
-            input: { tenantId, recipeUserId: recipeUserId.getAsString(), userContext },
+            input: { tenantId, userId, userContext },
         });
     },
 };

@@ -1,5 +1,4 @@
 import SuperTokens from "supertokens-node";
-import { User as UserClass } from "supertokens-node/lib/build/user";
 import Passwordless from "supertokens-node/recipe/passwordless";
 import { queryAPI } from "../fetcher";
 import { minify } from "../utils";
@@ -62,25 +61,13 @@ export const PasswordlessMock: Partial<typeof Passwordless> = {
             path: "/test/passwordless/signinup",
             input: { ...input },
         });
-        return {
-            ...response,
-            ...("user" in response
-                ? {
-                      user: new UserClass(response.user),
-                  }
-                : {}),
-            ...("recipeUserId" in response
-                ? {
-                      recipeUserId: SuperTokens.convertToRecipeUserId(response.recipeUserId),
-                  }
-                : {}),
-        };
+        return response;
     },
     updateUser: async (input) => {
         return await queryAPI({
             method: "post",
             path: "/test/passwordless/updateuser",
-            input: { ...input, recipeUserId: input.recipeUserId.getAsString() },
+            input: { ...input },
         });
     },
     createCode: async (input) => {
@@ -96,18 +83,6 @@ export const PasswordlessMock: Partial<typeof Passwordless> = {
             path: "/test/passwordless/consumecode",
             input: { ...input },
         });
-        return {
-            ...response,
-            ...("user" in response
-                ? {
-                      user: new UserClass(response.user),
-                  }
-                : {}),
-            ...("recipeUserId" in response
-                ? {
-                      recipeUserId: SuperTokens.convertToRecipeUserId(response.recipeUserId),
-                  }
-                : {}),
-        };
+        return response;
     },
 };

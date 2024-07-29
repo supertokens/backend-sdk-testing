@@ -7,6 +7,8 @@ export const API_PORT = Number(process.env.API_PORT || 3030);
 let apiStatus: "NOT_READY" | "OK" = "NOT_READY";
 let stConfig: string;
 
+const fdiVersion = '1.17';
+
 type Callback = (
     error: any | null,
     success: null | {
@@ -31,6 +33,7 @@ export function request(): ChainedRequest {
     let method: "get" | "post" | "put" = "get";
     let headers: Record<string, string> = {
         "Content-Type": "application/json",
+        "fdi-version": fdiVersion,
     };
     let input: any = null;
     let callback: Callback | null = null;
@@ -151,6 +154,7 @@ export async function queryAPI({
             method,
             headers: {
                 "Content-Type": "application/json",
+                "fdi-version": fdiVersion,
                 ...headers,
             },
             body: JSON.stringify(input),
