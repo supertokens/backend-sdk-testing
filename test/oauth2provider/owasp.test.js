@@ -16,11 +16,11 @@
 const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTenant } = require("../utils");
 let assert = require("assert");
 const { recipesMock, randomString, API_PORT } = require("../../api-mock");
-const { OAuth2, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
+const { OAuth2Provider, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
 const { default: generatePKCEChallenge} = require("pkce-challenge");
-const { createAuthorizationUrl, testOAuthFlowAndGetAuthCode } = require("../oauth2/utils");
+const { createAuthorizationUrl, testOAuthFlowAndGetAuthCode } = require("./utils");
 
-describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, function () {
+describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.test.js]")}`, function () {
     let globalConnectionURI;
 
     const startST = async () => {
@@ -67,10 +67,10 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
                     appName: "SuperTokens",
                     websiteDomain,
                 },
-                recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
+                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
             });
 
-            const { client } = await OAuth2.createOAuth2Client(defaultClientConf, {});
+            const { client } = await OAuth2Provider.createOAuth2Client(defaultClientConf, {});
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
@@ -106,10 +106,10 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
                     appName: "SuperTokens",
                     websiteDomain,
                 },
-                recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
+                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
             });
 
-            const { client } = await OAuth2.createOAuth2Client(defaultClientConf, {});
+            const { client } = await OAuth2Provider.createOAuth2Client(defaultClientConf, {});
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
@@ -146,10 +146,10 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
                     appName: "SuperTokens",
                     websiteDomain,
                 },
-                recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
+                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
             });
 
-            const { client } = await OAuth2.createOAuth2Client(defaultClientConf, {});
+            const { client } = await OAuth2Provider.createOAuth2Client(defaultClientConf, {});
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
@@ -185,10 +185,10 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
                     appName: "SuperTokens",
                     websiteDomain,
                 },
-                recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
+                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
             });
 
-            const { client } = await OAuth2.createOAuth2Client(defaultClientConf, {});
+            const { client } = await OAuth2Provider.createOAuth2Client(defaultClientConf, {});
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
@@ -222,13 +222,13 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
                     appName: "SuperTokens",
                     websiteDomain,
                 },
-                recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
+                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
             });
 
             const redirectUri = "http://localhost:4000/redirect-url";
             const scope = "profile";
-            const { client } = await OAuth2.createOAuth2Client(defaultClientConf, {});
-            const { client: client2 } = await OAuth2.createOAuth2Client(defaultClientConf, {});
+            const { client } = await OAuth2Provider.createOAuth2Client(defaultClientConf, {});
+            const { client: client2 } = await OAuth2Provider.createOAuth2Client(defaultClientConf, {});
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
@@ -236,7 +236,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
-            let url = `${apiDomain}/auth/oauth2provider/token`;
+            let url = `${apiDomain}/auth/oauth/token`;
             const res = await fetch(url, {
                 method: "POST",
                 body: new URLSearchParams({
@@ -268,19 +268,19 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
                     appName: "SuperTokens",
                     websiteDomain,
                 },
-                recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
+                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
             });
 
             const redirectUri = "http://localhost:4000/redirect-url";
             const scope = "profile";
-            const { client } = await OAuth2.createOAuth2Client(defaultClientConf, {});
+            const { client } = await OAuth2Provider.createOAuth2Client(defaultClientConf, {});
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
             const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope });
             const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
-            let url = `${apiDomain}/auth/oauth2provider/token`;
+            let url = `${apiDomain}/auth/oauth/token`;
             // The first call consumes the code
             await fetch(url, {
                 method: "POST",
@@ -326,13 +326,13 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
                     appName: "SuperTokens",
                     websiteDomain,
                 },
-                recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
+                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
             });
 
             const scope = "profile";
             const redirectUri = "http://localhost:4000/redirect-url";
             const redirectUri2 = "http://localhost:4000/redirect-url2";
-            const { client } = await OAuth2.createOAuth2Client(
+            const { client } = await OAuth2Provider.createOAuth2Client(
                 { ...defaultClientConf, redirectUris: [redirectUri, redirectUri2] },
                 {}
             );
@@ -342,7 +342,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
             const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope });
             const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
-            let url = `${apiDomain}/auth/oauth2provider/token`;
+            let url = `${apiDomain}/auth/oauth/token`;
             // then we check for errors
             const res = await fetch(url, {
                 method: "POST",
@@ -378,12 +378,12 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
                     appName: "SuperTokens",
                     websiteDomain,
                 },
-                recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
+                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
             });
 
             const scope = "profile";
             const redirectUri = "http://localhost:4000/redirect-url";
-            const { client } = await OAuth2.createOAuth2Client({...defaultClientConf, }, {});
+            const { client } = await OAuth2Provider.createOAuth2Client({...defaultClientConf, }, {});
 
             const state = new Buffer.from("some-random-string", "base64").toString();
             const { code_challenge, code_verifier } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
@@ -392,7 +392,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
-            let url = `${apiDomain}/auth/oauth2provider/token`;
+            let url = `${apiDomain}/auth/oauth/token`;
             const res = await fetch(url, {
                 method: "POST",
                 body: new URLSearchParams({
@@ -425,12 +425,12 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
                     appName: "SuperTokens",
                     websiteDomain,
                 },
-                recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
+                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
             });
 
             const scope = "profile";
             const redirectUri = "http://localhost:4000/redirect-url";
-            const { client } = await OAuth2.createOAuth2Client({...defaultClientConf, }, {});
+            const { client } = await OAuth2Provider.createOAuth2Client({...defaultClientConf, }, {});
 
             const state = new Buffer.from("some-random-string", "base64").toString();
             const { code_challenge, code_verifier } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
@@ -442,7 +442,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
 
-            let url = `${apiDomain}/auth/oauth2provider/token`;
+            let url = `${apiDomain}/auth/oauth/token`;
             const res = await fetch(url, {
                 method: "POST",
                 body: new URLSearchParams({
@@ -474,12 +474,12 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
                     appName: "SuperTokens",
                     websiteDomain,
                 },
-                recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
+                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
             });
 
             const scope = "profile";
             const redirectUri = "http://localhost:4000/redirect-url";
-            const { client } = await OAuth2.createOAuth2Client({...defaultClientConf, }, {});
+            const { client } = await OAuth2Provider.createOAuth2Client({...defaultClientConf, }, {});
 
             const state = new Buffer.from("some-random-string", "base64").toString();
             const { code_challenge, code_verifier } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
@@ -499,7 +499,7 @@ describe(`OAuth2 OWASP checks: ${printPath("[test/oauth2/owasp.test.js]")}`, fun
 
             const { authorizationCode: authorizationCode2 } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl: authorisationUrl2, redirectUri, scope, state, useSignIn: true });
 
-            let url = `${apiDomain}/auth/oauth2provider/token`;
+            let url = `${apiDomain}/auth/oauth/token`;
             const res = await fetch(url, {
                 method: "POST",
                 body: new URLSearchParams({
