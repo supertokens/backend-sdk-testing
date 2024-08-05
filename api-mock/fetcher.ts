@@ -7,7 +7,7 @@ export const API_PORT = Number(process.env.API_PORT || 3030);
 let apiStatus: "NOT_READY" | "OK" = "NOT_READY";
 let stConfig: string;
 
-const fdiVersion = '1.17';
+const fdiVersion = "1.18";
 
 type Callback = (
     error: any | null,
@@ -201,7 +201,7 @@ export async function resetOverrideLogs() {
 }
 
 export async function getOverrideLogs() {
-    const {logs} = await queryAPI({
+    const { logs } = await queryAPI({
         method: "get",
         path: "/test/getoverridelogs",
     });
