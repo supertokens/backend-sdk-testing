@@ -1,4 +1,4 @@
-import SuperTokens from "supertokens-node";
+import SuperTokens, { convertToRecipeUserId, RecipeUserId } from "supertokens-node";
 import EmailPasswordRecipe from "supertokens-node/lib/build/recipe/emailverification/recipe";
 import EmailVerification, { EmailVerificationClaim } from "supertokens-node/recipe/emailverification";
 import { queryAPI } from "../fetcher";
@@ -68,7 +68,7 @@ export const EmailVerificationMock: Partial<typeof EmailVerification> = {
     },
     createEmailVerificationToken: async (
         tenantId: string,
-        userId: string,
+        recipeUserId: RecipeUserId,
         email?: string | undefined,
         userContext?: Record<string, any> | undefined
     ) => {
@@ -77,19 +77,25 @@ export const EmailVerificationMock: Partial<typeof EmailVerification> = {
             path: "/test/emailverification/createemailverificationtoken",
             input: {
                 tenantId,
-                userId,
+                recipeUserId: recipeUserId.getAsString(),
                 email,
                 userContext,
             },
         });
     },
-    verifyEmailUsingToken: async (tenantId: string, token: string, userContext?: Record<string, any> | undefined) => {
+    verifyEmailUsingToken: async (
+        tenantId: string,
+        token: string,
+        attemptAccountLinking?: boolean,
+        userContext?: Record<string, any> | undefined
+    ) => {
         const response = await queryAPI({
             method: "post",
             path: "/test/emailverification/verifyemailusingtoken",
             input: {
                 tenantId,
                 token,
+                attemptAccountLinking,
                 userContext,
             },
         });

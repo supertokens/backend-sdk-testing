@@ -1,5 +1,5 @@
-import SuperTokens from "supertokens-node";
-import EmailPassword, { User } from "supertokens-node/recipe/emailpassword";
+import SuperTokens, { RecipeUserId, User } from "supertokens-node";
+import EmailPassword from "supertokens-node/recipe/emailpassword";
 import { queryAPI } from "../fetcher";
 import { minify } from "../utils";
 
@@ -55,7 +55,9 @@ export const EmailPasswordMock: Partial<typeof EmailPassword> = {
             path: "/test/emailpassword/signup",
             input: { tenantId, email, password, userContext },
         });
-        return response as { status: "OK"; user: User } | { status: "EMAIL_ALREADY_EXISTS_ERROR" };
+        return response as
+            | { status: "OK"; user: User; recipeUserId: RecipeUserId }
+            | { status: "EMAIL_ALREADY_EXISTS_ERROR" };
     },
     signIn: async (tenantId: string, email: string, password: string, userContext?: any) => {
         const response = await queryAPI({
@@ -63,7 +65,9 @@ export const EmailPasswordMock: Partial<typeof EmailPassword> = {
             path: "/test/emailpassword/signin",
             input: { tenantId, email, password, userContext },
         });
-        return response as { status: "OK"; user: User } | { status: "WRONG_CREDENTIALS_ERROR" };
+        return response as
+            | { status: "OK"; user: User; recipeUserId: RecipeUserId }
+            | { status: "WRONG_CREDENTIALS_ERROR" };
     },
     updateEmailOrPassword: async (input) => {
         return await queryAPI({
