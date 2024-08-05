@@ -85,10 +85,7 @@ describe(`EmailverificationTests: ${printPath(
                 recipeList: [EmailPassword.init(), EmailVerification.init(), Session.init()],
             });
             const { user } = await EmailPassword.signUp("public", "test@example.com", "password123");
-            const session = await Session.createNewSessionWithoutRequestResponse(
-                "public",
-                user.id
-            );
+            const session = await Session.createNewSessionWithoutRequestResponse("public", user.id);
 
             {
                 await session.mergeIntoAccessTokenPayload({
@@ -152,10 +149,7 @@ describe(`EmailverificationTests: ${printPath(
                 recipeList: [EmailPassword.init(), EmailVerification.init(), Session.init()],
             });
             const { user } = await EmailPassword.signUp("public", "test@example.com", "password123");
-            const session = await Session.createNewSessionWithoutRequestResponse(
-                "public",
-                user.id
-            );
+            const session = await Session.createNewSessionWithoutRequestResponse("public", user.id);
 
             {
                 await session.mergeIntoAccessTokenPayload({
@@ -216,10 +210,7 @@ describe(`EmailverificationTests: ${printPath(
                 recipeList: [EmailPassword.init(), EmailVerification.init(), Session.init()],
             });
             const { user } = await EmailPassword.signUp("public", "test@example.com", "password123");
-            const session = await Session.createNewSessionWithoutRequestResponse(
-                "public",
-                user.id
-            );
+            const session = await Session.createNewSessionWithoutRequestResponse("public", user.id);
 
             // NOTE: the default value of refetchTimeOnFalseInSeconds is 10 seconds
             {

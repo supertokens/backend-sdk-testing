@@ -1,7 +1,6 @@
 import Session from "supertokens-node/recipe/session";
 import { queryAPI } from "../fetcher";
 import { minify } from "../utils";
-import SuperTokens from "supertokens-node";
 import {
     ClaimValidationResult,
     RecipeInterface,
@@ -12,6 +11,7 @@ import {
     TokenInfo,
 } from "supertokens-node/lib/build/recipe/session/types";
 import { JSONObject } from "supertokens-node/recipe/usermetadata";
+import { convertToRecipeUserId, RecipeUserId } from "supertokens-node";
 
 type SerializedSession = {
     accessToken: string;
@@ -67,6 +67,10 @@ class RemoteSessionObject implements SessionContainerInterface {
         });
         Object.assign(this.data, updatedSession);
         return retVal;
+    }
+
+    getRecipeUserId(userContext?: any): RecipeUserId {
+        return convertToRecipeUserId(this.data.recipeUserId.recipeUserId);
     }
 
     getUserId(userContext?: any): string {
@@ -236,7 +240,7 @@ export const SessionMock: Partial<typeof Session> = {
     },
     createNewSessionWithoutRequestResponse: async (
         tenantId,
-        userId,
+        recipeUserId,
         accessTokenPayload,
         sessionDataInDatabase,
         disableAntiCsrf,
@@ -247,7 +251,7 @@ export const SessionMock: Partial<typeof Session> = {
             path: "/test/session/createnewsessionwithoutrequestresponse",
             input: {
                 tenantId,
-                userId,
+                recipeUserId,
                 accessTokenPayload,
                 sessionDataInDatabase,
                 disableAntiCsrf,
