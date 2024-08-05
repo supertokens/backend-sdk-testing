@@ -1,5 +1,5 @@
-import SuperTokens from "supertokens-node";
-import ThirdParty, { User } from "supertokens-node/recipe/thirdparty";
+import { User } from "supertokens-node";
+import ThirdParty from "supertokens-node/recipe/thirdparty";
 import { queryAPI } from "../fetcher";
 import { minify } from "../utils";
 
@@ -53,16 +53,18 @@ export const ThirdPartyMock: Partial<typeof ThirdParty> = {
         thirdPartyId: string,
         thirdPartyUserId: string,
         email: string,
+        isVerified: boolean,
         userContext?: any
     ) => {
         const response = await queryAPI({
             method: "post",
             path: "/test/thirdparty/manuallycreateorupdateuser",
-            input: { tenantId, thirdPartyId, thirdPartyUserId, email, userContext },
+            input: { tenantId, thirdPartyId, thirdPartyUserId, email, isVerified, userContext },
         });
         return {
             status: "OK",
-            createdNewUser: response.createdNewUser,
+            createdNewRecipeUser: response.createdNewUser,
+            recipeUserId: response.recipeUserId,
             user: response.user as User,
         };
     },
