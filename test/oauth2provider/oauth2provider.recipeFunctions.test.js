@@ -16,9 +16,9 @@
 const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTenant } = require("../utils");
 let assert = require("assert");
 const { recipesMock, randomString } = require("../../api-mock");
-const { OAuth2, supertokens: SuperTokens } = recipesMock;
+const { OAuth2Provider, supertokens: SuperTokens } = recipesMock;
 
-describe(`OAuth2-recipeFunctions: ${printPath("[test/oauth2/oauth2.recipeFunctions.test.js]")}`, function () {
+describe(`OAuth2Provider-recipeFunctions: ${printPath("[test/oauth2provider/OAuth2Provider.recipeFunctions.test.js]")}`, function () {
     let globalConnectionURI;
 
     const startST = async () => {
@@ -61,10 +61,10 @@ describe(`OAuth2-recipeFunctions: ${printPath("[test/oauth2/oauth2.recipeFunctio
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [OAuth2.init()],
+            recipeList: [OAuth2Provider.init()],
         });
 
-        const { client } = await OAuth2.createOAuth2Client({}, {});
+        const { client } = await OAuth2Provider.createOAuth2Client({}, {});
 
         assert(client.clientId !== undefined);
         assert(client.clientSecret !== undefined);
@@ -82,10 +82,10 @@ describe(`OAuth2-recipeFunctions: ${printPath("[test/oauth2/oauth2.recipeFunctio
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [OAuth2.init()],
+            recipeList: [OAuth2Provider.init()],
         });
 
-        const { client } = await OAuth2.createOAuth2Client(
+        const { client } = await OAuth2Provider.createOAuth2Client(
             {
                 client_id: "client_id",
                 client_secret: "client_secret",
@@ -109,10 +109,10 @@ describe(`OAuth2-recipeFunctions: ${printPath("[test/oauth2/oauth2.recipeFunctio
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [OAuth2.init()],
+            recipeList: [OAuth2Provider.init()],
         });
 
-        const { error } = await OAuth2.createOAuth2Client(
+        const { error } = await OAuth2Provider.createOAuth2Client(
             {
                 client_id: "client_id",
                 client_secret: "client_secret",
@@ -135,11 +135,11 @@ describe(`OAuth2-recipeFunctions: ${printPath("[test/oauth2/oauth2.recipeFunctio
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [OAuth2.init()],
+            recipeList: [OAuth2Provider.init()],
         });
 
         // Create a client
-        const { client } = await OAuth2.createOAuth2Client(
+        const { client } = await OAuth2Provider.createOAuth2Client(
             {
                 client_id: "client_id",
                 client_secret: "client_secret",
@@ -156,7 +156,7 @@ describe(`OAuth2-recipeFunctions: ${printPath("[test/oauth2/oauth2.recipeFunctio
         assert.strictEqual(JSON.stringify(client.metadata), JSON.stringify({}));
 
         // Update the client
-        const { client: updatedClient } = await OAuth2.updateOAuth2Client(
+        const { client: updatedClient } = await OAuth2Provider.updateOAuth2Client(
             {
                 clientId: client.clientId,
                 clientSecret: "new_client_secret",
@@ -184,11 +184,11 @@ describe(`OAuth2-recipeFunctions: ${printPath("[test/oauth2/oauth2.recipeFunctio
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [OAuth2.init()],
+            recipeList: [OAuth2Provider.init()],
         });
 
         // Create a client
-        const { client } = await OAuth2.createOAuth2Client(
+        const { client } = await OAuth2Provider.createOAuth2Client(
             {
                 client_id: "client_id",
                 client_secret: "client_secret",
@@ -200,7 +200,7 @@ describe(`OAuth2-recipeFunctions: ${printPath("[test/oauth2/oauth2.recipeFunctio
         assert.strictEqual(client.clientSecret, "client_secret");
 
         // Delete the client
-        const { status } = await OAuth2.deleteOAuth2Client(
+        const { status } = await OAuth2Provider.deleteOAuth2Client(
             {
                 clientId: client.clientId,
             },
@@ -221,12 +221,12 @@ describe(`OAuth2-recipeFunctions: ${printPath("[test/oauth2/oauth2.recipeFunctio
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [OAuth2.init()],
+            recipeList: [OAuth2Provider.init()],
         });
 
         // Create 10 clients
         for (let i = 0; i < 10; i++) {
-            await OAuth2.createOAuth2Client(
+            await OAuth2Provider.createOAuth2Client(
                 {
                     client_id: `client_id_${i}`,
                 },
@@ -239,7 +239,7 @@ describe(`OAuth2-recipeFunctions: ${printPath("[test/oauth2/oauth2.recipeFunctio
 
         // Fetch clients in pages of 3
         do {
-            const result = await OAuth2.getOAuth2Clients({ pageSize: 3, paginationToken: nextPaginationToken }, {});
+            const result = await OAuth2Provider.getOAuth2Clients({ pageSize: 3, paginationToken: nextPaginationToken }, {});
             assert.strictEqual(result.status, "OK");
             nextPaginationToken = result.nextPaginationToken;
             allClients.push(...result.clients);
@@ -262,24 +262,24 @@ describe(`OAuth2-recipeFunctions: ${printPath("[test/oauth2/oauth2.recipeFunctio
                 appName: "SuperTokens",
                 websiteDomain: "supertokens.io",
             },
-            recipeList: [OAuth2.init()],
+            recipeList: [OAuth2Provider.init()],
         });
 
         // Create 5 clients with clientName = "customClientName"
         for (let i = 0; i < 5; i++) {
-            await OAuth2.createOAuth2Client({ clientName: "customClientName" }, {});
+            await OAuth2Provider.createOAuth2Client({ clientName: "customClientName" }, {});
         }
 
         // Create 5 clients with owner = "test"
         for (let i = 0; i < 5; i++) {
-            await OAuth2.createOAuth2Client({ owner: "test" }, {});
+            await OAuth2Provider.createOAuth2Client({ owner: "test" }, {});
         }
 
-        let result = await OAuth2.getOAuth2Clients({ clientName: "customClientName" }, {});
+        let result = await OAuth2Provider.getOAuth2Clients({ clientName: "customClientName" }, {});
         assert.strictEqual(result.status, "OK");
         assert.strictEqual(result.clients.length, 5);
 
-        result = await OAuth2.getOAuth2Clients({ owner: "test" }, {});
+        result = await OAuth2Provider.getOAuth2Clients({ owner: "test" }, {});
         assert.strictEqual(result.status, "OK");
         assert.strictEqual(result.clients.length, 5);
     });

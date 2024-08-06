@@ -16,8 +16,8 @@
 const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTenant } = require("../utils");
 let assert = require("assert");
 const { recipesMock, randomString, API_PORT, request } = require("../../api-mock");
-const { OAuth2, OAuth2Client, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
-const { testOAuthFlowAndGetAuthCode, getAuthorizationUrlFromAPI } = require("../oauth2/utils");
+const { OAuth2Provider, OAuth2Client, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
+const { testOAuthFlowAndGetAuthCode, createAuthorizationUrl } = require("../oauth2provider/utils");
 
 describe(`OAuth2Client-API: ${printPath("[test/oauth2client/oauth2client.api.test.js]")}`, function () {
     let globalConnectionURI;
@@ -51,78 +51,6 @@ describe(`OAuth2Client-API: ${printPath("[test/oauth2client/oauth2client.api.tes
         await Promise.all(deleteClientPromies);
     });
 
-    it("should get the authorization url", async function () {
-        const connectionURI = await startST();
-
-        const apiDomain = `http://localhost:${API_PORT}`;
-        const websiteDomain = "http://supertokens.io";
-        const redirectUri = "http://localhost:4000/redirect-url";
-
-        const initParams = {
-            supertokens: {
-                connectionURI,
-            },
-            appInfo: {
-                apiDomain,
-                appName: "SuperTokens",
-                websiteDomain,
-            },
-        };
-
-        SuperTokens.init({
-            ...initParams,
-            recipeList: [OAuth2.init()],
-        });
-
-        const { client } = await OAuth2.createOAuth2Client(
-            {
-                redirectUris: [redirectUri],
-                scope: "profile",
-                skipConsent: true,
-                grantTypes: ["authorization_code", "refresh_token"],
-                responseTypes: ["code", "id_token"],
-                tokenEndpointAuthMethod: "client_secret_post",
-            },
-            {}
-        );
-
-        SuperTokens.init({
-            ...initParams,
-            recipeList: [
-                OAuth2.init(),
-                OAuth2Client.init({
-                    providerConfig: {
-                        clientId: client.clientId,
-                        clientSecret: client.clientSecret,
-                        oidcDiscoveryEndpoint: `${apiDomain}/auth`,
-                    },
-                }),
-                Session.init(),
-            ],
-        });
-
-        let response = await new Promise((resolve) =>
-            request()
-                .get(`/auth/oauth2client/authorisationurl?redirectURIOnProviderDashboard=${redirectUri}`)
-                .expect(200)
-                .end((err, res) => {
-                    if (err) {
-                        resolve(undefined);
-                    } else {
-                        resolve(res);
-                    }
-                })
-        );
-
-        assert(response !== undefined);
-        const redirectUrl = new URL(response.body.urlWithQueryParams);
-
-        assert.deepStrictEqual(redirectUrl.origin, apiDomain);
-        assert.deepStrictEqual(redirectUrl.searchParams.get("client_id"), client.clientId);
-        assert.deepStrictEqual(redirectUrl.searchParams.get("redirect_uri"), redirectUri);
-        assert.deepStrictEqual(redirectUrl.searchParams.get("response_type"), "code");
-    });
-
     it("should successfully signin", async function () {
         const connectionURI = await startST();
 
@@ -144,10 +72,10 @@ describe(`OAuth2Client-API: ${printPath("[test/oauth2client/oauth2client.api.tes
 
         SuperTokens.init({
             ...initParams,
-            recipeList: [OAuth2.init()],
+            recipeList: [OAuth2Provider.init()],
         });
 
-        const { client } = await OAuth2.createOAuth2Client(
+        const { client } = await OAuth2Provider.createOAuth2Client(
             {
                 redirectUris: [redirectUri],
                 scope: scope,
@@ -162,12 +90,12 @@ describe(`OAuth2Client-API: ${printPath("[test/oauth2client/oauth2client.api.tes
         SuperTokens.init({
             ...initParams,
             recipeList: [
-                OAuth2.init(),
+                OAuth2Provider.init(),
                 OAuth2Client.init({
                     providerConfig: {
                         clientId: client.clientId,
                         clientSecret: client.clientSecret,
-                        oidcDiscoveryEndpoint: `${apiDomain}/auth`,
+                        oidcDiscoveryEndpoint: `${apiDomain}/auth/.well-known/openid-configuration`,
                     },
                 }),
                 Session.init(),
@@ -177,7 +105,13 @@ describe(`OAuth2Client-API: ${printPath("[test/oauth2client/oauth2client.api.tes
 
         const state = new Buffer.from("some-random-string", "base64").toString();
 
-        const authorisationUrl = await getAuthorizationUrlFromAPI({ redirectUri, scope, state });
+        const authorisationUrl = createAuthorizationUrl({
+            apiDomain,
+            clientId: client.clientId,
+            redirectUri,
+            state,
+            scope,
+        });
 
         const { authorizationCode, userId } = await testOAuthFlowAndGetAuthCode({
             apiDomain,
@@ -191,10 +125,10 @@ describe(`OAuth2Client-API: ${printPath("[test/oauth2client/oauth2client.api.tes
 
         let signInRes = await new Promise((resolve) =>
             request()
-                .post("/auth/oauth2client/signin")
+                .post("/auth/oauth/client/signin")
                 .send({
                     redirectURIInfo: {
-                        redirectURIOnProviderDashboard: redirectUri,
+                        redirectURI: redirectUri,
                         redirectURIQueryParams: {
                             code: authorizationCode,
                         },

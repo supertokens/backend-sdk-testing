@@ -1,30 +1,7 @@
 const assert = require("assert");
 const setCookieParser = require("set-cookie-parser");
-const { request, recipesMock } = require("../../api-mock");
+const { recipesMock } = require("../../api-mock");
 const { EmailPassword, Session } = recipesMock;
-
-exports.getAuthorizationUrlFromAPI = async function ({ redirectUri, scope, state }) {
-    const response = await new Promise((resolve, reject) =>
-        request()
-            .get(`/auth/oauth2client/authorisationurl?redirectURIOnProviderDashboard=${redirectUri}`)
-            .expect(200)
-            .end((err, res) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(res);
-                }
-            })
-    );
-    assert(response !== undefined);
-    const authUrl = new URL(response.body.urlWithQueryParams);
-
-    let authUrlObj = new URL(authUrl);
-
-    authUrlObj.searchParams.set("scope", scope);
-    authUrlObj.searchParams.set("state", state);
-    return authUrlObj.toString();
-};
 
 exports.createAuthorizationUrl = function ({
     apiDomain,
@@ -39,12 +16,12 @@ exports.createAuthorizationUrl = function ({
         client_id: clientId,
         redirect_uri: redirectUri,
         response_type: responseType,
-        scope,
-        state,
+        ...(scope !== undefined ? { scope } : {}),
+        ...(state !== undefined ? { state } : {}),
         ...extraQueryParams,
     };
 
-    return `${apiDomain}/auth/oauth2provider/auth?${new URLSearchParams(queryParams)}`;
+    return `${apiDomain}/auth/oauth/auth?${new URLSearchParams(queryParams)}`;
 };
 
 exports.testOAuthFlowAndGetAuthCode = async function ({
@@ -88,7 +65,7 @@ exports.testOAuthFlowAndGetAuthCode = async function ({
 
     const session = await Session.createNewSessionWithoutRequestResponse("public", createSessionUser.recipeUserId);
 
-    res = await fetch(`${apiDomain}/auth/oauth2provider/login?loginChallenge=${loginChallenge}`, {
+    res = await fetch(`${apiDomain}/auth/oauth/login?loginChallenge=${loginChallenge}`, {
         method: "GET",
         redirect: "manual",
         headers: {

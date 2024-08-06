@@ -16,11 +16,11 @@
 const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTenant } = require("../utils");
 let assert = require("assert");
 const { recipesMock, randomString, API_PORT } = require("../../api-mock");
-const { OAuth2, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
-const { createAuthorizationUrl, testOAuthFlowAndGetAuthCode } = require("../oauth2/utils");
+const { OAuth2Provider, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
+const { createAuthorizationUrl, testOAuthFlowAndGetAuthCode } = require("./utils");
 const { default: generatePKCEChallenge } = require("pkce-challenge");
 
-describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, function () {
+describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/OAuth2Provider.api.test.js]")}`, function () {
     let globalConnectionURI;
 
     const startST = async () => {
@@ -54,11 +54,11 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
                 appName: "SuperTokens",
                 websiteDomain,
             },
-            recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
+            recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
         });
 
         const redirectUri = "http://localhost:4000/redirect-url";
-        const { client } = await OAuth2.createOAuth2Client(
+        const { client } = await OAuth2Provider.createOAuth2Client(
             {
                 redirectUris: [redirectUri],
                 scope,
@@ -90,7 +90,7 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
             state,
         });
 
-        const res = await fetch(`${apiDomain}/auth/oauth2provider/token`, {
+        const res = await fetch(`${apiDomain}/auth/oauth/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -127,11 +127,11 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
                 appName: "SuperTokens",
                 websiteDomain,
             },
-            recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
+            recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
         });
 
         const redirectUri = "http://localhost:4000/redirect-url";
-        const { client } = await OAuth2.createOAuth2Client(
+        const { client } = await OAuth2Provider.createOAuth2Client(
             {
                 redirectUris: [redirectUri],
                 scope,
@@ -163,7 +163,7 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
             state,
         });
 
-        const res = await fetch(`${apiDomain}/auth/oauth2provider/token`, {
+        const res = await fetch(`${apiDomain}/auth/oauth/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -185,7 +185,7 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
         assert.strictEqual(tokenResp.token_type, "bearer");
         assert.strictEqual(tokenResp.scope, scope);
 
-        let refreshTokenRes = await fetch(`${apiDomain}/auth/oauth2provider/token`, {
+        let refreshTokenRes = await fetch(`${apiDomain}/auth/oauth/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -223,11 +223,11 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
                 appName: "SuperTokens",
                 websiteDomain,
             },
-            recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
+            recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
         });
 
         const redirectUri = "http://localhost:4000/redirect-url";
-        const { client } = await OAuth2.createOAuth2Client(
+        const { client } = await OAuth2Provider.createOAuth2Client(
             {
                 redirectUris: [redirectUri],
                 scope,
@@ -265,7 +265,7 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
             state,
         });
 
-        const res = await fetch(`${apiDomain}/auth/oauth2provider/token`, {
+        const res = await fetch(`${apiDomain}/auth/oauth/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -303,11 +303,11 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
                 appName: "SuperTokens",
                 websiteDomain,
             },
-            recipeList: [OAuth2.init()],
+            recipeList: [OAuth2Provider.init()],
         });
 
         const redirectUri = "http://localhost:4000/redirect-url";
-        const { client } = await OAuth2.createOAuth2Client(
+        const { client } = await OAuth2Provider.createOAuth2Client(
             {
                 redirectUris: [redirectUri],
                 scope,
@@ -319,7 +319,7 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
             {}
         );
 
-        const res = await fetch(`${apiDomain}/auth/oauth2provider/token`, {
+        const res = await fetch(`${apiDomain}/auth/oauth/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -356,11 +356,11 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
                 appName: "SuperTokens",
                 websiteDomain,
             },
-            recipeList: [EmailPassword.init(), OAuth2.init()],
+            recipeList: [EmailPassword.init(), OAuth2Provider.init()],
         });
 
         const redirectUri = "http://localhost:4000/redirect-url";
-        const { client } = await OAuth2.createOAuth2Client(
+        const { client } = await OAuth2Provider.createOAuth2Client(
             {
                 redirectUris: [redirectUri],
                 scope,
@@ -376,7 +376,7 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
 
         assert.strictEqual(status, "OK");
 
-        const res = await fetch(`${apiDomain}/auth/oauth2provider/token`, {
+        const res = await fetch(`${apiDomain}/auth/oauth/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -413,12 +413,12 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
                 appName: "SuperTokens",
                 websiteDomain,
             },
-            recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
+            recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
         });
 
         // NOTE: Url fragments are not allowed in redirect URIs as per https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.2
         const redirectUri = "http://localhost:4000/redirect-url?foo=bar&baz=qux";
-        const { client } = await OAuth2.createOAuth2Client(
+        const { client } = await OAuth2Provider.createOAuth2Client(
             {
                 redirectUris: [redirectUri],
                 scope,
@@ -450,7 +450,7 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
             state,
         });
 
-        const res = await fetch(`${apiDomain}/auth/oauth2provider/token`, {
+        const res = await fetch(`${apiDomain}/auth/oauth/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -471,7 +471,7 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
         assert.strictEqual(tokenResp.scope, scope);
     });
 
-    it("should simulate a successful OAuth2 login flow (without state)", async function () {
+    it("should throw an error if state is not passed in the OAuth flow", async function () {
         const connectionURI = await startST();
 
         const apiDomain = `http://localhost:${API_PORT}`;
@@ -487,11 +487,11 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
                 appName: "SuperTokens",
                 websiteDomain,
             },
-            recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
+            recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
         });
 
         const redirectUri = "http://localhost:4000/redirect-url";
-        const { client } = await OAuth2.createOAuth2Client(
+        const { client } = await OAuth2Provider.createOAuth2Client(
             {
                 redirectUris: [redirectUri],
                 scope,
@@ -513,35 +513,16 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
             scope,
         });
 
-        const { authorizationCode } = await testOAuthFlowAndGetAuthCode({
-            apiDomain,
-            websiteDomain,
-            authorisationUrl,
-            clientId: client.clientId,
-            redirectUri,
-            scope,
-            state,
-        });
+        const res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
 
-        const res = await fetch(`${apiDomain}/auth/oauth2provider/token`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                code: authorizationCode,
-                client_id: client.clientId,
-                client_secret: client.clientSecret,
-                grant_type: "authorization_code",
-                redirect_uri: redirectUri,
-            }),
-        });
-        const tokenResp = await res.json();
+        const nextUrl = res.headers.get("Location");
+        nextUrlObj = new URL(nextUrl);
 
-        assert.strictEqual(res.status, 200);
-        assert(tokenResp.access_token !== undefined);
-        assert.strictEqual(tokenResp.token_type, "bearer");
-        assert.strictEqual(tokenResp.scope, scope);
+        const error = nextUrlObj.searchParams.get("error");
+        const errorDescription = nextUrlObj.searchParams.get("error_description");
+
+        assert.strictEqual(error, "invalid_state");
+        assert.strictEqual(errorDescription, "The state is missing or does not have enough characters and is therefore considered too weak. Request parameter 'state' must be at least be 8 characters long to ensure sufficient entropy.");
     });
 
     it("should simulate a successful OAuth2 login flow (id_token only implicit flow)", async function () {
@@ -560,11 +541,11 @@ describe(`OAuth2-API: ${printPath("[test/oauth2/oauth2.api.test.js]")}`, functio
                 appName: "SuperTokens",
                 websiteDomain,
             },
-            recipeList: [EmailPassword.init(), OAuth2.init(), Session.init()],
+            recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
         });
 
         const redirectUri = "http://localhost:4000/redirect-url?foo=bar&baz";
-        const { client } = await OAuth2.createOAuth2Client(
+        const { client } = await OAuth2Provider.createOAuth2Client(
             {
                 redirectUris: [redirectUri],
                 scope,
