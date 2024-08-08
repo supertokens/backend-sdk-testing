@@ -23,8 +23,9 @@ const {
 } = require("../utils");
 let assert = require("assert");
 let { PROCESS_STATE } = require("supertokens-node/lib/build/processState");
-const { randomString, recipesMock, request } = require("../../api-mock");
+const { randomString, recipesMock, request, getOverrideLogs } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
+const { getUpdatedUserFromDBForRespCompare } = require("../accountlinking-with-session/utils");
 const {
     AccountLinking,
     EmailPassword,
@@ -554,6 +555,125 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                 }
             }
             assert(didAsserts);
+        });
+
+        it("should call shouldDoAutomaticAccountLinking with the right parameters when linking by account info to the oldest user", async function () {
+            const connectionURI = await startST();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    EmailPassword.init(),
+                    Session.init(),
+                    ThirdParty.init({
+                        signInAndUpFeature: {
+                            providers: [
+                                {
+                                    config: {
+                                        thirdPartyId: "google",
+                                        clients: [
+                                            {
+                                                clientId: "",
+                                                clientSecret: "",
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    }),
+                    AccountLinking.init({
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
+                    }),
+                ],
+            });
+
+            let tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
+                "public",
+                "google",
+                "abc",
+                "test@example.com",
+                false,
+                undefined,
+                { DO_NOT_LINK: true }
+            );
+            assert(!tpUser.user.isPrimaryUser);
+
+            let res = await new Promise((resolve) =>
+                request()
+                    .post("/auth/signup")
+                    .send({
+                        formFields: [
+                            {
+                                id: "email",
+                                value: "test@example.com",
+                            },
+                            {
+                                id: "password",
+                                value: "password123",
+                            },
+                        ],
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            resolve(undefined);
+                        } else {
+                            resolve(res);
+                        }
+                    })
+            );
+            assert(res !== undefined);
+            assert(res.body.status === "OK");
+            let epUser = await supertokens.getUser(res.body.user.id);
+            assert(epUser.isPrimaryUser === true);
+            assert(epUser.loginMethods.length === 2);
+
+            let sessionTokens = extractInfoFromResponse(res);
+            let session = await Session.getSessionWithoutRequestResponse(sessionTokens.accessTokenFromAny);
+            assert.notStrictEqual(session.getUserId(), session.getRecipeUserId().getAsString());
+            assert.strictEqual(session.getUserId(), tpUser.user.id);
+            let didAsserts = false;
+            for (let i = 0; i < epUser.loginMethods.length; i++) {
+                if (epUser.loginMethods[i].recipeId === "emailpassword") {
+                    didAsserts = true;
+                    assert(
+                        epUser.loginMethods[i].recipeUserId.getAsString() === session.getRecipeUserId().getAsString()
+                    );
+                    assert(epUser.loginMethods[i].email === "test@example.com");
+                }
+            }
+            assert(didAsserts);
+            const logs = await getOverrideLogs();
+            const shouldDoAutomaticAccountLinkingCallParams = logs.filter(l => l.name === "AccountLinking.shouldDoAutomaticAccountLinking" && l.type === "CALL").map(l => l.data);
+
+            // can the tpUser become primary?
+            assert.deepStrictEqual(shouldDoAutomaticAccountLinkingCallParams[0][0].recipeId, "thirdparty");
+            assert.deepStrictEqual(shouldDoAutomaticAccountLinkingCallParams[0][0].thirdParty, tpUser.user.thirdParty[0]);
+            assert.deepStrictEqual(shouldDoAutomaticAccountLinkingCallParams[0][1], null);
+            assert.strictEqual(shouldDoAutomaticAccountLinkingCallParams[0][4].DO_NOT_LINK, true);
+
+            // can the epUser become primary?
+            assert.deepStrictEqual(shouldDoAutomaticAccountLinkingCallParams[1][0].recipeId, "emailpassword");
+            assert.deepStrictEqual(shouldDoAutomaticAccountLinkingCallParams[1][0].email, "test@example.com");
+            assert.deepStrictEqual(shouldDoAutomaticAccountLinkingCallParams[1][1], null);
+
+            assert.deepStrictEqual(shouldDoAutomaticAccountLinkingCallParams[2][0].recipeId, "thirdparty");
+            assert.deepStrictEqual(shouldDoAutomaticAccountLinkingCallParams[2][0].thirdParty, tpUser.user.thirdParty[0]);
+            assert.deepStrictEqual(shouldDoAutomaticAccountLinkingCallParams[2][1], null);
+
+            assert.deepStrictEqual(shouldDoAutomaticAccountLinkingCallParams[3][0].recipeId, "emailpassword");
+            assert.deepStrictEqual(shouldDoAutomaticAccountLinkingCallParams[3][0].email, "test@example.com");
+            const tpUserForComparison = tpUser.user.toJson();
+            tpUserForComparison.isPrimaryUser = true;
+            assert.deepStrictEqual(shouldDoAutomaticAccountLinkingCallParams[3][1], JSON.parse(JSON.stringify(tpUserForComparison)));
         });
 
         it("calling signUpPOST succeeds, and links to older account, if email exists in some non email password, non primary user - account linking enabled, and email verification not required", async function () {
