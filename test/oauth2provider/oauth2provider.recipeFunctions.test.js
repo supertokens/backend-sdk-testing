@@ -15,10 +15,13 @@
 
 const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTenant } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString } = require("../../api-mock");
-const { OAuth2Provider, supertokens: SuperTokens } = recipesMock;
+const { recipesMock, randomString, API_PORT } = require("../../api-mock");
+const { createAuthorizationUrl, testOAuthFlowAndGetAuthCode } = require("./utils");
+const { OAuth2Provider, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
 
-describe(`OAuth2Provider-recipeFunctions: ${printPath("[test/oauth2provider/OAuth2Provider.recipeFunctions.test.js]")}`, function () {
+describe(`OAuth2Provider-recipeFunctions: ${printPath(
+    "[test/oauth2provider/OAuth2Provider.recipeFunctions.test.js]"
+)}`, function () {
     let globalConnectionURI;
 
     const startST = async () => {
@@ -239,7 +242,10 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath("[test/oauth2provider/OAut
 
         // Fetch clients in pages of 3
         do {
-            const result = await OAuth2Provider.getOAuth2Clients({ pageSize: 3, paginationToken: nextPaginationToken }, {});
+            const result = await OAuth2Provider.getOAuth2Clients(
+                { pageSize: 3, paginationToken: nextPaginationToken },
+                {}
+            );
             assert.strictEqual(result.status, "OK");
             nextPaginationToken = result.nextPaginationToken;
             allClients.push(...result.clients);
@@ -282,5 +288,334 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath("[test/oauth2provider/OAut
         result = await OAuth2Provider.getOAuth2Clients({ owner: "test" }, {});
         assert.strictEqual(result.status, "OK");
         assert.strictEqual(result.clients.length, 5);
+    });
+
+    describe("validateAccessToken", function () {
+        it("should validate tokens from a successful OAuth2 login flow (openid, offline_access)", async function () {
+            const connectionURI = await startST();
+
+            const apiDomain = `http://localhost:${API_PORT}`;
+            const websiteDomain = "http://supertokens.io";
+            const scope = "profile offline_access openid";
+
+            SuperTokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain,
+                    appName: "SuperTokens",
+                    websiteDomain,
+                },
+                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
+            });
+
+            const redirectUri = "http://localhost:4000/redirect-url";
+            const { client } = await OAuth2Provider.createOAuth2Client(
+                {
+                    redirectUris: [redirectUri],
+                    scope,
+                    skipConsent: true,
+                    grantTypes: ["authorization_code", "refresh_token"],
+                    responseTypes: ["code", "id_token"],
+                    tokenEndpointAuthMethod: "client_secret_post",
+                },
+                {}
+            );
+
+            const state = new Buffer.from("some-random-string", "base64").toString();
+
+            const authorisationUrl = createAuthorizationUrl({
+                apiDomain,
+                clientId: client.clientId,
+                redirectUri,
+                state,
+                scope,
+            });
+
+            const { authorizationCode, sessionId } = await testOAuthFlowAndGetAuthCode({
+                apiDomain,
+                websiteDomain,
+                authorisationUrl,
+                clientId: client.clientId,
+                redirectUri,
+                scope,
+                state,
+            });
+
+            const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    code: authorizationCode,
+                    client_id: client.clientId,
+                    client_secret: client.clientSecret,
+                    grant_type: "authorization_code",
+                    redirect_uri: redirectUri,
+                }),
+            });
+            const tokenResp = await res.json();
+
+            assert.strictEqual(res.status, 200);
+            assert(tokenResp.access_token !== undefined);
+
+            const { payload, status } = await OAuth2Provider.validateOAuth2AccessToken(tokenResp.access_token, {
+                clientId: client.clientId,
+                scopes: scope.split(" "),
+            });
+            assert.strictEqual(status, "OK");
+            assert.strictEqual(payload.client_id, client.clientId);
+            assert.strictEqual(payload.ext.sessionHandle, sessionId);
+            assert.strictEqual(payload.scp.length, 3);
+            assert.strictEqual(payload.scp[0], "profile");
+            assert.strictEqual(payload.scp[1], "offline_access");
+            assert.strictEqual(payload.scp[2], "openid");
+        });
+
+        it("should validate tokens from a successful OAuth2 login flow (client credentials)", async function () {
+            const connectionURI = await startST();
+
+            const apiDomain = `http://localhost:${API_PORT}`;
+            const websiteDomain = "http://supertokens.io";
+            const scope = "profile offline_access openid";
+
+            SuperTokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain,
+                    appName: "SuperTokens",
+                    websiteDomain,
+                },
+                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
+            });
+
+            const redirectUri = "http://localhost:4000/redirect-url";
+            const { client } = await OAuth2Provider.createOAuth2Client(
+                {
+                    redirectUris: [redirectUri],
+                    audience: ["storageAPI", "calendarAPI"],
+                    scope,
+                    skipConsent: true,
+                    grantTypes: ["authorization_code", "refresh_token", "client_credentials"],
+                    responseTypes: ["code", "id_token"],
+                    tokenEndpointAuthMethod: "client_secret_post",
+                },
+                {}
+            );
+
+            const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    client_id: client.clientId,
+                    client_secret: client.clientSecret,
+                    grant_type: "client_credentials",
+                    audience: "storageAPI",
+                    scope,
+                }),
+            });
+
+            const tokenResp = await res.json();
+
+            assert.strictEqual(res.status, 200);
+            assert(tokenResp.access_token !== undefined);
+
+            const { payload, status } = await OAuth2Provider.validateOAuth2AccessToken(tokenResp.access_token, {
+                clientId: client.clientId,
+                scopes: scope.split(" "),
+            });
+            assert.strictEqual(status, "OK");
+            assert.strictEqual(payload.client_id, client.clientId);
+            assert.strictEqual(payload.scp.length, 3);
+            assert.strictEqual(payload.scp[0], "profile");
+            assert.strictEqual(payload.scp[1], "offline_access");
+            assert.strictEqual(payload.scp[2], "openid");
+        });
+
+        it("should validate tokens from a successful OAuth2 login flow (client credentials)", async function () {
+            const connectionURI = await startST();
+
+            const apiDomain = `http://localhost:${API_PORT}`;
+            const websiteDomain = "http://supertokens.io";
+            const scope = "profile offline_access openid";
+
+            SuperTokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain,
+                    appName: "SuperTokens",
+                    websiteDomain,
+                },
+                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
+            });
+
+            const redirectUri = "http://localhost:4000/redirect-url";
+            const { client } = await OAuth2Provider.createOAuth2Client(
+                {
+                    redirectUris: [redirectUri],
+                    audience: ["storageAPI", "calendarAPI"],
+                    scope,
+                    skipConsent: true,
+                    grantTypes: ["authorization_code", "refresh_token", "client_credentials"],
+                    responseTypes: ["code", "id_token"],
+                    tokenEndpointAuthMethod: "client_secret_post",
+                },
+                {}
+            );
+
+            const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    client_id: client.clientId,
+                    client_secret: client.clientSecret,
+                    grant_type: "client_credentials",
+                    audience: "storageAPI",
+                    scope,
+                }),
+            });
+
+            const tokenResp = await res.json();
+
+            assert.strictEqual(res.status, 200);
+            assert(tokenResp.access_token !== undefined);
+
+            const { payload, status } = await OAuth2Provider.validateOAuth2AccessToken(tokenResp.access_token, {
+                clientId: client.clientId,
+                scopes: scope.split(" "),
+            });
+            assert.strictEqual(status, "OK");
+            assert.strictEqual(payload.client_id, client.clientId);
+            assert.strictEqual(payload.scp.length, 3);
+            assert.strictEqual(payload.scp[0], "profile");
+            assert.strictEqual(payload.scp[1], "offline_access");
+            assert.strictEqual(payload.scp[2], "openid");
+        });
+
+        it("should validate tokens from a successful createTokenForClientCredentials call", async function () {
+            const connectionURI = await startST();
+
+            const apiDomain = `http://localhost:${API_PORT}`;
+            const websiteDomain = "http://supertokens.io";
+            const scope = "profile offline_access openid";
+
+            SuperTokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain,
+                    appName: "SuperTokens",
+                    websiteDomain,
+                },
+                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
+            });
+
+            const redirectUri = "http://localhost:4000/redirect-url";
+            const { client } = await OAuth2Provider.createOAuth2Client(
+                {
+                    redirectUris: [redirectUri],
+                    audience: ["storageAPI", "calendarAPI"],
+                    scope,
+                    skipConsent: true,
+                    grantTypes: ["authorization_code", "refresh_token", "client_credentials"],
+                    responseTypes: ["code", "id_token"],
+                    tokenEndpointAuthMethod: "client_secret_post",
+                },
+                {}
+            );
+
+            const tokenResp = await OAuth2Provider.createTokenForClientCredentials(
+                client.clientId,
+                client.clientSecret,
+                scope.split(" "),
+                "storageAPI",
+                {}
+            );
+
+            assert(tokenResp.access_token !== undefined);
+
+            const { payload, status } = await OAuth2Provider.validateOAuth2AccessToken(tokenResp.access_token, {
+                clientId: client.clientId,
+                audience: "storageAPI",
+                scopes: scope.split(" "),
+            });
+            assert.strictEqual(status, "OK");
+            assert.strictEqual(payload.client_id, client.clientId);
+            assert.strictEqual(payload.scp.length, 3);
+            assert.strictEqual(payload.scp[0], "profile");
+            assert.strictEqual(payload.scp[1], "offline_access");
+            assert.strictEqual(payload.scp[2], "openid");
+        });
+
+        it("should validate tokens with checkDatabase true from a successful createTokenForClientCredentials call", async function () {
+            const connectionURI = await startST();
+
+            const apiDomain = `http://localhost:${API_PORT}`;
+            const websiteDomain = "http://supertokens.io";
+            const scope = "profile offline_access openid";
+
+            SuperTokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain,
+                    appName: "SuperTokens",
+                    websiteDomain,
+                },
+                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
+            });
+
+            const redirectUri = "http://localhost:4000/redirect-url";
+            const { client } = await OAuth2Provider.createOAuth2Client(
+                {
+                    redirectUris: [redirectUri],
+                    audience: ["storageAPI", "calendarAPI"],
+                    scope,
+                    skipConsent: true,
+                    grantTypes: ["authorization_code", "refresh_token", "client_credentials"],
+                    responseTypes: ["code", "id_token"],
+                    tokenEndpointAuthMethod: "client_secret_post",
+                },
+                {}
+            );
+
+            const tokenResp = await OAuth2Provider.createTokenForClientCredentials(
+                client.clientId,
+                client.clientSecret,
+                scope.split(" "),
+                "storageAPI",
+                {}
+            );
+
+            assert(tokenResp.access_token !== undefined);
+
+            const { payload, status } = await OAuth2Provider.validateOAuth2AccessToken(
+                tokenResp.access_token,
+                {
+                    clientId: client.clientId,
+                    audience: "storageAPI",
+                    scopes: scope.split(" "),
+                },
+                true
+            );
+            assert.strictEqual(status, "OK");
+            assert.strictEqual(payload.client_id, client.clientId);
+            assert.strictEqual(payload.scp.length, 3);
+            assert.strictEqual(payload.scp[0], "profile");
+            assert.strictEqual(payload.scp[1], "offline_access");
+            assert.strictEqual(payload.scp[2], "openid");
+        });
     });
 });

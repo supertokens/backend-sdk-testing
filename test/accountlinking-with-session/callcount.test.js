@@ -15,7 +15,7 @@
 const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
 const {
     getTestEmail,
-    postAPI,
+    postToAuthAPI,
     createEmailPasswordUser,
     makeUserPrimary,
     getSessionForUser,
@@ -117,7 +117,9 @@ const setup = async function setup(config = {}) {
                 mode: "OPTIONAL",
             }),
             Multitenancy.init(),
-            Session.init(),
+            Session.init({
+                overwriteSessionDuringSignInUp: config.overwriteSessionDuringSignInUp ?? false,
+            }),
             config.initMFA &&
                 MultiFactorAuth.init({
                     firstFactors: config.firstFactors,
@@ -243,6 +245,7 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             await setup({
                 initAccountLinking: false,
                 initMFA: false,
+                overwriteSessionDuringSignInUp: false,
             });
             const email = getTestEmail();
             let user = await createThirdPartyUser(email, true);
@@ -250,7 +253,7 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             const session = await getSessionForUser(user);
             await resetOverrideParams();
 
-            const resp = await signUpPOST(email, session);
+            const resp = await signUpPOST(email, session, undefined, false);
             assert.strictEqual(resp.body.status, "OK");
 
             let overrideParams = await getOverrideParams();
@@ -414,7 +417,7 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
 });
 
 async function consumeCodePOST(code, session) {
-    return postAPI(
+    return postToAuthAPI(
         "/auth/signinup/code/consume",
         code.userInputCode !== undefined
             ? {
@@ -431,7 +434,7 @@ async function consumeCodePOST(code, session) {
 }
 
 async function totpVerifyPOST(totp, session) {
-    return postAPI(
+    return postToAuthAPI(
         "/auth/totp/verify",
         {
             totp,
@@ -440,21 +443,22 @@ async function totpVerifyPOST(totp, session) {
     );
 }
 
-async function signUpPOST(email, session, password = testPassword) {
-    return postAPI(
+async function signUpPOST(email, session, password = testPassword, shouldTryLinkingWithSessionUser) {
+    return postToAuthAPI(
         "/auth/signup",
         {
             formFields: [
                 { id: "email", value: email },
                 { id: "password", value: password },
             ],
+            shouldTryLinkingWithSessionUser,
         },
         session
     );
 }
 
 async function signInPOST(email, session, password = testPassword) {
-    return postAPI(
+    return postToAuthAPI(
         "/auth/signin",
         {
             formFields: [

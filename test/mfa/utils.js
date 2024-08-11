@@ -59,6 +59,7 @@ module.exports.epSignUp = async function (email, password, accessToken, userCont
                             value: email,
                         },
                     ],
+                    shouldTryLinkingWithSessionUser: true,
                     userContext,
                 })
                 .expect(200)
@@ -122,6 +123,7 @@ module.exports.epSignIn = async function (email, password, accessToken) {
                             value: email,
                         },
                     ],
+                    shouldTryLinkingWithSessionUser: true,
                 })
                 .end((err, res) => {
                     if (err) {
@@ -159,6 +161,7 @@ module.exports.plessCreateCode = async function ({ email, phoneNumber }, accessT
                 .send({
                     email,
                     phoneNumber,
+                    shouldTryLinkingWithSessionUser: true,
                 })
                 .expect(200)
                 .end((err, res) => {
@@ -197,6 +200,7 @@ module.exports.plessResendCode = async function (code, accessToken) {
                 .send({
                     preAuthSessionId: code.preAuthSessionId,
                     deviceId: code.deviceId,
+                    shouldTryLinkingWithSessionUser: true,
                 })
                 .expect(200)
                 .end((err, res) => {
@@ -243,9 +247,9 @@ module.exports.plessEmailSignInUp = async function (email, accessToken, userCont
                     preAuthSessionId: code.preAuthSessionId,
                     userInputCode: code.userInputCode,
                     deviceId: code.deviceId,
+                    shouldTryLinkingWithSessionUser: true,
                     userContext,
                 })
-                .expect(200)
                 .end((err, res) => {
                     if (err) {
                         resolve(err);
@@ -289,6 +293,7 @@ module.exports.plessPhoneSigninUp = async function (phoneNumber, accessToken) {
                     preAuthSessionId: code.preAuthSessionId,
                     userInputCode: code.userInputCode,
                     deviceId: code.deviceId,
+                    shouldTryLinkingWithSessionUser: true,
                 })
                 .end((err, res) => {
                     if (err) {
@@ -337,6 +342,7 @@ module.exports.tpSignInUp = async function (thirdPartyId, email, accessToken, us
                             email: email,
                         },
                     },
+                    shouldTryLinkingWithSessionUser: true,
                     userContext,
                 })
                 .end((err, res) => {

@@ -17,14 +17,14 @@ const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTe
 let assert = require("assert");
 const { recipesMock, randomString, API_PORT } = require("../../api-mock");
 const { OAuth2Provider, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
-const { createAuthorizationUrl, testOAuthFlowAndGetAuthCode } = require("./utils");
+const { createAuthorizationUrl, testOAuthFlowAndGetAuthCode, validateIdToken } = require("./utils");
 const { default: generatePKCEChallenge } = require("pkce-challenge");
 
-describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/OAuth2Provider.api.test.js]")}`, function () {
+describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.api.test.js]")}`, function () {
     let globalConnectionURI;
 
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
+    const startST = async (cfg) => {
+        return createTenant(globalConnectionURI, randomString(), cfg);
     };
 
     before(async function () {
@@ -393,7 +393,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/OAuth2Provider.a
 
         const tokenResp = await res.json();
 
-        assert.strictEqual(res.status, 200);
+        assert.strictEqual(res.status, 400);
         assert.strictEqual(tokenResp.error, "invalid_request");
     });
 
@@ -522,7 +522,10 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/OAuth2Provider.a
         const errorDescription = nextUrlObj.searchParams.get("error_description");
 
         assert.strictEqual(error, "invalid_state");
-        assert.strictEqual(errorDescription, "The state is missing or does not have enough characters and is therefore considered too weak. Request parameter 'state' must be at least be 8 characters long to ensure sufficient entropy.");
+        assert.strictEqual(
+            errorDescription,
+            "The state is missing or does not have enough characters and is therefore considered too weak. Request parameter 'state' must be at least be 8 characters long to ensure sufficient entropy."
+        );
     });
 
     it("should simulate a successful OAuth2 login flow (id_token only implicit flow)", async function () {
@@ -587,5 +590,2058 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/OAuth2Provider.a
 
         assert.strictEqual(decodedToken.nonce, nonce);
         assert.strictEqual(decodedToken.sub, userId);
+    });
+
+    describe("extra params", () => {
+        describe("prompt", function () {
+            let connectionURI, apiDomain, websiteDomain, scope, redirectUri, client, state, state2, nonce;
+
+            beforeEach(async function () {
+                connectionURI = await startST({ access_token_validity: 2 });
+
+                apiDomain = `http://localhost:${API_PORT}`;
+                websiteDomain = "http://supertokens.io";
+                scope = "profile openid";
+
+                SuperTokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        apiDomain,
+                        appName: "SuperTokens",
+                        websiteDomain,
+                    },
+                    recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
+                });
+
+                redirectUri = "http://localhost:4000/redirect-url";
+                const clientResponse = await OAuth2Provider.createOAuth2Client(
+                    {
+                        redirectUris: [redirectUri],
+                        scope,
+                        skipConsent: true,
+                        grantTypes: ["authorization_code", "refresh_token"],
+                        responseTypes: ["code", "id_token"],
+                        tokenEndpointAuthMethod: "client_secret_post",
+                    },
+                    {}
+                );
+                client = clientResponse.client;
+
+                state = new Buffer.from("some-random-string").toString("base64");
+                state2 = new Buffer.from("some-random-string2").toString("base64");
+                nonce = "random-nonce";
+            });
+
+            describe("prompt=none", function () {
+                it("should error if there is no active session", async function () {
+                    const authorisationUrl = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state,
+                        scope,
+                        extraQueryParams: {
+                            prompt: "none",
+                            nonce,
+                        },
+                    });
+
+                    const { error, errorDescription } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl,
+                        clientId: client.clientId,
+                        redirectUri,
+                        scope,
+                        state,
+                        skipLogin: true,
+                        expectError: true,
+                    });
+
+                    assert.strictEqual(error, "login_required");
+                    assert.ok(errorDescription);
+                });
+
+                it("should error if there is a no session with oauth cookies", async function () {
+                    const authorisationUrl = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state,
+                        scope,
+                        extraQueryParams: {
+                            nonce,
+                        },
+                    });
+
+                    const { authorizationCode, setCookieHeaders } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl,
+                        clientId: client.clientId,
+                        redirectUri,
+                        scope,
+                        state,
+                    });
+
+                    const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            code: authorizationCode,
+                            client_id: client.clientId,
+                            client_secret: client.clientSecret,
+                            grant_type: "authorization_code",
+                            redirect_uri: redirectUri,
+                        }),
+                    });
+                    assert.strictEqual(res.status, 200);
+                    const tokenResp1 = await res.json();
+
+                    const authorisationUrl2 = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state: state2,
+                        scope,
+                        responseType: "code",
+                        extraQueryParams: {
+                            prompt: "none",
+                            nonce,
+                        },
+                    });
+
+                    const { error, errorDescription } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl: authorisationUrl2,
+                        clientId: client.clientId,
+                        redirectUri,
+                        scope,
+                        state: state2,
+                        prevSetCookieHeaders: setCookieHeaders,
+                        skipLogin: true,
+                        expectError: true,
+                    });
+
+                    assert.strictEqual(error, "login_required");
+                    assert.ok(errorDescription);
+                });
+
+                it("should error if there is an expired session", async function () {
+                    const authorisationUrl = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state,
+                        scope,
+                        extraQueryParams: {
+                            prompt: "none",
+                            nonce,
+                        },
+                    });
+
+                    const createSessionUser = await EmailPassword.signUp("public", "test@example.com", "password123");
+
+                    const session = await Session.createNewSessionWithoutRequestResponse(
+                        "public",
+                        createSessionUser.recipeUserId
+                    );
+
+                    await new Promise((resolve) => setTimeout(resolve, 3000));
+                    const { error, errorDescription } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl,
+                        clientId: client.clientId,
+                        redirectUri,
+                        scope,
+                        state,
+                        session,
+                        skipLogin: true,
+                        expectError: true,
+                    });
+
+                    assert.strictEqual(error, "login_required");
+                    assert.ok(errorDescription);
+                });
+
+                it("should error if there is an expired session with oauth cookies", async function () {
+                    const authorisationUrl = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state,
+                        scope,
+                        extraQueryParams: {
+                            nonce,
+                        },
+                    });
+
+                    const { authorizationCode, setCookieHeaders, session } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl,
+                        clientId: client.clientId,
+                        redirectUri,
+                        scope,
+                        state,
+                    });
+
+                    const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            code: authorizationCode,
+                            client_id: client.clientId,
+                            client_secret: client.clientSecret,
+                            grant_type: "authorization_code",
+                            redirect_uri: redirectUri,
+                        }),
+                    });
+                    assert.strictEqual(res.status, 200);
+                    const tokenResp1 = await res.json();
+
+                    const authorisationUrl2 = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state: state2,
+                        scope,
+                        responseType: "code",
+                        extraQueryParams: {
+                            prompt: "none",
+                            nonce,
+                        },
+                    });
+
+                    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+                    const { error, errorDescription } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl: authorisationUrl2,
+                        clientId: client.clientId,
+                        redirectUri,
+                        scope,
+                        state: state2,
+                        prevSetCookieHeaders: setCookieHeaders,
+                        session,
+                        skipLogin: true,
+                        expectError: true,
+                    });
+
+                    assert.strictEqual(error, "login_required");
+                    assert.ok(errorDescription);
+                });
+
+                it("should error if there is a revoked session", async function () {
+                    const authorisationUrl = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state,
+                        scope,
+                        extraQueryParams: {
+                            prompt: "none",
+                            nonce,
+                        },
+                    });
+
+                    const createSessionUser = await EmailPassword.signUp("public", "test@example.com", "password123");
+
+                    const session = await Session.createNewSessionWithoutRequestResponse(
+                        "public",
+                        createSessionUser.recipeUserId
+                    );
+
+                    await session.revokeSession();
+                    const { error, errorDescription } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl,
+                        clientId: client.clientId,
+                        redirectUri,
+                        scope,
+                        state,
+                        session,
+                        skipLogin: true,
+                        expectError: true,
+                    });
+
+                    assert.strictEqual(error, "login_required");
+                    assert.ok(errorDescription);
+                });
+
+                it("should error if there is a revoked session with oauth cookies", async function () {
+                    const authorisationUrl = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state,
+                        scope,
+                        extraQueryParams: {
+                            nonce,
+                        },
+                    });
+
+                    const { authorizationCode, setCookieHeaders, session } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl,
+                        clientId: client.clientId,
+                        redirectUri,
+                        scope,
+                        state,
+                    });
+
+                    const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            code: authorizationCode,
+                            client_id: client.clientId,
+                            client_secret: client.clientSecret,
+                            grant_type: "authorization_code",
+                            redirect_uri: redirectUri,
+                        }),
+                    });
+                    assert.strictEqual(res.status, 200);
+                    const tokenResp1 = await res.json();
+
+                    const authorisationUrl2 = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state: state2,
+                        scope,
+                        responseType: "code",
+                        extraQueryParams: {
+                            prompt: "none",
+                            nonce,
+                        },
+                    });
+
+                    await session.revokeSession();
+
+                    const { error, errorDescription } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl: authorisationUrl2,
+                        clientId: client.clientId,
+                        redirectUri,
+                        scope,
+                        state: state2,
+                        prevSetCookieHeaders: setCookieHeaders,
+                        session,
+                        skipLogin: true,
+                        expectError: true,
+                    });
+
+                    assert.strictEqual(error, "login_required");
+                    assert.ok(errorDescription);
+                });
+
+                it("should succeed if there is an active session without oauth cookies", async function () {
+                    const createSessionUser = await EmailPassword.signUp("public", "test@example.com", "password123");
+
+                    const session = await Session.createNewSessionWithoutRequestResponse(
+                        "public",
+                        createSessionUser.recipeUserId
+                    );
+
+                    const authorisationUrl = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state,
+                        scope,
+                        extraQueryParams: {
+                            nonce,
+                            prompt: "none",
+                        },
+                    });
+
+                    const { authorizationCode } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl,
+                        clientId: client.clientId,
+                        redirectUri,
+                        session,
+                        skipLogin: true,
+                        scope,
+                        state,
+                    });
+
+                    const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            code: authorizationCode,
+                            client_id: client.clientId,
+                            client_secret: client.clientSecret,
+                            grant_type: "authorization_code",
+                            redirect_uri: redirectUri,
+                        }),
+                    });
+                    assert.strictEqual(res.status, 200);
+                    const tokenResp = await res.json();
+
+                    assert(tokenResp.access_token !== undefined);
+                    assert.strictEqual(tokenResp.token_type, "bearer");
+                    assert.strictEqual(tokenResp.scope, scope);
+
+                    const { payload, status } = await validateIdToken(tokenResp.id_token, {
+                        requiredAudience: client.clientId,
+                        requiredScopes: scope.split(" "),
+                        requiredClientId: client.clientId,
+                    });
+                    assert.strictEqual(status, "OK");
+                    const accessTokenHash = await crypto.subtle.digest(
+                        "SHA-256",
+                        new TextEncoder().encode(tokenResp.access_token)
+                    );
+                    const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
+
+                    assert.strictEqual(payload.aud[0], client.clientId);
+                    // assert.strictEqual(payload.iss, apiDomain);
+                    assert.strictEqual(payload.sub, createSessionUser.user.id);
+                    assert(typeof payload.jti === "string");
+                    assert(Number.isInteger(payload.iat));
+                    assert(Number.isInteger(payload.exp));
+                    assert.strictEqual(payload.at_hash, expectedAtHash);
+
+                    assert.strictEqual(payload.nonce, nonce);
+                    assert.notStrictEqual(payload.auth_time, undefined);
+                });
+
+                it("should succeed if there is an active session with oauth cookies", async function () {
+                    const authorisationUrl = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state,
+                        scope,
+                        extraQueryParams: {
+                            nonce,
+                        },
+                    });
+
+                    const { authorizationCode, setCookieHeaders, session } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl,
+                        clientId: client.clientId,
+                        redirectUri,
+                        scope,
+                        state,
+                    });
+
+                    const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            code: authorizationCode,
+                            client_id: client.clientId,
+                            client_secret: client.clientSecret,
+                            grant_type: "authorization_code",
+                            redirect_uri: redirectUri,
+                        }),
+                    });
+                    assert.strictEqual(res.status, 200);
+                    const tokenResp1 = await res.json();
+
+                    const authorisationUrl2 = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state: state2,
+                        scope,
+                        responseType: "code",
+                        extraQueryParams: {
+                            prompt: "none",
+                            nonce,
+                        },
+                    });
+
+                    const { authorizationCode: authorizationCode2, userId } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl: authorisationUrl2,
+                        clientId: client.clientId,
+                        redirectUri,
+                        scope,
+                        state: state2,
+                        prevSetCookieHeaders: setCookieHeaders,
+                        session,
+                        skipLogin: true,
+                    });
+
+                    const res2 = await fetch(`${apiDomain}/auth/oauth/token`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            code: authorizationCode2,
+                            client_id: client.clientId,
+                            client_secret: client.clientSecret,
+                            grant_type: "authorization_code",
+                            redirect_uri: redirectUri,
+                        }),
+                    });
+                    const tokenResp2 = await res2.json();
+                    assert.strictEqual(res2.status, 200);
+
+                    assert(tokenResp2.access_token !== undefined);
+                    assert.strictEqual(tokenResp2.token_type, "bearer");
+                    assert.strictEqual(tokenResp2.scope, scope);
+
+                    const { payload, status } = await validateIdToken(tokenResp2.id_token, {
+                        requiredAudience: client.clientId,
+                        requiredScopes: scope.split(" "),
+                        requiredClientId: client.clientId,
+                    });
+                    assert.strictEqual(status, "OK");
+                    const accessTokenHash = await crypto.subtle.digest(
+                        "SHA-256",
+                        new TextEncoder().encode(tokenResp2.access_token)
+                    );
+                    const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
+
+                    assert.strictEqual(payload.aud[0], client.clientId);
+                    // assert.strictEqual(payload.iss, apiDomain);
+                    assert.strictEqual(payload.sub, userId);
+                    assert(typeof payload.jti === "string");
+                    assert(Number.isInteger(payload.iat));
+                    assert(Number.isInteger(payload.exp));
+                    assert.strictEqual(payload.at_hash, expectedAtHash);
+
+                    assert.strictEqual(payload.nonce, nonce);
+                    assert.notStrictEqual(payload.auth_time, undefined);
+                });
+            });
+
+            describe("prompt=login", function () {
+                it("should work normally if there is no session without oauth cookies", async function () {
+                    const authorisationUrl = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state,
+                        scope,
+                        extraQueryParams: {
+                            nonce,
+                            prompt: "login",
+                        },
+                    });
+
+                    const { authorizationCode, userId } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl,
+                        clientId: client.clientId,
+                        redirectUri,
+                        skipLogin: false,
+                        shouldHaveForceFreshAuth: true,
+                        scope,
+                        state,
+                    });
+
+                    const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            code: authorizationCode,
+                            client_id: client.clientId,
+                            client_secret: client.clientSecret,
+                            grant_type: "authorization_code",
+                            redirect_uri: redirectUri,
+                        }),
+                    });
+                    assert.strictEqual(res.status, 200);
+                    const tokenResp = await res.json();
+
+                    assert(tokenResp.access_token !== undefined);
+                    assert.strictEqual(tokenResp.token_type, "bearer");
+                    assert.strictEqual(tokenResp.scope, scope);
+
+                    const { payload, status } = await validateIdToken(tokenResp.id_token, {
+                        requiredAudience: client.clientId,
+                        requiredScopes: scope.split(" "),
+                        requiredClientId: client.clientId,
+                    });
+                    assert.strictEqual(status, "OK");
+                    const accessTokenHash = await crypto.subtle.digest(
+                        "SHA-256",
+                        new TextEncoder().encode(tokenResp.access_token)
+                    );
+                    const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
+
+                    assert.strictEqual(payload.aud[0], client.clientId);
+                    // assert.strictEqual(payload.iss, apiDomain);
+                    assert.strictEqual(payload.sub, userId);
+                    assert(typeof payload.jti === "string");
+                    assert(Number.isInteger(payload.iat));
+                    assert(Number.isInteger(payload.exp));
+                    assert.strictEqual(payload.at_hash, expectedAtHash);
+
+                    assert.strictEqual(payload.nonce, nonce);
+                    assert.notStrictEqual(payload.auth_time, undefined);
+                });
+
+                it("should work normally if there is no session with oauth cookies", async function () {
+                    const authorisationUrl = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state,
+                        scope,
+                        extraQueryParams: {
+                            nonce,
+                        },
+                    });
+
+                    const { authorizationCode, setCookieHeaders, session } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl,
+                        clientId: client.clientId,
+                        redirectUri,
+                        scope,
+                        state,
+                    });
+
+                    const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            code: authorizationCode,
+                            client_id: client.clientId,
+                            client_secret: client.clientSecret,
+                            grant_type: "authorization_code",
+                            redirect_uri: redirectUri,
+                        }),
+                    });
+                    assert.strictEqual(res.status, 200);
+                    const tokenResp1 = await res.json();
+
+                    const authorisationUrl2 = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state: state2,
+                        scope,
+                        responseType: "code",
+                        extraQueryParams: {
+                            prompt: "login",
+                            nonce,
+                        },
+                    });
+
+                    const { authorizationCode: authorizationCode2, userId } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl: authorisationUrl2,
+                        clientId: client.clientId,
+                        redirectUri,
+                        scope,
+                        state: state2,
+                        prevSetCookieHeaders: setCookieHeaders,
+                        skipLogin: false,
+                        shouldHaveForceFreshAuth: true,
+                        useSignIn: true,
+                    });
+
+                    const res2 = await fetch(`${apiDomain}/auth/oauth/token`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            code: authorizationCode2,
+                            client_id: client.clientId,
+                            client_secret: client.clientSecret,
+                            grant_type: "authorization_code",
+                            redirect_uri: redirectUri,
+                        }),
+                    });
+                    const tokenResp2 = await res2.json();
+                    assert.strictEqual(res2.status, 200);
+
+                    assert(tokenResp2.access_token !== undefined);
+                    assert.strictEqual(tokenResp2.token_type, "bearer");
+                    assert.strictEqual(tokenResp2.scope, scope);
+
+                    const { payload, status } = await validateIdToken(tokenResp2.id_token, {
+                        requiredAudience: client.clientId,
+                        requiredScopes: scope.split(" "),
+                        requiredClientId: client.clientId,
+                    });
+                    assert.strictEqual(status, "OK");
+                    const accessTokenHash = await crypto.subtle.digest(
+                        "SHA-256",
+                        new TextEncoder().encode(tokenResp2.access_token)
+                    );
+                    const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
+
+                    assert.strictEqual(payload.aud[0], client.clientId);
+                    // assert.strictEqual(payload.iss, apiDomain);
+                    assert.strictEqual(payload.sub, userId);
+                    assert(typeof payload.jti === "string");
+                    assert(Number.isInteger(payload.iat));
+                    assert(Number.isInteger(payload.exp));
+                    assert.strictEqual(payload.at_hash, expectedAtHash);
+
+                    assert.strictEqual(payload.nonce, nonce);
+                    assert.notStrictEqual(payload.auth_time, undefined);
+                });
+
+                it("should redirect to auth even if there is an expired session without oauth cookies", async function () {
+                    const createSessionUser = await EmailPassword.signUp("public", "test@example.com", "password123");
+
+                    const session = await Session.createNewSessionWithoutRequestResponse(
+                        "public",
+                        createSessionUser.recipeUserId
+                    );
+
+                    const authorisationUrl = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state,
+                        scope,
+                        extraQueryParams: {
+                            nonce,
+                            prompt: "login",
+                        },
+                    });
+                    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+                    const { authorizationCode, userId } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl,
+                        clientId: client.clientId,
+                        redirectUri,
+                        skipLogin: false,
+                        useSignIn: true,
+                        shouldHaveForceFreshAuth: true,
+                        session,
+                        scope,
+                        state,
+                    });
+
+                    const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            code: authorizationCode,
+                            client_id: client.clientId,
+                            client_secret: client.clientSecret,
+                            grant_type: "authorization_code",
+                            redirect_uri: redirectUri,
+                        }),
+                    });
+                    assert.strictEqual(res.status, 200);
+                    const tokenResp = await res.json();
+
+                    assert(tokenResp.access_token !== undefined);
+                    assert.strictEqual(tokenResp.token_type, "bearer");
+                    assert.strictEqual(tokenResp.scope, scope);
+
+                    const { payload, status } = await validateIdToken(tokenResp.id_token, {
+                        requiredAudience: client.clientId,
+                        requiredScopes: scope.split(" "),
+                        requiredClientId: client.clientId,
+                    });
+                    assert.strictEqual(status, "OK");
+                    const accessTokenHash = await crypto.subtle.digest(
+                        "SHA-256",
+                        new TextEncoder().encode(tokenResp.access_token)
+                    );
+                    const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
+
+                    assert.strictEqual(payload.aud[0], client.clientId);
+                    // assert.strictEqual(payload.iss, apiDomain);
+                    assert.strictEqual(payload.sub, userId);
+                    assert(typeof payload.jti === "string");
+                    assert(Number.isInteger(payload.iat));
+                    assert(Number.isInteger(payload.exp));
+                    assert.strictEqual(payload.at_hash, expectedAtHash);
+
+                    assert.strictEqual(payload.nonce, nonce);
+                    assert.notStrictEqual(payload.auth_time, undefined);
+                });
+
+                it("should redirect to auth even if there is an expired session with oauth cookies", async function () {
+                    const authorisationUrl = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state,
+                        scope,
+                        extraQueryParams: {
+                            nonce,
+                        },
+                    });
+
+                    const { authorizationCode, setCookieHeaders, session } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl,
+                        clientId: client.clientId,
+                        redirectUri,
+                        scope,
+                        state,
+                    });
+
+                    const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            code: authorizationCode,
+                            client_id: client.clientId,
+                            client_secret: client.clientSecret,
+                            grant_type: "authorization_code",
+                            redirect_uri: redirectUri,
+                        }),
+                    });
+                    assert.strictEqual(res.status, 200);
+                    const tokenResp1 = await res.json();
+
+                    const authorisationUrl2 = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state: state2,
+                        scope,
+                        responseType: "code",
+                        extraQueryParams: {
+                            prompt: "login",
+                            nonce,
+                        },
+                    });
+                    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+                    const { authorizationCode: authorizationCode2, userId } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl: authorisationUrl2,
+                        clientId: client.clientId,
+                        redirectUri,
+                        scope,
+                        state: state2,
+                        session,
+                        prevSetCookieHeaders: setCookieHeaders,
+                        skipLogin: false,
+                        shouldHaveForceFreshAuth: true,
+                        useSignIn: true,
+                    });
+
+                    const res2 = await fetch(`${apiDomain}/auth/oauth/token`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            code: authorizationCode2,
+                            client_id: client.clientId,
+                            client_secret: client.clientSecret,
+                            grant_type: "authorization_code",
+                            redirect_uri: redirectUri,
+                        }),
+                    });
+                    const tokenResp2 = await res2.json();
+                    assert.strictEqual(res2.status, 200);
+
+                    assert(tokenResp2.access_token !== undefined);
+                    assert.strictEqual(tokenResp2.token_type, "bearer");
+                    assert.strictEqual(tokenResp2.scope, scope);
+
+                    const { payload, status } = await validateIdToken(tokenResp2.id_token, {
+                        requiredAudience: client.clientId,
+                        requiredScopes: scope.split(" "),
+                        requiredClientId: client.clientId,
+                    });
+                    assert.strictEqual(status, "OK");
+                    const accessTokenHash = await crypto.subtle.digest(
+                        "SHA-256",
+                        new TextEncoder().encode(tokenResp2.access_token)
+                    );
+                    const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
+
+                    assert.strictEqual(payload.aud[0], client.clientId);
+                    // assert.strictEqual(payload.iss, apiDomain);
+                    assert.strictEqual(payload.sub, userId);
+                    assert(typeof payload.jti === "string");
+                    assert(Number.isInteger(payload.iat));
+                    assert(Number.isInteger(payload.exp));
+                    assert.strictEqual(payload.at_hash, expectedAtHash);
+
+                    assert.strictEqual(payload.nonce, nonce);
+                    assert.notStrictEqual(payload.auth_time, undefined);
+                });
+
+                it("should redirect to auth even if there is an active session without oauth cookies", async function () {
+                    const createSessionUser = await EmailPassword.signUp("public", "test@example.com", "password123");
+
+                    const session = await Session.createNewSessionWithoutRequestResponse(
+                        "public",
+                        createSessionUser.recipeUserId
+                    );
+
+                    const authorisationUrl = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state,
+                        scope,
+                        extraQueryParams: {
+                            nonce,
+                            prompt: "login",
+                        },
+                    });
+
+                    const { authorizationCode, userId } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl,
+                        clientId: client.clientId,
+                        redirectUri,
+                        skipLogin: false,
+                        shouldHaveForceFreshAuth: true,
+                        useSignIn: true,
+                        session,
+                        scope,
+                        state,
+                    });
+
+                    const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            code: authorizationCode,
+                            client_id: client.clientId,
+                            client_secret: client.clientSecret,
+                            grant_type: "authorization_code",
+                            redirect_uri: redirectUri,
+                        }),
+                    });
+                    assert.strictEqual(res.status, 200);
+                    const tokenResp = await res.json();
+
+                    assert(tokenResp.access_token !== undefined);
+                    assert.strictEqual(tokenResp.token_type, "bearer");
+                    assert.strictEqual(tokenResp.scope, scope);
+
+                    const { payload, status } = await validateIdToken(tokenResp.id_token, {
+                        requiredAudience: client.clientId,
+                        requiredScopes: scope.split(" "),
+                        requiredClientId: client.clientId,
+                    });
+                    assert.strictEqual(status, "OK");
+                    const accessTokenHash = await crypto.subtle.digest(
+                        "SHA-256",
+                        new TextEncoder().encode(tokenResp.access_token)
+                    );
+                    const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
+
+                    assert.strictEqual(payload.aud[0], client.clientId);
+                    // assert.strictEqual(payload.iss, apiDomain);
+                    assert.strictEqual(payload.sub, userId);
+                    assert(typeof payload.jti === "string");
+                    assert(Number.isInteger(payload.iat));
+                    assert(Number.isInteger(payload.exp));
+                    assert.strictEqual(payload.at_hash, expectedAtHash);
+
+                    assert.strictEqual(payload.nonce, nonce);
+                    assert.notStrictEqual(payload.auth_time, undefined);
+                });
+
+                it("should redirect to auth even if there is an active session with oauth cookies", async function () {
+                    const authorisationUrl = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state,
+                        scope,
+                        extraQueryParams: {
+                            nonce,
+                        },
+                    });
+
+                    const { authorizationCode, setCookieHeaders, session } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl,
+                        clientId: client.clientId,
+                        redirectUri,
+                        scope,
+                        state,
+                    });
+
+                    const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            code: authorizationCode,
+                            client_id: client.clientId,
+                            client_secret: client.clientSecret,
+                            grant_type: "authorization_code",
+                            redirect_uri: redirectUri,
+                        }),
+                    });
+                    assert.strictEqual(res.status, 200);
+                    const tokenResp1 = await res.json();
+
+                    const authorisationUrl2 = createAuthorizationUrl({
+                        apiDomain,
+                        clientId: client.clientId,
+                        redirectUri,
+                        state: state2,
+                        scope,
+                        responseType: "code",
+                        extraQueryParams: {
+                            prompt: "login",
+                            nonce,
+                        },
+                    });
+
+                    const { authorizationCode: authorizationCode2, userId } = await testOAuthFlowAndGetAuthCode({
+                        apiDomain,
+                        websiteDomain,
+                        authorisationUrl: authorisationUrl2,
+                        clientId: client.clientId,
+                        redirectUri,
+                        scope,
+                        state: state2,
+                        session,
+                        prevSetCookieHeaders: setCookieHeaders,
+                        skipLogin: false,
+                        shouldHaveForceFreshAuth: true,
+                        useSignIn: true,
+                    });
+
+                    const res2 = await fetch(`${apiDomain}/auth/oauth/token`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            code: authorizationCode2,
+                            client_id: client.clientId,
+                            client_secret: client.clientSecret,
+                            grant_type: "authorization_code",
+                            redirect_uri: redirectUri,
+                        }),
+                    });
+                    const tokenResp2 = await res2.json();
+                    assert.strictEqual(res2.status, 200);
+
+                    assert(tokenResp2.access_token !== undefined);
+                    assert.strictEqual(tokenResp2.token_type, "bearer");
+                    assert.strictEqual(tokenResp2.scope, scope);
+
+                    const { payload, status } = await validateIdToken(tokenResp2.id_token, {
+                        requiredAudience: client.clientId,
+                        requiredScopes: scope.split(" "),
+                        requiredClientId: client.clientId,
+                    });
+                    assert.strictEqual(status, "OK");
+                    const accessTokenHash = await crypto.subtle.digest(
+                        "SHA-256",
+                        new TextEncoder().encode(tokenResp2.access_token)
+                    );
+                    const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
+
+                    assert.strictEqual(payload.aud[0], client.clientId);
+                    // assert.strictEqual(payload.iss, apiDomain);
+                    assert.strictEqual(payload.sub, userId);
+                    assert(typeof payload.jti === "string");
+                    assert(Number.isInteger(payload.iat));
+                    assert(Number.isInteger(payload.exp));
+                    assert.strictEqual(payload.at_hash, expectedAtHash);
+
+                    assert.strictEqual(payload.nonce, nonce);
+                    assert.notStrictEqual(payload.auth_time, undefined);
+                });
+            });
+
+            it("should error if there is anything else besides none", async function () {
+                const authorisationUrl = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state,
+                    scope,
+                    extraQueryParams: {
+                        prompt: "none consent",
+                        nonce,
+                    },
+                });
+
+                const { error, errorDescription } = await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl,
+                    clientId: client.clientId,
+                    redirectUri,
+                    scope,
+                    state,
+                    skipLogin: true,
+                    expectError: true,
+                });
+
+                assert.strictEqual(error, "login_required");
+                assert.ok(errorDescription);
+            });
+
+            it("should error for unknown values (without session)", async function () {
+                const authorisationUrl = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state,
+                    scope,
+                    extraQueryParams: {
+                        nonce,
+                        prompt: "nope",
+                    },
+                });
+
+                const { error, errorDescription } = await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl,
+                    clientId: client.clientId,
+                    redirectUri,
+                    skipLogin: false,
+                    expectError: true,
+                    scope,
+                    state,
+                });
+
+                assert.strictEqual(error, "invalid_request");
+                assert.ok(errorDescription);
+            });
+            it("should error for unknown values (with session)", async function () {
+                const createSessionUser = await EmailPassword.signUp("public", "test@example.com", "password123");
+
+                const session = await Session.createNewSessionWithoutRequestResponse(
+                    "public",
+                    createSessionUser.recipeUserId
+                );
+
+                const authorisationUrl = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state,
+                    scope,
+                    extraQueryParams: {
+                        nonce,
+                        prompt: "nope",
+                    },
+                });
+
+                const { error, errorDescription } = await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl,
+                    clientId: client.clientId,
+                    redirectUri,
+                    session,
+                    skipLogin: true,
+                    expectError: true,
+                    scope,
+                    state,
+                });
+                assert.strictEqual(error, "invalid_request");
+                assert.ok(errorDescription);
+            });
+            it("should error for unsupported values (without session)", async function () {
+                const authorisationUrl = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state,
+                    scope,
+                    extraQueryParams: {
+                        nonce,
+                        prompt: "select_account",
+                    },
+                });
+
+                const { error, errorDescription } = await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl,
+                    clientId: client.clientId,
+                    redirectUri,
+                    skipLogin: false,
+                    expectError: true,
+                    scope,
+                    state,
+                });
+
+                assert.strictEqual(error, "invalid_request");
+                assert.ok(errorDescription);
+            });
+            it("should error for unsupported values (with session)", async function () {
+                const createSessionUser = await EmailPassword.signUp("public", "test@example.com", "password123");
+
+                const session = await Session.createNewSessionWithoutRequestResponse(
+                    "public",
+                    createSessionUser.recipeUserId
+                );
+
+                const authorisationUrl = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state,
+                    scope,
+                    extraQueryParams: {
+                        nonce,
+                        prompt: "select_account",
+                    },
+                });
+
+                const { error, errorDescription } = await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl,
+                    clientId: client.clientId,
+                    redirectUri,
+                    session,
+                    skipLogin: true,
+                    expectError: true,
+                    scope,
+                    state,
+                });
+                assert.strictEqual(error, "invalid_request");
+                assert.ok(errorDescription);
+            });
+        });
+
+        describe("max_age", () => {
+            let connectionURI, apiDomain, websiteDomain, scope, redirectUri, client, state, state2, nonce;
+
+            beforeEach(async function () {
+                connectionURI = await startST({ access_token_validity: 10 });
+
+                apiDomain = `http://localhost:${API_PORT}`;
+                websiteDomain = "http://supertokens.io";
+                scope = "profile openid";
+
+                SuperTokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        apiDomain,
+                        appName: "SuperTokens",
+                        websiteDomain,
+                    },
+                    recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
+                });
+
+                redirectUri = "http://localhost:4000/redirect-url";
+                const clientResponse = await OAuth2Provider.createOAuth2Client(
+                    {
+                        redirectUris: [redirectUri],
+                        scope,
+                        skipConsent: true,
+                        grantTypes: ["authorization_code", "refresh_token"],
+                        responseTypes: ["code", "id_token"],
+                        tokenEndpointAuthMethod: "client_secret_post",
+                    },
+                    {}
+                );
+                client = clientResponse.client;
+
+                state = new Buffer.from("some-random-string").toString("base64");
+                state2 = new Buffer.from("some-random-string2").toString("base64");
+                nonce = "random-nonce";
+            });
+
+            it("should not require fresh sign in if max_age is larger than the session age", async function () {
+                const authorisationUrl = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state,
+                    scope,
+                    extraQueryParams: {
+                        nonce,
+                    },
+                });
+
+                const { authorizationCode, setCookieHeaders, session } = await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl,
+                    clientId: client.clientId,
+                    redirectUri,
+                    scope,
+                    state,
+                });
+
+                const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        code: authorizationCode,
+                        client_id: client.clientId,
+                        client_secret: client.clientSecret,
+                        grant_type: "authorization_code",
+                        redirect_uri: redirectUri,
+                    }),
+                });
+                assert.strictEqual(res.status, 200);
+                const tokenResp1 = await res.json();
+
+                const authorisationUrl2 = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state: state2,
+                    scope,
+                    responseType: "code",
+                    extraQueryParams: {
+                        max_age: 10,
+                        nonce,
+                    },
+                });
+
+                const { authorizationCode: authorizationCode2, userId } = await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl: authorisationUrl2,
+                    clientId: client.clientId,
+                    redirectUri,
+                    scope,
+                    state: state2,
+                    prevSetCookieHeaders: setCookieHeaders,
+                    session,
+                    skipLogin: true,
+                });
+
+                const res2 = await fetch(`${apiDomain}/auth/oauth/token`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        code: authorizationCode2,
+                        client_id: client.clientId,
+                        client_secret: client.clientSecret,
+                        grant_type: "authorization_code",
+                        redirect_uri: redirectUri,
+                    }),
+                });
+                const tokenResp2 = await res2.json();
+                assert.strictEqual(res2.status, 200);
+
+                assert(tokenResp2.access_token !== undefined);
+                assert.strictEqual(tokenResp2.token_type, "bearer");
+                assert.strictEqual(tokenResp2.scope, scope);
+
+                const { payload, status } = await validateIdToken(tokenResp2.id_token, {
+                    requiredAudience: client.clientId,
+                    requiredScopes: scope.split(" "),
+                    requiredClientId: client.clientId,
+                });
+                assert.strictEqual(status, "OK");
+                const accessTokenHash = await crypto.subtle.digest(
+                    "SHA-256",
+                    new TextEncoder().encode(tokenResp2.access_token)
+                );
+                const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
+
+                assert.strictEqual(payload.aud[0], client.clientId);
+                // assert.strictEqual(payload.iss, apiDomain);
+                assert.strictEqual(payload.sub, userId);
+                assert(typeof payload.jti === "string");
+                assert(Number.isInteger(payload.iat));
+                assert(Number.isInteger(payload.exp));
+                assert.strictEqual(payload.at_hash, expectedAtHash);
+
+                assert.strictEqual(payload.nonce, nonce);
+                assert.notStrictEqual(payload.auth_time, undefined);
+            });
+
+            it("should require fresh sign in if max_age is less than the session age", async function () {
+                const authorisationUrl = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state,
+                    scope,
+                    extraQueryParams: {
+                        nonce,
+                    },
+                });
+
+                const { authorizationCode, setCookieHeaders, session } = await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl,
+                    clientId: client.clientId,
+                    redirectUri,
+                    scope,
+                    state,
+                });
+
+                const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        code: authorizationCode,
+                        client_id: client.clientId,
+                        client_secret: client.clientSecret,
+                        grant_type: "authorization_code",
+                        redirect_uri: redirectUri,
+                    }),
+                });
+                assert.strictEqual(res.status, 200);
+                const tokenResp1 = await res.json();
+
+                await new Promise((res) => setTimeout(res, 3000));
+
+                const authorisationUrl2 = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state: state2,
+                    scope,
+                    responseType: "code",
+                    extraQueryParams: {
+                        max_age: 2,
+                        nonce,
+                    },
+                });
+
+                const { authorizationCode: authorizationCode2, userId } = await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl: authorisationUrl2,
+                    clientId: client.clientId,
+                    redirectUri,
+                    scope,
+                    state: state2,
+                    prevSetCookieHeaders: setCookieHeaders,
+                    session,
+                    useSignIn: true,
+                    skipLogin: false,
+                    shouldHaveForceFreshAuth: true,
+                });
+
+                const res2 = await fetch(`${apiDomain}/auth/oauth/token`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        code: authorizationCode2,
+                        client_id: client.clientId,
+                        client_secret: client.clientSecret,
+                        grant_type: "authorization_code",
+                        redirect_uri: redirectUri,
+                    }),
+                });
+                const tokenResp2 = await res2.json();
+                assert.strictEqual(res2.status, 200);
+
+                assert(tokenResp2.access_token !== undefined);
+                assert.strictEqual(tokenResp2.token_type, "bearer");
+                assert.strictEqual(tokenResp2.scope, scope);
+
+                const { payload, status } = await validateIdToken(tokenResp2.id_token, {
+                    requiredAudience: client.clientId,
+                    requiredScopes: scope.split(" "),
+                    requiredClientId: client.clientId,
+                });
+                assert.strictEqual(status, "OK");
+                const accessTokenHash = await crypto.subtle.digest(
+                    "SHA-256",
+                    new TextEncoder().encode(tokenResp2.access_token)
+                );
+                const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
+
+                assert.strictEqual(payload.aud[0], client.clientId);
+                // assert.strictEqual(payload.iss, apiDomain);
+                assert.strictEqual(payload.sub, userId);
+                assert(typeof payload.jti === "string");
+                assert(Number.isInteger(payload.iat));
+                assert(Number.isInteger(payload.exp));
+                assert.strictEqual(payload.at_hash, expectedAtHash);
+
+                assert.strictEqual(payload.nonce, nonce);
+                assert.notStrictEqual(payload.auth_time, undefined);
+            });
+
+            it("should require fresh sign in if max_age is 0", async function () {
+                const authorisationUrl = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state,
+                    scope,
+                    extraQueryParams: {
+                        nonce,
+                    },
+                });
+
+                const { authorizationCode, setCookieHeaders, session } = await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl,
+                    clientId: client.clientId,
+                    redirectUri,
+                    scope,
+                    state,
+                });
+
+                const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        code: authorizationCode,
+                        client_id: client.clientId,
+                        client_secret: client.clientSecret,
+                        grant_type: "authorization_code",
+                        redirect_uri: redirectUri,
+                    }),
+                });
+                assert.strictEqual(res.status, 200);
+                const tokenResp1 = await res.json();
+
+                const authorisationUrl2 = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state: state2,
+                    scope,
+                    responseType: "code",
+                    extraQueryParams: {
+                        max_age: 0,
+                        nonce,
+                    },
+                });
+
+                const { authorizationCode: authorizationCode2, userId } = await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl: authorisationUrl2,
+                    clientId: client.clientId,
+                    redirectUri,
+                    scope,
+                    state: state2,
+                    prevSetCookieHeaders: setCookieHeaders,
+                    session,
+                    useSignIn: true,
+                    skipLogin: false,
+                    shouldHaveForceFreshAuth: true,
+                });
+
+                const res2 = await fetch(`${apiDomain}/auth/oauth/token`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        code: authorizationCode2,
+                        client_id: client.clientId,
+                        client_secret: client.clientSecret,
+                        grant_type: "authorization_code",
+                        redirect_uri: redirectUri,
+                    }),
+                });
+                const tokenResp2 = await res2.json();
+                assert.strictEqual(res2.status, 200);
+
+                assert(tokenResp2.access_token !== undefined);
+                assert.strictEqual(tokenResp2.token_type, "bearer");
+                assert.strictEqual(tokenResp2.scope, scope);
+
+                const { payload, status } = await validateIdToken(tokenResp2.id_token, {
+                    requiredAudience: client.clientId,
+                    requiredScopes: scope.split(" "),
+                    requiredClientId: client.clientId,
+                });
+                assert.strictEqual(status, "OK");
+                const accessTokenHash = await crypto.subtle.digest(
+                    "SHA-256",
+                    new TextEncoder().encode(tokenResp2.access_token)
+                );
+                const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
+
+                assert.strictEqual(payload.aud[0], client.clientId);
+                // assert.strictEqual(payload.iss, apiDomain);
+                assert.strictEqual(payload.sub, userId);
+                assert(typeof payload.jti === "string");
+                assert(Number.isInteger(payload.iat));
+                assert(Number.isInteger(payload.exp));
+                assert.strictEqual(payload.at_hash, expectedAtHash);
+
+                assert.strictEqual(payload.nonce, nonce);
+                assert.notStrictEqual(payload.auth_time, undefined);
+            });
+
+            it("should require fresh sign in if max_age is negative", async function () {
+                const authorisationUrl = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state,
+                    scope,
+                    extraQueryParams: {
+                        nonce,
+                    },
+                });
+
+                const { authorizationCode, setCookieHeaders, session } = await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl,
+                    clientId: client.clientId,
+                    redirectUri,
+                    scope,
+                    state,
+                });
+
+                const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        code: authorizationCode,
+                        client_id: client.clientId,
+                        client_secret: client.clientSecret,
+                        grant_type: "authorization_code",
+                        redirect_uri: redirectUri,
+                    }),
+                });
+                assert.strictEqual(res.status, 200);
+                const tokenResp1 = await res.json();
+
+                const authorisationUrl2 = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state: state2,
+                    scope,
+                    responseType: "code",
+                    extraQueryParams: {
+                        max_age: -1,
+                        nonce,
+                    },
+                });
+
+                const { error, errorDescription } = await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl: authorisationUrl2,
+                    clientId: client.clientId,
+                    redirectUri,
+                    scope,
+                    state: state2,
+                    prevSetCookieHeaders: setCookieHeaders,
+                    session,
+                    skipLogin: true,
+                    expectError: true,
+                });
+
+                assert.strictEqual(error, "invalid_request");
+                assert(errorDescription.includes("max_age"));
+            });
+
+            it("should error if fresh sign in if max_age is not a number", async function () {
+                const authorisationUrl = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state,
+                    scope,
+                    extraQueryParams: {
+                        nonce,
+                    },
+                });
+
+                const { authorizationCode, setCookieHeaders, session } = await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl,
+                    clientId: client.clientId,
+                    redirectUri,
+                    scope,
+                    state,
+                });
+
+                const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        code: authorizationCode,
+                        client_id: client.clientId,
+                        client_secret: client.clientSecret,
+                        grant_type: "authorization_code",
+                        redirect_uri: redirectUri,
+                    }),
+                });
+                assert.strictEqual(res.status, 200);
+                const tokenResp1 = await res.json();
+
+                const authorisationUrl2 = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state: state2,
+                    scope,
+                    responseType: "code",
+                    extraQueryParams: {
+                        max_age: "AAAA",
+                        nonce,
+                    },
+                });
+
+                const { error, errorDescription } = await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl: authorisationUrl2,
+                    clientId: client.clientId,
+                    redirectUri,
+                    scope,
+                    state: state2,
+                    prevSetCookieHeaders: setCookieHeaders,
+                    session,
+                    expectError: true,
+                    skipLogin: true,
+                });
+
+                assert.strictEqual(error, "error");
+                assert.ok(errorDescription);
+            });
+        });
+
+        describe("display", () => {
+            let connectionURI, apiDomain, websiteDomain, scope, redirectUri, client, state, state2, nonce;
+
+            beforeEach(async function () {
+                connectionURI = await startST({ access_token_validity: 10 });
+
+                apiDomain = `http://localhost:${API_PORT}`;
+                websiteDomain = "http://supertokens.io";
+                scope = "profile openid";
+
+                SuperTokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        apiDomain,
+                        appName: "SuperTokens",
+                        websiteDomain,
+                    },
+                    recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
+                });
+
+                redirectUri = "http://localhost:4000/redirect-url";
+                const clientResponse = await OAuth2Provider.createOAuth2Client(
+                    {
+                        redirectUris: [redirectUri],
+                        scope,
+                        skipConsent: true,
+                        grantTypes: ["authorization_code", "refresh_token"],
+                        responseTypes: ["code", "id_token"],
+                        tokenEndpointAuthMethod: "client_secret_post",
+                    },
+                    {}
+                );
+                client = clientResponse.client;
+
+                state = new Buffer.from("some-random-string").toString("base64");
+                state2 = new Buffer.from("some-random-string2").toString("base64");
+                nonce = "random-nonce";
+            });
+
+            it("should not error for valid values", async () => {
+                const authorisationUrl = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state,
+                    scope,
+                    extraQueryParams: {
+                        nonce,
+                        display: "popup",
+                    },
+                });
+                await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl,
+                    clientId: client.clientId,
+                    redirectUri,
+                    skipLogin: false,
+                    scope,
+                    state,
+                });
+            });
+
+            it("should not error for non-standard values", async () => {
+                const authorisationUrl = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state,
+                    scope,
+                    extraQueryParams: {
+                        nonce,
+                        display: "whatever",
+                    },
+                });
+
+                await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl,
+                    clientId: client.clientId,
+                    redirectUri,
+                    skipLogin: false,
+                    scope,
+                    state,
+                });
+            });
+        });
+
+        describe("ui_locales", () => {
+            let connectionURI, apiDomain, websiteDomain, scope, redirectUri, client, state, state2, nonce;
+
+            beforeEach(async function () {
+                connectionURI = await startST({ access_token_validity: 10 });
+
+                apiDomain = `http://localhost:${API_PORT}`;
+                websiteDomain = "http://supertokens.io";
+                scope = "profile openid";
+
+                SuperTokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        apiDomain,
+                        appName: "SuperTokens",
+                        websiteDomain,
+                    },
+                    recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
+                });
+
+                redirectUri = "http://localhost:4000/redirect-url";
+                const clientResponse = await OAuth2Provider.createOAuth2Client(
+                    {
+                        redirectUris: [redirectUri],
+                        scope,
+                        skipConsent: true,
+                        grantTypes: ["authorization_code", "refresh_token"],
+                        responseTypes: ["code", "id_token"],
+                        tokenEndpointAuthMethod: "client_secret_post",
+                    },
+                    {}
+                );
+                client = clientResponse.client;
+
+                state = new Buffer.from("some-random-string").toString("base64");
+                state2 = new Buffer.from("some-random-string2").toString("base64");
+                nonce = "random-nonce";
+            });
+
+            it("should not error for valid values", async () => {
+                const authorisationUrl = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state,
+                    scope,
+                    extraQueryParams: {
+                        nonce,
+                        ui_locales: "fr-CA fr en",
+                    },
+                });
+                await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl,
+                    clientId: client.clientId,
+                    redirectUri,
+                    skipLogin: false,
+                    scope,
+                    state,
+                });
+            });
+
+            it("should not error for non-standard values", async () => {
+                const authorisationUrl = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    redirectUri,
+                    state,
+                    scope,
+                    extraQueryParams: {
+                        nonce,
+                        ui_locales: "whatever",
+                    },
+                });
+
+                await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl,
+                    clientId: client.clientId,
+                    redirectUri,
+                    skipLogin: false,
+                    scope,
+                    state,
+                });
+            });
+        });
+
+        describe("acr_values", () => {
+            let connectionURI, apiDomain, websiteDomain, scope, redirectUri, client, state, state2, nonce;
+
+            beforeEach(async function () {
+                connectionURI = await startST({ access_token_validity: 10 });
+
+                apiDomain = `http://localhost:${API_PORT}`;
+                websiteDomain = "http://supertokens.io";
+                scope = "profile openid";
+
+                SuperTokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        apiDomain,
+                        appName: "SuperTokens",
+                        websiteDomain,
+                    },
+                    recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
+                });
+
+                redirectUri = "http://localhost:4000/redirect-url";
+                const clientResponse = await OAuth2Provider.createOAuth2Client(
+                    {
+                        redirectUris: [redirectUri],
+                        scope,
+                        skipConsent: true,
+                        grantTypes: ["authorization_code", "refresh_token", "implicit"],
+                        responseTypes: ["code", "id_token"],
+                        tokenEndpointAuthMethod: "client_secret_post",
+                    },
+                    {}
+                );
+                client = clientResponse.client;
+
+                state = new Buffer.from("some-random-string").toString("base64");
+                state2 = new Buffer.from("some-random-string2").toString("base64");
+                nonce = "random-nonce";
+            });
+
+            it("should not error for valid values", async () => {
+                const authorisationUrl = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    responseType: "id_token",
+                    redirectUri,
+                    state,
+                    scope,
+                    extraQueryParams: {
+                        nonce,
+                        acr_values: "urn:mace:incommon:iap:silver",
+                    },
+                });
+
+                const { idToken } = await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl,
+                    responseType: "id_token",
+                    clientId: client.clientId,
+                    redirectUri,
+                    skipLogin: false,
+                    scope,
+                    state,
+                });
+
+                const { payload: tokenPayload } = await validateIdToken(idToken);
+                assert.strictEqual(tokenPayload.acr, "0");
+            });
+
+            it("should not error for non-standard values", async () => {
+                const authorisationUrl = createAuthorizationUrl({
+                    apiDomain,
+                    clientId: client.clientId,
+                    responseType: "id_token",
+                    redirectUri,
+                    state,
+                    scope,
+                    extraQueryParams: {
+                        nonce,
+                        acr_values: "whatever",
+                    },
+                });
+
+                const { idToken } = await testOAuthFlowAndGetAuthCode({
+                    apiDomain,
+                    websiteDomain,
+                    authorisationUrl,
+                    responseType: "id_token",
+                    clientId: client.clientId,
+                    redirectUri,
+                    skipLogin: false,
+                    scope,
+                    state,
+                });
+
+                const { payload: tokenPayload } = await validateIdToken(idToken);
+                assert.strictEqual(tokenPayload.acr, "0");
+            });
+        });
     });
 });

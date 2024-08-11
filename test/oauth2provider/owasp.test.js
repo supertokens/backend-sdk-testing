@@ -17,7 +17,7 @@ const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTe
 let assert = require("assert");
 const { recipesMock, randomString, API_PORT } = require("../../api-mock");
 const { OAuth2Provider, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
-const { default: generatePKCEChallenge} = require("pkce-challenge");
+const { default: generatePKCEChallenge } = require("pkce-challenge");
 const { createAuthorizationUrl, testOAuthFlowAndGetAuthCode } = require("./utils");
 
 describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.test.js]")}`, function () {
@@ -74,7 +74,13 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri: redirectUri + "/subpath", state, scope: "profile" });
+            const authorisationUrl = createAuthorizationUrl({
+                apiDomain,
+                clientId: client.clientId,
+                redirectUri: redirectUri + "/subpath",
+                state,
+                scope: "profile",
+            });
             // Start the OAuth Flow
             let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
 
@@ -113,7 +119,13 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri: redirectUri.replace("localhost", "localhost.org"), state, scope: "profile" });
+            const authorisationUrl = createAuthorizationUrl({
+                apiDomain,
+                clientId: client.clientId,
+                redirectUri: redirectUri.replace("localhost", "localhost.org"),
+                state,
+                scope: "profile",
+            });
 
             // Start the OAuth Flow
             let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
@@ -153,7 +165,13 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri: redirectUri.replace("localhost", "127.1"), state, scope: "profile" });
+            const authorisationUrl = createAuthorizationUrl({
+                apiDomain,
+                clientId: client.clientId,
+                redirectUri: redirectUri.replace("localhost", "127.1"),
+                state,
+                scope: "profile",
+            });
 
             // Start the OAuth Flow
             let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
@@ -192,7 +210,13 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri: redirectUri.replace("localhost", "2130706433"), state, scope: "profile" });
+            const authorisationUrl = createAuthorizationUrl({
+                apiDomain,
+                clientId: client.clientId,
+                redirectUri: redirectUri.replace("localhost", "2130706433"),
+                state,
+                scope: "profile",
+            });
             let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
 
             let nextUrl = res.headers.get("Location");
@@ -232,9 +256,23 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope });
+            const authorisationUrl = createAuthorizationUrl({
+                apiDomain,
+                clientId: client.clientId,
+                redirectUri,
+                state,
+                scope,
+            });
 
-            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
+            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({
+                apiDomain,
+                websiteDomain,
+                clientId: client.clientId,
+                authorisationUrl,
+                redirectUri,
+                scope,
+                state,
+            });
 
             let url = `${apiDomain}/auth/oauth/token`;
             const res = await fetch(url, {
@@ -248,7 +286,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
                 }),
             });
             const tokenResp = await res.json();
-            assert.strictEqual(res.status, 200);
+            assert.strictEqual(res.status, 400);
             assert.deepStrictEqual(tokenResp, {
                 error: "invalid_grant",
                 error_description:
@@ -277,8 +315,22 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope });
-            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
+            const authorisationUrl = createAuthorizationUrl({
+                apiDomain,
+                clientId: client.clientId,
+                redirectUri,
+                state,
+                scope,
+            });
+            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({
+                apiDomain,
+                websiteDomain,
+                clientId: client.clientId,
+                authorisationUrl,
+                redirectUri,
+                scope,
+                state,
+            });
 
             let url = `${apiDomain}/auth/oauth/token`;
             // The first call consumes the code
@@ -306,7 +358,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
             });
             const tokenResp = await res.json();
 
-            assert.strictEqual(res.status, 200);
+            assert.strictEqual(res.status, 400);
             assert.deepStrictEqual(tokenResp, {
                 error: "invalid_grant",
                 error_description:
@@ -339,8 +391,22 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const state = new Buffer.from("some-random-string", "base64").toString();
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope });
-            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
+            const authorisationUrl = createAuthorizationUrl({
+                apiDomain,
+                clientId: client.clientId,
+                redirectUri,
+                state,
+                scope,
+            });
+            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({
+                apiDomain,
+                websiteDomain,
+                clientId: client.clientId,
+                authorisationUrl,
+                redirectUri,
+                scope,
+                state,
+            });
 
             let url = `${apiDomain}/auth/oauth/token`;
             // then we check for errors
@@ -356,7 +422,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
             });
             const tokenResp = await res.json();
 
-            assert.strictEqual(res.status, 200);
+            assert.strictEqual(res.status, 400);
             assert.deepStrictEqual(tokenResp, {
                 error: "invalid_grant",
                 error_description:
@@ -383,14 +449,28 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const scope = "profile";
             const redirectUri = "http://localhost:4000/redirect-url";
-            const { client } = await OAuth2Provider.createOAuth2Client({...defaultClientConf, }, {});
+            const { client } = await OAuth2Provider.createOAuth2Client({ ...defaultClientConf }, {});
 
             const state = new Buffer.from("some-random-string", "base64").toString();
             const { code_challenge, code_verifier } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope });
+            const authorisationUrl = createAuthorizationUrl({
+                apiDomain,
+                clientId: client.clientId,
+                redirectUri,
+                state,
+                scope,
+            });
 
-            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
+            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({
+                apiDomain,
+                websiteDomain,
+                clientId: client.clientId,
+                authorisationUrl,
+                redirectUri,
+                scope,
+                state,
+            });
 
             let url = `${apiDomain}/auth/oauth/token`;
             const res = await fetch(url, {
@@ -405,7 +485,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
                 }),
             });
             const tokenResp = await res.json();
-            assert.strictEqual(res.status, 200);
+            assert.strictEqual(res.status, 400);
             assert.deepStrictEqual(tokenResp, {
                 error: "invalid_grant",
                 error_description:
@@ -430,17 +510,32 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const scope = "profile";
             const redirectUri = "http://localhost:4000/redirect-url";
-            const { client } = await OAuth2Provider.createOAuth2Client({...defaultClientConf, }, {});
+            const { client } = await OAuth2Provider.createOAuth2Client({ ...defaultClientConf }, {});
 
             const state = new Buffer.from("some-random-string", "base64").toString();
             const { code_challenge, code_verifier } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope, extraQueryParams: {
-                code_challenge,
-                code_challenge_method: "S256",
-            } });
+            const authorisationUrl = createAuthorizationUrl({
+                apiDomain,
+                clientId: client.clientId,
+                redirectUri,
+                state,
+                scope,
+                extraQueryParams: {
+                    code_challenge,
+                    code_challenge_method: "S256",
+                },
+            });
 
-            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
+            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({
+                apiDomain,
+                websiteDomain,
+                clientId: client.clientId,
+                authorisationUrl,
+                redirectUri,
+                scope,
+                state,
+            });
 
             let url = `${apiDomain}/auth/oauth/token`;
             const res = await fetch(url, {
@@ -454,7 +549,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
                 }),
             });
             const tokenResp = await res.json();
-            assert.strictEqual(res.status, 200);
+            assert.strictEqual(res.status, 400);
             assert.deepStrictEqual(tokenResp, {
                 error: "invalid_grant",
                 error_description:
@@ -479,25 +574,56 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const scope = "profile";
             const redirectUri = "http://localhost:4000/redirect-url";
-            const { client } = await OAuth2Provider.createOAuth2Client({...defaultClientConf, }, {});
+            const { client } = await OAuth2Provider.createOAuth2Client({ ...defaultClientConf }, {});
 
             const state = new Buffer.from("some-random-string", "base64").toString();
             const { code_challenge, code_verifier } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
             const { code_challenge: code_challenge2 } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
 
-            const authorisationUrl = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope, extraQueryParams: {
-                code_challenge,
-                code_challenge_method: "S256",
-            } });
+            const authorisationUrl = createAuthorizationUrl({
+                apiDomain,
+                clientId: client.clientId,
+                redirectUri,
+                state,
+                scope,
+                extraQueryParams: {
+                    code_challenge,
+                    code_challenge_method: "S256",
+                },
+            });
 
-            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl, redirectUri, scope, state });
+            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({
+                apiDomain,
+                websiteDomain,
+                clientId: client.clientId,
+                authorisationUrl,
+                redirectUri,
+                scope,
+                state,
+            });
 
-            const authorisationUrl2 = createAuthorizationUrl({ apiDomain, clientId: client.clientId, redirectUri, state, scope, extraQueryParams: {
-                code_challenge: code_challenge2,
-                code_challenge_method: "S256",
-            } });
+            const authorisationUrl2 = createAuthorizationUrl({
+                apiDomain,
+                clientId: client.clientId,
+                redirectUri,
+                state,
+                scope,
+                extraQueryParams: {
+                    code_challenge: code_challenge2,
+                    code_challenge_method: "S256",
+                },
+            });
 
-            const { authorizationCode: authorizationCode2 } = await testOAuthFlowAndGetAuthCode({ apiDomain, websiteDomain, clientId: client.clientId, authorisationUrl: authorisationUrl2, redirectUri, scope, state, useSignIn: true });
+            const { authorizationCode: authorizationCode2 } = await testOAuthFlowAndGetAuthCode({
+                apiDomain,
+                websiteDomain,
+                clientId: client.clientId,
+                authorisationUrl: authorisationUrl2,
+                redirectUri,
+                scope,
+                state,
+                useSignIn: true,
+            });
 
             let url = `${apiDomain}/auth/oauth/token`;
             const res = await fetch(url, {
@@ -512,7 +638,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
                 }),
             });
             const tokenResp = await res.json();
-            assert.strictEqual(res.status, 200);
+            assert.strictEqual(res.status, 400);
             assert.deepStrictEqual(tokenResp, {
                 error: "invalid_grant",
                 error_description:

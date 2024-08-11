@@ -50,4 +50,24 @@ export const OAuth2ProviderMock: Partial<typeof OAuth2Provider> = {
             ...response,
         };
     },
+    validateOAuth2AccessToken: async (token, requirements, checkDatabase, userContext) => {
+        const response = await queryAPI({
+            method: "post",
+            path: "/test/oauth2provider/validateoauth2accesstoken",
+            input: { token, requirements, checkDatabase, userContext },
+        });
+        return {
+            ...response,
+        };
+    },
+    createTokenForClientCredentials: async (clientId, clientSecret, scope, audience, userContext) => {
+        const response = await queryAPI({
+            method: "post",
+            path: "/test/oauth2provider/createtokenforclientcredentials",
+            input: { clientId, clientSecret, scope, audience, userContext },
+        });
+        return {
+            ...response,
+        };
+    },
 };

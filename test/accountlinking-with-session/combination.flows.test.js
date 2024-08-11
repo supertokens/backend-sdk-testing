@@ -14,7 +14,7 @@
  */
 const { printPath, setupST, killAllST, cleanST, startST: globalStartST } = require("../utils");
 const {
-    postAPI,
+    postToAuthAPI,
     putAPI,
     getUpdatedUserFromDBForRespCompare,
     getSessionFromResponse,
@@ -103,7 +103,7 @@ describe(`Multi-recipe account linking flows w/ session: ${printPath(
 });
 
 async function signInUpPOST(email, isVerified, session, userId = email, error = undefined) {
-    return postAPI(
+    return postToAuthAPI(
         "/auth/signinup",
         {
             thirdPartyId: "custom",
@@ -119,7 +119,7 @@ async function signInUpPOST(email, isVerified, session, userId = email, error = 
 }
 
 async function signUpPOST(email, session, password = testPassword) {
-    return postAPI(
+    return postToAuthAPI(
         "/auth/signup",
         {
             formFields: [

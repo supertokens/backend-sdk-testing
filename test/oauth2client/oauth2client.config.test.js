@@ -55,6 +55,7 @@ describe(`OAuth2Client-Config: ${printPath("[test/oauth2client/oauth2client.conf
 
         // Missing providerConfig
         {
+            let caught;
             try {
                 SuperTokens.init({
                     ...initParams,
@@ -63,16 +64,16 @@ describe(`OAuth2Client-Config: ${printPath("[test/oauth2client/oauth2client.conf
 
                 // Call queryAPI to init the SuperTokens instance
                 await queryAPI({ path: "/test" });
-                assert(false);
             } catch (err) {
-                if (err.message !== "Please pass providerConfig argument in the OAuth2Client recipe.") {
-                    throw err;
-                }
+                caught = err;
             }
+            assert.ok(caught);
+            assert.strictEqual(caught.message, "Please pass providerConfig argument in the OAuth2Client recipe.");
         }
 
         // Missing clientId
         {
+            let caught;
             try {
                 SuperTokens.init({
                     ...initParams,
@@ -85,16 +86,16 @@ describe(`OAuth2Client-Config: ${printPath("[test/oauth2client/oauth2client.conf
 
                 // Call queryAPI to init the SuperTokens instance
                 await queryAPI({ path: "/test" });
-                assert(false);
             } catch (err) {
-                if (err.message !== "Please pass clientId argument in the OAuth2Client providerConfig.") {
-                    throw err;
-                }
+                caught = err;
             }
+            assert.ok(caught);
+            assert.strictEqual(caught.message, "Please pass clientId argument in the OAuth2Client providerConfig.");
         }
 
-        // Missing providerConfig
+        // Missing oidcDiscoveryEndpoint
         {
+            let caught;
             try {
                 SuperTokens.init({
                     ...initParams,
@@ -109,12 +110,14 @@ describe(`OAuth2Client-Config: ${printPath("[test/oauth2client/oauth2client.conf
 
                 // Call queryAPI to init the SuperTokens instance
                 await queryAPI({ path: "/test" });
-                assert(false);
             } catch (err) {
-                if (err.message !== "Please pass clientSecret argument in the OAuth2Client providerConfig.") {
-                    throw err;
-                }
+                caught = err;
             }
+            assert.ok(caught);
+            assert.strictEqual(
+                caught.message,
+                "Please pass oidcDiscoveryEndpoint argument in the OAuth2Client providerConfig."
+            );
         }
     });
 });

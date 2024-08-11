@@ -194,11 +194,12 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
         let accessToken = cookies.accessTokenFromAny;
 
         res = await plessEmailSignInUp("test1@example.com", accessToken);
-        cookies = extractInfoFromResponse(res);
-        assert.strictEqual("OK", res.body.status);
-        assert.strictEqual(false, res.body.user.isPrimaryUser);
-        assert.strictEqual(1, res.body.user.loginMethods.length);
-        assert.strictEqual(undefined, cookies.accessTokenFromAny);
+
+        assert.strictEqual(res.status, 400);
+        assert.deepStrictEqual(res.body, {
+            message:
+                "shouldDoAutomaticAccountLinking returned false when creating primary user but shouldTryLinkingWithSessionUser is true",
+        });
     });
 
     it("test factor setup with same email as another existing user when automatic account linking is turned on but verification not required", async function () {
@@ -663,7 +664,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
         let res = await tpSignInUp("custom3", "test2@example.com");
         assert.strictEqual("OK", res.body.status);
 
-        res = await tpSignInUp("custom3", "test1@example.com", {
+        res = await tpSignInUp("custom3", "test1@example.com", undefined, {
             DO_LINK: true,
         });
         assert.strictEqual("OK", res.body.status);
@@ -801,7 +802,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
         let res = await tpSignInUp("custom3", "test2@example.com");
         assert.strictEqual("OK", res.body.status);
 
-        res = await tpSignInUp("custom3", "test1@example.com", {
+        res = await tpSignInUp("custom3", "test1@example.com", undefined, {
             DO_LINK: true,
         });
         assert.strictEqual("OK", res.body.status);
