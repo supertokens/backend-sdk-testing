@@ -72,7 +72,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const { client } = await OAuth2Provider.createOAuth2Client(defaultClientConf, {});
 
-            const state = new Buffer.from("some-random-string", "base64").toString();
+            const state = Buffer.from("some-random-string").toString("base64");
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
@@ -117,7 +117,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const { client } = await OAuth2Provider.createOAuth2Client(defaultClientConf, {});
 
-            const state = new Buffer.from("some-random-string", "base64").toString();
+            const state = Buffer.from("some-random-string").toString("base64");
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
@@ -163,7 +163,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const { client } = await OAuth2Provider.createOAuth2Client(defaultClientConf, {});
 
-            const state = new Buffer.from("some-random-string", "base64").toString();
+            const state = Buffer.from("some-random-string").toString("base64");
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
@@ -208,7 +208,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const { client } = await OAuth2Provider.createOAuth2Client(defaultClientConf, {});
 
-            const state = new Buffer.from("some-random-string", "base64").toString();
+            const state = Buffer.from("some-random-string").toString("base64");
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
@@ -254,7 +254,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
             const { client } = await OAuth2Provider.createOAuth2Client(defaultClientConf, {});
             const { client: client2 } = await OAuth2Provider.createOAuth2Client(defaultClientConf, {});
 
-            const state = new Buffer.from("some-random-string", "base64").toString();
+            const state = Buffer.from("some-random-string").toString("base64");
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
@@ -313,7 +313,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
             const scope = "profile";
             const { client } = await OAuth2Provider.createOAuth2Client(defaultClientConf, {});
 
-            const state = new Buffer.from("some-random-string", "base64").toString();
+            const state = Buffer.from("some-random-string").toString("base64");
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
@@ -389,7 +389,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
                 {}
             );
 
-            const state = new Buffer.from("some-random-string", "base64").toString();
+            const state = Buffer.from("some-random-string").toString("base64");
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
@@ -451,7 +451,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
             const redirectUri = "http://localhost:4000/redirect-url";
             const { client } = await OAuth2Provider.createOAuth2Client({ ...defaultClientConf }, {});
 
-            const state = new Buffer.from("some-random-string", "base64").toString();
+            const state = Buffer.from("some-random-string").toString("base64");
             const { code_challenge, code_verifier } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
 
             const authorisationUrl = createAuthorizationUrl({
@@ -512,7 +512,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
             const redirectUri = "http://localhost:4000/redirect-url";
             const { client } = await OAuth2Provider.createOAuth2Client({ ...defaultClientConf }, {});
 
-            const state = new Buffer.from("some-random-string", "base64").toString();
+            const state = Buffer.from("some-random-string").toString("base64");
             const { code_challenge, code_verifier } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
 
             const authorisationUrl = createAuthorizationUrl({
@@ -576,7 +576,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
             const redirectUri = "http://localhost:4000/redirect-url";
             const { client } = await OAuth2Provider.createOAuth2Client({ ...defaultClientConf }, {});
 
-            const state = new Buffer.from("some-random-string", "base64").toString();
+            const state = Buffer.from("some-random-string").toString("base64");
             const { code_challenge, code_verifier } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
             const { code_challenge: code_challenge2 } = generatePKCEChallenge(64); // According to https://www.rfc-editor.org/rfc/rfc7636, length must be between 43 and 128
 
