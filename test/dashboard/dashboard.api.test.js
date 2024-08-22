@@ -15,7 +15,7 @@
 const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
 let assert = require("assert");
 const { recipesMock, request } = require("../../api-mock");
-const { EmailPassword, Session, supertokens, ThirdParty, Multitenancy, Passwordless } = recipesMock;
+const { EmailPassword, Session, supertokens, ThirdParty, Multitenancy, Passwordless, MultiFactorAuth } = recipesMock;
 
 let connectionURI;
 
@@ -1547,28 +1547,505 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             });
         });
 
-        // describe("updateTenantFirstFactor", function () {
-        //     it("test enabling first factor", async function () {});
+        describe("updateTenantFirstFactor", function () {
+            it("test enabling first factor", async function () {
+                await supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        appName: "SuperTokens",
+                        apiDomain: "api.supertokens.io",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [Session.init(), EmailPassword.init(), ThirdParty.init()],
+                });
 
-        //     it("test disabling first factor", async function () {});
+                await Multitenancy.createOrUpdateTenant("t1");
 
-        //     it("test enabling first factor that is not initialised", async function () {});
+                let res = await new Promise((resolve) =>
+                    request()
+                        .put("/auth/t1/dashboard/api/tenant/first-factor")
+                        .set("Authorization", "Bearer test")
+                        .send({
+                            factorId: "emailpassword",
+                            enable: true,
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
 
-        //     it("test enabling first factor that does not have a valid contact method", async function () {});
+                assert.equal(res.body.status, "OK");
 
-        //     it("test enabling first factor that does not have a valid flow type", async function () {});
-        // });
+                res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/t1/dashboard/api/tenant")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
 
-        // describe("updateTenantSecondaryFactor", function () {
-        //     it("test enabling secondary factor", async function () {});
+                assert.equal(res.body.tenant.firstFactors.length, 1);
+                assert.equal(res.body.tenant.firstFactors[0], "emailpassword");
+            });
 
-        //     it("test disabling secondary factor", async function () {});
+            it("test disabling first factor", async function () {
+                await supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        appName: "SuperTokens",
+                        apiDomain: "api.supertokens.io",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [Session.init(), EmailPassword.init(), ThirdParty.init()],
+                });
 
-        //     it("test enabling secondary factor that is not initialised", async function () {});
+                let res = await new Promise((resolve) =>
+                    request()
+                        .put("/auth/public/dashboard/api/tenant/first-factor")
+                        .set("Authorization", "Bearer test")
+                        .send({
+                            factorId: "emailpassword",
+                            enable: false,
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
 
-        //     it("test enabling secondary factor that does not have a valid contact method", async function () {});
+                assert.equal(res.body.status, "OK");
 
-        //     it("test enabling secondary factor that does not have a valid flow type", async function () {});
-        // });
+                res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/public/dashboard/api/tenant")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.tenant.firstFactors.length, 1);
+                assert.equal(res.body.tenant.firstFactors[0], "thirdparty");
+            });
+
+            it("test enabling first factor that is not initialised", async function () {
+                await supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        appName: "SuperTokens",
+                        apiDomain: "api.supertokens.io",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [Session.init(), EmailPassword.init(), ThirdParty.init()],
+                });
+
+                await Multitenancy.createOrUpdateTenant("t1");
+
+                let res = await new Promise((resolve) =>
+                    request()
+                        .put("/auth/t1/dashboard/api/tenant/first-factor")
+                        .set("Authorization", "Bearer test")
+                        .send({
+                            factorId: "otp-email",
+                            enable: true,
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.status, "RECIPE_NOT_CONFIGURED_ON_BACKEND_SDK_ERROR");
+            });
+
+            it("test enabling first factor that does not have a valid contact method", async function () {
+                await supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        appName: "SuperTokens",
+                        apiDomain: "api.supertokens.io",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [
+                        Session.init(),
+                        EmailPassword.init(),
+                        ThirdParty.init(),
+                        Passwordless.init({
+                            contactMethod: "PHONE",
+                            flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
+                        }),
+                    ],
+                });
+
+                await Multitenancy.createOrUpdateTenant("t1");
+
+                let res = await new Promise((resolve) =>
+                    request()
+                        .put("/auth/t1/dashboard/api/tenant/first-factor")
+                        .set("Authorization", "Bearer test")
+                        .send({
+                            factorId: "otp-email",
+                            enable: true,
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.status, "RECIPE_NOT_CONFIGURED_ON_BACKEND_SDK_ERROR");
+            });
+
+            it("test enabling first factor that does not have a valid flow type", async function () {
+                await supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        appName: "SuperTokens",
+                        apiDomain: "api.supertokens.io",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [
+                        Session.init(),
+                        EmailPassword.init(),
+                        ThirdParty.init(),
+                        Passwordless.init({
+                            contactMethod: "EMAIL_OR_PHONE",
+                            flowType: "MAGIC_LINK",
+                        }),
+                    ],
+                });
+
+                await Multitenancy.createOrUpdateTenant("t1");
+
+                let res = await new Promise((resolve) =>
+                    request()
+                        .put("/auth/t1/dashboard/api/tenant/first-factor")
+                        .set("Authorization", "Bearer test")
+                        .send({
+                            factorId: "otp-email",
+                            enable: true,
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.status, "RECIPE_NOT_CONFIGURED_ON_BACKEND_SDK_ERROR");
+            });
+        });
+
+        describe("updateTenantSecondaryFactor", function () {
+            it("test enabling secondary factor", async function () {
+                await supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        appName: "SuperTokens",
+                        apiDomain: "api.supertokens.io",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [Session.init(), EmailPassword.init(), ThirdParty.init(), MultiFactorAuth.init()],
+                });
+
+                await Multitenancy.createOrUpdateTenant("t1");
+
+                let res = await new Promise((resolve) =>
+                    request()
+                        .put("/auth/t1/dashboard/api/tenant/required-secondary-factor")
+                        .set("Authorization", "Bearer test")
+                        .send({
+                            factorId: "emailpassword",
+                            enable: true,
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.status, "OK");
+
+                res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/t1/dashboard/api/tenant")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.tenant.requiredSecondaryFactors.length, 1);
+                assert.equal(res.body.tenant.requiredSecondaryFactors[0], "emailpassword");
+            });
+
+            it("test disabling secondary factor", async function () {
+                await supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        appName: "SuperTokens",
+                        apiDomain: "api.supertokens.io",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [Session.init(), EmailPassword.init(), ThirdParty.init(), MultiFactorAuth.init()],
+                });
+
+                await new Promise((resolve) =>
+                    request()
+                        .put("/auth/public/dashboard/api/tenant/required-secondary-factor")
+                        .set("Authorization", "Bearer test")
+                        .send({
+                            factorId: "emailpassword",
+                            enable: true,
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                let res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/public/dashboard/api/tenant")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.tenant.requiredSecondaryFactors.length, 1);
+                assert.equal(res.body.tenant.requiredSecondaryFactors[0], "emailpassword");
+
+                res = await new Promise((resolve) =>
+                    request()
+                        .put("/auth/public/dashboard/api/tenant/required-secondary-factor")
+                        .set("Authorization", "Bearer test")
+                        .send({
+                            factorId: "emailpassword",
+                            enable: false,
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.status, "OK");
+
+                res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/public/dashboard/api/tenant")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.tenant.requiredSecondaryFactors, undefined);
+            });
+
+            it("test enabling secondary factor that is not initialised", async function () {
+                await supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        appName: "SuperTokens",
+                        apiDomain: "api.supertokens.io",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [Session.init(), EmailPassword.init(), ThirdParty.init(), MultiFactorAuth.init()],
+                });
+
+                await Multitenancy.createOrUpdateTenant("t1");
+
+                let res = await new Promise((resolve) =>
+                    request()
+                        .put("/auth/t1/dashboard/api/tenant/required-secondary-factor")
+                        .set("Authorization", "Bearer test")
+                        .send({
+                            factorId: "otp-email",
+                            enable: true,
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.status, "RECIPE_NOT_CONFIGURED_ON_BACKEND_SDK_ERROR");
+            });
+
+            it("test enabling secondary factor that does not have a valid contact method", async function () {
+                await supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        appName: "SuperTokens",
+                        apiDomain: "api.supertokens.io",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [
+                        Session.init(),
+                        EmailPassword.init(),
+                        ThirdParty.init(),
+                        Passwordless.init({
+                            contactMethod: "PHONE",
+                            flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
+                        }),
+                        MultiFactorAuth.init(),
+                    ],
+                });
+
+                await Multitenancy.createOrUpdateTenant("t1");
+
+                let res = await new Promise((resolve) =>
+                    request()
+                        .put("/auth/t1/dashboard/api/tenant/required-secondary-factor")
+                        .set("Authorization", "Bearer test")
+                        .send({
+                            factorId: "otp-email",
+                            enable: true,
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.status, "RECIPE_NOT_CONFIGURED_ON_BACKEND_SDK_ERROR");
+            });
+
+            it("test enabling secondary factor that does not have a valid flow type", async function () {
+                await supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        appName: "SuperTokens",
+                        apiDomain: "api.supertokens.io",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [
+                        Session.init(),
+                        EmailPassword.init(),
+                        ThirdParty.init(),
+                        Passwordless.init({
+                            contactMethod: "EMAIL_OR_PHONE",
+                            flowType: "MAGIC_LINK",
+                        }),
+                        MultiFactorAuth.init(),
+                    ],
+                });
+
+                await Multitenancy.createOrUpdateTenant("t1");
+
+                let res = await new Promise((resolve) =>
+                    request()
+                        .put("/auth/t1/dashboard/api/tenant/required-secondary-factor")
+                        .set("Authorization", "Bearer test")
+                        .send({
+                            factorId: "otp-email",
+                            enable: true,
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.status, "RECIPE_NOT_CONFIGURED_ON_BACKEND_SDK_ERROR");
+            });
+        });
     });
 });
