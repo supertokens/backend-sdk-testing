@@ -865,23 +865,340 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
         });
 
         describe("getThirdPartyConfig", function () {
-        //     it("test get config from static config", async function () {});
+            it("test get config from static config", async function () {
+                await stInitWithThirdParty();
 
-        //     it("test get config from core", async function () {});
+                const res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/dashboard/api/thirdparty/config?thirdPartyId=google")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+                assert.equal(res.body.providerConfig.thirdPartyId, "google");
+                assert.equal(res.body.providerConfig.clients.length, 1);
+                assert.equal(res.body.providerConfig.clients[0].clientId, "clientid");
+            });
 
-        //     it("test get non-existing config from core", async function () {});
+            it("test get config from core", async function () {
+                await stInitWithThirdParty();
 
-        //     it("test get config when thirdParty is not initialised", async function () {});
+                await new Promise((resolve) =>
+                    request()
+                        .put("/auth/dashboard/api/thirdparty/config")
+                        .set("Authorization", "Bearer test")
+                        .send({
+                            providerConfig: {
+                                thirdPartyId: "discord",
+                                clients: [{ clientId: "clientid", clientSecret: "secret" }],
+                            },
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
 
-        //     it("test get okta config with valid oktaDomain", async function () {});
+                const res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/dashboard/api/thirdparty/config?thirdPartyId=discord")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
 
-        //     it("test get okta config with invalid oktaDomain", async function () {});
+                assert.equal(res.body.providerConfig.thirdPartyId, "discord");
+                assert.equal(res.body.providerConfig.clients.length, 1);
+                assert.equal(res.body.providerConfig.clients[0].clientId, "clientid");
+            });
 
-        //     it("test get ad config with valid directoryId", async function () {});
+            it("test get config from merged between static and core", async function () {
+                await stInitWithThirdParty();
 
-        //     it("test get ad config with invalid directoryId", async function () {});
+                await new Promise((resolve) =>
+                    request()
+                        .put("/auth/dashboard/api/thirdparty/config")
+                        .set("Authorization", "Bearer test")
+                        .send({
+                            providerConfig: {
+                                thirdPartyId: "google",
+                            },
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
 
-        //     it("test get invalid static config resolves after adding valid config in core", async function () {});
+                const res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/dashboard/api/thirdparty/config?thirdPartyId=google")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.providerConfig.thirdPartyId, "google");
+                assert.equal(res.body.providerConfig.clients.length, 1);
+                assert.equal(res.body.providerConfig.clients[0].clientId, "clientid");
+            });
+
+            it("test get non-existing config from core", async function () {
+                await stInitWithThirdParty();
+
+                const res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/dashboard/api/thirdparty/config?thirdPartyId=discord")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.providerConfig.thirdPartyId, "discord");
+                assert.equal(res.body.providerConfig.clients.length, 1);
+                assert.equal(res.body.providerConfig.clients[0].clientId, "");
+                assert.equal(res.body.providerConfig.authorizationEndpoint, "https://discord.com/oauth2/authorize")
+            });
+
+            it("test get okta config with valid oktaDomain", async function () {
+                await stInitWithThirdParty();
+
+                const res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/dashboard/api/thirdparty/config?thirdPartyId=okta&oktaDomain=https%3A%2F%2Fdev-8636097.okta.com")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.providerConfig.thirdPartyId, "okta");
+                assert.equal(res.body.providerConfig.clients.length, 1);
+                assert.equal(res.body.providerConfig.clients[0].clientId, "");
+                assert.equal(res.body.providerConfig.authorizationEndpoint, "https://dev-8636097.okta.com/oauth2/v1/authorize");
+            });
+
+            it("test get okta config with invalid oktaDomain", async function () {
+                await stInitWithThirdParty();
+
+                const res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/dashboard/api/thirdparty/config?thirdPartyId=okta&oktaDomain=https%3A%2F%2Fdev-12345.okta.com")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.providerConfig.thirdPartyId, "okta");
+                assert.equal(res.body.providerConfig.clients.length, 1);
+                assert.equal(res.body.providerConfig.clients[0].clientId, "");
+                assert.equal(res.body.providerConfig.clients[0].additionalConfig.oktaDomain, "https://dev-12345.okta.com");
+                assert.equal(res.body.providerConfig.authorizationEndpoint, undefined);
+            });
+
+            it("test get ad config with valid directoryId", async function () {
+                await stInitWithThirdParty();
+
+                const res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/dashboard/api/thirdparty/config?thirdPartyId=active-directory&directoryId=97f9a564-fcee-4b88-ae34-a1fbc4656593")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.providerConfig.thirdPartyId, "active-directory");
+                assert.equal(res.body.providerConfig.clients.length, 1);
+                assert.equal(res.body.providerConfig.clients[0].clientId, "");
+                assert.equal(res.body.providerConfig.authorizationEndpoint, "https://login.microsoftonline.com/97f9a564-fcee-4b88-ae34-a1fbc4656593/oauth2/v2.0/authorize");
+            });
+
+            it("test get ad config with invalid directoryId", async function () {
+                await stInitWithThirdParty();
+
+                const res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/dashboard/api/thirdparty/config?thirdPartyId=active-directory&directoryId=97f9a564-1234-4b88-ae34-a1fbc4656593")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.providerConfig.thirdPartyId, "active-directory");
+                assert.equal(res.body.providerConfig.clients.length, 1);
+                assert.equal(res.body.providerConfig.clients[0].clientId, "");
+                assert.equal(res.body.providerConfig.clients[0].additionalConfig.directoryId, "97f9a564-1234-4b88-ae34-a1fbc4656593");
+                assert.equal(res.body.providerConfig.authorizationEndpoint, undefined);
+            });
+
+            it("test get invalid static config resolves after adding valid config in core", async function () {
+                await supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        appName: "SuperTokens",
+                        apiDomain: "api.supertokens.io",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [
+                        Session.init(),
+                        ThirdParty.init({
+                            signInAndUpFeature: {
+                                providers: [
+                                    {
+                                        config: {
+                                            thirdPartyId: "active-directory",
+                                            clients: [
+                                                {
+                                                    clientId: "clientid",
+                                                    clientSecret: "secret",
+                                                    additionalConfig: {
+                                                        directoryId: "97f9a564-1234-4b88-ae34-a1fbc4656593", // invalid directory Id
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        })
+                    ]
+                });
+
+                let res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/dashboard/api/thirdparty/config?thirdPartyId=active-directory")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.providerConfig.thirdPartyId, "active-directory");
+                assert.equal(res.body.providerConfig.clients.length, 1);
+                assert.equal(res.body.providerConfig.clients[0].clientId, "clientid");
+                assert.equal(res.body.providerConfig.clients[0].additionalConfig.directoryId, "97f9a564-1234-4b88-ae34-a1fbc4656593");
+                assert.equal(res.body.providerConfig.authorizationEndpoint, undefined);
+
+                await new Promise((resolve) =>
+                    request()
+                        .put("/auth/dashboard/api/thirdparty/config")
+                        .set("Authorization", "Bearer test")
+                        .send({
+                            providerConfig: {
+                                thirdPartyId: "active-directory",
+                                clients: [
+                                    {
+                                        clientId: "clientid",
+                                        clientSecret: "secret",
+                                        additionalConfig: {
+                                            directoryId: "97f9a564-fcee-4b88-ae34-a1fbc4656593", // valid directory Id
+                                        }
+                                    }
+                                ]
+                            },
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/dashboard/api/thirdparty/config?thirdPartyId=active-directory")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.providerConfig.thirdPartyId, "active-directory");
+                assert.equal(res.body.providerConfig.clients.length, 1);
+                assert.equal(res.body.providerConfig.clients[0].clientId, "clientid");
+                assert.equal(res.body.providerConfig.clients[0].additionalConfig.directoryId, "97f9a564-fcee-4b88-ae34-a1fbc4656593");
+                assert.equal(res.body.providerConfig.authorizationEndpoint, "https://login.microsoftonline.com/97f9a564-fcee-4b88-ae34-a1fbc4656593/oauth2/v2.0/authorize");
+            });
         });
 
         // describe("listAllTenants", function () {
