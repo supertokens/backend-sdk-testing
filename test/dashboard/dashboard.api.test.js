@@ -77,7 +77,6 @@ async function stInitWithoutThirdParty() {
 }
 
 describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}`, function () {
-
     beforeEach(async function () {
         await killAllST();
         await setupST();
@@ -320,7 +319,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                             Session.init(),
                         ],
                     });
-    
+
                     await new Promise((resolve) =>
                         request()
                             .put("/auth/dashboard/api/thirdparty/config")
@@ -340,7 +339,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                                 }
                             })
                     );
-    
+
                     let res = await new Promise((resolve) =>
                         request()
                             .put("/auth/dashboard/api/thirdparty/config")
@@ -362,7 +361,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                     );
                     assert(res !== undefined);
                     assert.equal(res.body.createdNew, false);
-    
+
                     let thirdPartyProvider = await ThirdParty.getProvider("public", "google");
                     assert.equal(thirdPartyProvider.config.thirdPartyId, "google");
                     assert.equal(thirdPartyProvider.config.clientId, "clientid");
@@ -404,7 +403,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                     assert.equal(res.body.didConfigExist, false);
                 });
 
-                it("test delete config from static adds rest to the core", async function() {
+                it("test delete config from static adds rest to the core", async function () {
                     await stInitWithThirdParty();
 
                     let res = await new Promise((resolve) =>
@@ -424,7 +423,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                     );
                     assert(res !== undefined);
                     assert.equal(res.body.didConfigExist, true);
-    
+
                     let thirdPartyProvider = await ThirdParty.getProvider("public", "google");
                     assert.equal(thirdPartyProvider.config, undefined);
                 });
@@ -452,7 +451,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                         ],
                     });
                     await Multitenancy.createOrUpdateTenant("t1");
-    
+
                     await new Promise((resolve) =>
                         request()
                             .put("/auth/t1/dashboard/api/thirdparty/config")
@@ -472,7 +471,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                                 }
                             })
                     );
-    
+
                     let res = await new Promise((resolve) =>
                         request()
                             .put("/auth/t1/dashboard/api/thirdparty/config")
@@ -494,7 +493,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                     );
                     assert(res !== undefined);
                     assert.equal(res.body.createdNew, false);
-    
+
                     let thirdPartyProvider = await ThirdParty.getProvider("t1", "google");
                     assert.equal(thirdPartyProvider.config.thirdPartyId, "google");
                     assert.equal(thirdPartyProvider.config.clientId, "clientid");
@@ -536,7 +535,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                     assert.equal(res.body.didConfigExist, false);
                 });
 
-                it("test delete config from static adds rest to the core", async function() {
+                it("test delete config from static adds rest to the core", async function () {
                     await stInitWithThirdParty(true);
                     await Multitenancy.createOrUpdateTenant("t1");
 
@@ -557,7 +556,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                     );
                     assert(res !== undefined);
                     assert.equal(res.body.didConfigExist, true);
-    
+
                     let thirdPartyProvider = await ThirdParty.getProvider("t1", "google");
                     assert.equal(thirdPartyProvider.config, undefined);
                 });
@@ -790,9 +789,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                     );
                     assert.equal(res.body.status, "OK");
                     assert.equal(res.body.tenant.tenantId, "public");
-                    assert.deepEqual(res.body.tenant.firstFactors, [
-                        "emailpassword",
-                    ]);
+                    assert.deepEqual(res.body.tenant.firstFactors, ["emailpassword"]);
                 });
 
                 it("test with only passwordless initialised with only one factor", async function () {
@@ -805,10 +802,13 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                             apiDomain: "api.supertokens.io",
                             websiteDomain: "supertokens.io",
                         },
-                        recipeList: [Passwordless.init({
-                            flowType: "USER_INPUT_CODE",
-                            contactMethod: "EMAIL",
-                        }), Session.init()],
+                        recipeList: [
+                            Passwordless.init({
+                                flowType: "USER_INPUT_CODE",
+                                contactMethod: "EMAIL",
+                            }),
+                            Session.init(),
+                        ],
                     });
 
                     let res = await new Promise((resolve) =>
@@ -827,9 +827,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                     );
                     assert.equal(res.body.status, "OK");
                     assert.equal(res.body.tenant.tenantId, "public");
-                    assert.deepEqual(res.body.tenant.firstFactors, [
-                        "otp-email",
-                    ]);
+                    assert.deepEqual(res.body.tenant.firstFactors, ["otp-email"]);
                 });
             });
 
@@ -993,7 +991,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                 assert.equal(res.body.providerConfig.thirdPartyId, "discord");
                 assert.equal(res.body.providerConfig.clients.length, 1);
                 assert.equal(res.body.providerConfig.clients[0].clientId, "");
-                assert.equal(res.body.providerConfig.authorizationEndpoint, "https://discord.com/oauth2/authorize")
+                assert.equal(res.body.providerConfig.authorizationEndpoint, "https://discord.com/oauth2/authorize");
             });
 
             it("test get okta config with valid oktaDomain", async function () {
@@ -1001,7 +999,9 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
 
                 const res = await new Promise((resolve) =>
                     request()
-                        .get("/auth/dashboard/api/thirdparty/config?thirdPartyId=okta&oktaDomain=https%3A%2F%2Fdev-8636097.okta.com")
+                        .get(
+                            "/auth/dashboard/api/thirdparty/config?thirdPartyId=okta&oktaDomain=https%3A%2F%2Fdev-8636097.okta.com"
+                        )
                         .set("Authorization", "Bearer test")
                         .send()
                         .expect(200)
@@ -1017,7 +1017,10 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                 assert.equal(res.body.providerConfig.thirdPartyId, "okta");
                 assert.equal(res.body.providerConfig.clients.length, 1);
                 assert.equal(res.body.providerConfig.clients[0].clientId, "");
-                assert.equal(res.body.providerConfig.authorizationEndpoint, "https://dev-8636097.okta.com/oauth2/v1/authorize");
+                assert.equal(
+                    res.body.providerConfig.authorizationEndpoint,
+                    "https://dev-8636097.okta.com/oauth2/v1/authorize"
+                );
             });
 
             it("test get okta config with invalid oktaDomain", async function () {
@@ -1025,7 +1028,9 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
 
                 const res = await new Promise((resolve) =>
                     request()
-                        .get("/auth/dashboard/api/thirdparty/config?thirdPartyId=okta&oktaDomain=https%3A%2F%2Fdev-12345.okta.com")
+                        .get(
+                            "/auth/dashboard/api/thirdparty/config?thirdPartyId=okta&oktaDomain=https%3A%2F%2Fdev-12345.okta.com"
+                        )
                         .set("Authorization", "Bearer test")
                         .send()
                         .expect(200)
@@ -1041,7 +1046,10 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                 assert.equal(res.body.providerConfig.thirdPartyId, "okta");
                 assert.equal(res.body.providerConfig.clients.length, 1);
                 assert.equal(res.body.providerConfig.clients[0].clientId, "");
-                assert.equal(res.body.providerConfig.clients[0].additionalConfig.oktaDomain, "https://dev-12345.okta.com");
+                assert.equal(
+                    res.body.providerConfig.clients[0].additionalConfig.oktaDomain,
+                    "https://dev-12345.okta.com"
+                );
                 assert.equal(res.body.providerConfig.authorizationEndpoint, undefined);
             });
 
@@ -1050,7 +1058,9 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
 
                 const res = await new Promise((resolve) =>
                     request()
-                        .get("/auth/dashboard/api/thirdparty/config?thirdPartyId=active-directory&directoryId=97f9a564-fcee-4b88-ae34-a1fbc4656593")
+                        .get(
+                            "/auth/dashboard/api/thirdparty/config?thirdPartyId=active-directory&directoryId=97f9a564-fcee-4b88-ae34-a1fbc4656593"
+                        )
                         .set("Authorization", "Bearer test")
                         .send()
                         .expect(200)
@@ -1066,7 +1076,10 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                 assert.equal(res.body.providerConfig.thirdPartyId, "active-directory");
                 assert.equal(res.body.providerConfig.clients.length, 1);
                 assert.equal(res.body.providerConfig.clients[0].clientId, "");
-                assert.equal(res.body.providerConfig.authorizationEndpoint, "https://login.microsoftonline.com/97f9a564-fcee-4b88-ae34-a1fbc4656593/oauth2/v2.0/authorize");
+                assert.equal(
+                    res.body.providerConfig.authorizationEndpoint,
+                    "https://login.microsoftonline.com/97f9a564-fcee-4b88-ae34-a1fbc4656593/oauth2/v2.0/authorize"
+                );
             });
 
             it("test get ad config with invalid directoryId", async function () {
@@ -1074,7 +1087,9 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
 
                 const res = await new Promise((resolve) =>
                     request()
-                        .get("/auth/dashboard/api/thirdparty/config?thirdPartyId=active-directory&directoryId=97f9a564-1234-4b88-ae34-a1fbc4656593")
+                        .get(
+                            "/auth/dashboard/api/thirdparty/config?thirdPartyId=active-directory&directoryId=97f9a564-1234-4b88-ae34-a1fbc4656593"
+                        )
                         .set("Authorization", "Bearer test")
                         .send()
                         .expect(200)
@@ -1090,7 +1105,10 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                 assert.equal(res.body.providerConfig.thirdPartyId, "active-directory");
                 assert.equal(res.body.providerConfig.clients.length, 1);
                 assert.equal(res.body.providerConfig.clients[0].clientId, "");
-                assert.equal(res.body.providerConfig.clients[0].additionalConfig.directoryId, "97f9a564-1234-4b88-ae34-a1fbc4656593");
+                assert.equal(
+                    res.body.providerConfig.clients[0].additionalConfig.directoryId,
+                    "97f9a564-1234-4b88-ae34-a1fbc4656593"
+                );
                 assert.equal(res.body.providerConfig.authorizationEndpoint, undefined);
             });
 
@@ -1118,15 +1136,15 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                                                     clientSecret: "secret",
                                                     additionalConfig: {
                                                         directoryId: "97f9a564-1234-4b88-ae34-a1fbc4656593", // invalid directory Id
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    }
-                                ]
-                            }
-                        })
-                    ]
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    },
+                                ],
+                            },
+                        }),
+                    ],
                 });
 
                 let res = await new Promise((resolve) =>
@@ -1147,7 +1165,10 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                 assert.equal(res.body.providerConfig.thirdPartyId, "active-directory");
                 assert.equal(res.body.providerConfig.clients.length, 1);
                 assert.equal(res.body.providerConfig.clients[0].clientId, "clientid");
-                assert.equal(res.body.providerConfig.clients[0].additionalConfig.directoryId, "97f9a564-1234-4b88-ae34-a1fbc4656593");
+                assert.equal(
+                    res.body.providerConfig.clients[0].additionalConfig.directoryId,
+                    "97f9a564-1234-4b88-ae34-a1fbc4656593"
+                );
                 assert.equal(res.body.providerConfig.authorizationEndpoint, undefined);
 
                 await new Promise((resolve) =>
@@ -1163,9 +1184,9 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                                         clientSecret: "secret",
                                         additionalConfig: {
                                             directoryId: "97f9a564-fcee-4b88-ae34-a1fbc4656593", // valid directory Id
-                                        }
-                                    }
-                                ]
+                                        },
+                                    },
+                                ],
                             },
                         })
                         .expect(200)
@@ -1196,26 +1217,335 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                 assert.equal(res.body.providerConfig.thirdPartyId, "active-directory");
                 assert.equal(res.body.providerConfig.clients.length, 1);
                 assert.equal(res.body.providerConfig.clients[0].clientId, "clientid");
-                assert.equal(res.body.providerConfig.clients[0].additionalConfig.directoryId, "97f9a564-fcee-4b88-ae34-a1fbc4656593");
-                assert.equal(res.body.providerConfig.authorizationEndpoint, "https://login.microsoftonline.com/97f9a564-fcee-4b88-ae34-a1fbc4656593/oauth2/v2.0/authorize");
+                assert.equal(
+                    res.body.providerConfig.clients[0].additionalConfig.directoryId,
+                    "97f9a564-fcee-4b88-ae34-a1fbc4656593"
+                );
+                assert.equal(
+                    res.body.providerConfig.authorizationEndpoint,
+                    "https://login.microsoftonline.com/97f9a564-fcee-4b88-ae34-a1fbc4656593/oauth2/v2.0/authorize"
+                );
             });
         });
 
-        // describe("listAllTenants", function () {
-        //     it("test list all tenants with login methods", async function () {});
+        describe("listAllTenants", function () {
+            it("test list all tenants with login methods", async function () {
+                await supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        appName: "SuperTokens",
+                        apiDomain: "api.supertokens.io",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [
+                        EmailPassword.init(),
+                        ThirdParty.init(),
+                        Passwordless.init({
+                            flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
+                            contactMethod: "EMAIL_OR_PHONE",
+                        }),
+                        Session.init(),
+                    ],
+                });
 
-        //     it("test login methods based on SDK init", async function () {});
+                await Multitenancy.createOrUpdateTenant("t1", {
+                    firstFactors: null,
+                });
+                await Multitenancy.createOrUpdateTenant("t2", {
+                    firstFactors: [],
+                });
+                await Multitenancy.createOrUpdateTenant("t3", {
+                    firstFactors: ["emailpassword"],
+                });
+                await Multitenancy.createOrUpdateTenant("t4", {
+                    firstFactors: ["otp-email", "link-phone"],
+                });
+                await Multitenancy.createOrUpdateTenant("t5", {
+                    firstFactors: ["thirdparty", "emailpassword"],
+                });
 
-        //     it("test login methods based on core config", async function () {});
-        // });
+                let res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/dashboard/api/tenants")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+                assert.equal(res.body.status, "OK");
+                assert.equal(res.body.tenants.length, 6);
+                for (const tenant of res.body.tenants) {
+                    if (tenant.tenantId === "public") {
+                        assert.deepEqual(tenant.firstFactors, [
+                            "emailpassword",
+                            "thirdparty",
+                            "otp-email",
+                            "otp-phone",
+                            "link-email",
+                            "link-phone",
+                        ]);
+                    } else if (tenant.tenantId === "t1") {
+                        assert.deepEqual(tenant.firstFactors, [
+                            "emailpassword",
+                            "thirdparty",
+                            "otp-email",
+                            "otp-phone",
+                            "link-email",
+                            "link-phone",
+                        ]);
+                    } else if (tenant.tenantId === "t2") {
+                        assert.deepEqual(tenant.firstFactors, []);
+                    } else if (tenant.tenantId === "t3") {
+                        assert.deepEqual(tenant.firstFactors, ["emailpassword"]);
+                    } else if (tenant.tenantId === "t4") {
+                        assert.deepEqual(tenant.firstFactors, ["otp-email", "link-phone"]);
+                    } else if (tenant.tenantId === "t5") {
+                        assert.deepEqual(tenant.firstFactors, ["emailpassword", "thirdparty"]);
+                    } else {
+                        assert.fail("Unknown tenant");
+                    }
+                }
+            });
 
-        // describe("updateTenantCoreConfig", function () {
-        //     it("test update core config with valid config", async function () {});
+            it("test login methods based on SDK init", async function () {
+                await supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        appName: "SuperTokens",
+                        apiDomain: "api.supertokens.io",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [
+                        EmailPassword.init(),
+                        Passwordless.init({
+                            flowType: "USER_INPUT_CODE",
+                            contactMethod: "EMAIL",
+                        }),
+                        Session.init(),
+                    ],
+                });
 
-        //     it("test update core config with invalid config", async function () {});
+                await Multitenancy.createOrUpdateTenant("t1", {
+                    firstFactors: null,
+                });
+                await Multitenancy.createOrUpdateTenant("t2", {
+                    firstFactors: [],
+                });
+                await Multitenancy.createOrUpdateTenant("t3", {
+                    firstFactors: ["emailpassword"],
+                });
+                await Multitenancy.createOrUpdateTenant("t4", {
+                    firstFactors: ["otp-email", "link-phone"],
+                });
+                await Multitenancy.createOrUpdateTenant("t5", {
+                    firstFactors: ["thirdparty", "emailpassword"],
+                });
 
-        //     it("test update public tenant core config", async function () {});
-        // });
+                let res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/dashboard/api/tenants")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+                assert.equal(res.body.status, "OK");
+                assert.equal(res.body.tenants.length, 6);
+                for (const tenant of res.body.tenants) {
+                    if (tenant.tenantId === "public") {
+                        assert.deepEqual(tenant.firstFactors, ["emailpassword", "otp-email"]);
+                    } else if (tenant.tenantId === "t1") {
+                        assert.deepEqual(tenant.firstFactors, ["emailpassword", "otp-email"]);
+                    } else if (tenant.tenantId === "t2") {
+                        assert.deepEqual(tenant.firstFactors, []);
+                    } else if (tenant.tenantId === "t3") {
+                        assert.deepEqual(tenant.firstFactors, ["emailpassword"]);
+                    } else if (tenant.tenantId === "t4") {
+                        assert.deepEqual(tenant.firstFactors, ["otp-email"]);
+                    } else if (tenant.tenantId === "t5") {
+                        assert.deepEqual(tenant.firstFactors, ["emailpassword"]);
+                    } else {
+                        assert.fail("Unknown tenant");
+                    }
+                }
+            });
+        });
+
+        describe("updateTenantCoreConfig", function () {
+            it("test update core config with valid config", async function () {
+                await supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        appName: "SuperTokens",
+                        apiDomain: "api.supertokens.io",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [Session.init(), EmailPassword.init(), ThirdParty.init()],
+                });
+
+                await Multitenancy.createOrUpdateTenant("t1", { firstFactors: null });
+
+                let res = await new Promise((resolve) =>
+                    request()
+                        .put("/auth/t1/dashboard/api/tenant/core-config")
+                        .set("Authorization", "Bearer test")
+                        .send({
+                            name: "email_verification_token_lifetime",
+                            value: 17200000,
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.status, "OK");
+
+                res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/t1/dashboard/api/tenant")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                let found = false;
+                for (const config of res.body.tenant.coreConfig) {
+                    if (config.key === "email_verification_token_lifetime") {
+                        assert.equal(config.value, 17200000);
+                        found = true;
+                        break;
+                    }
+                }
+                assert(found, "email_verification_token_lifetime not found");
+            });
+
+            it("test update core config with invalid config", async function () {
+                await supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        appName: "SuperTokens",
+                        apiDomain: "api.supertokens.io",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [Session.init(), EmailPassword.init(), ThirdParty.init()],
+                });
+
+                await Multitenancy.createOrUpdateTenant("t1", { firstFactors: null });
+
+                let res = await new Promise((resolve) =>
+                    request()
+                        .put("/auth/t1/dashboard/api/tenant/core-config")
+                        .set("Authorization", "Bearer test")
+                        .send({
+                            name: "email_verification_token_lifetime",
+                            value: true,
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.status, "INVALID_CONFIG_ERROR");
+
+                res = await new Promise((resolve) =>
+                    request()
+                        .get("/auth/t1/dashboard/api/tenant")
+                        .set("Authorization", "Bearer test")
+                        .send()
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                let found = false;
+                for (const config of res.body.tenant.coreConfig) {
+                    if (config.key === "email_verification_token_lifetime") {
+                        assert.equal(config.value, config.defaultValue);
+                        found = true;
+                        break;
+                    }
+                }
+                assert(found, "email_verification_token_lifetime not found");
+            });
+
+            it("test update public tenant core config", async function () {
+                await supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        appName: "SuperTokens",
+                        apiDomain: "api.supertokens.io",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [Session.init(), EmailPassword.init(), ThirdParty.init()],
+                });
+
+                await Multitenancy.createOrUpdateTenant("t1", { firstFactors: null });
+
+                let res = await new Promise((resolve) =>
+                    request()
+                        .put("/auth/public/dashboard/api/tenant/core-config")
+                        .set("Authorization", "Bearer test")
+                        .send({
+                            name: "email_verification_token_lifetime",
+                            value: 17200000,
+                        })
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) {
+                                resolve(undefined);
+                            } else {
+                                resolve(res);
+                            }
+                        })
+                );
+
+                assert.equal(res.body.status, "INVALID_CONFIG_ERROR");
+            });
+        });
 
         // describe("updateTenantFirstFactor", function () {
         //     it("test enabling first factor", async function () {});
