@@ -608,12 +608,14 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
     });
 
     describe("Logout", () => {
-        it("should simulate a successful OAuth2 logout flow", async function () {
-            const connectionURI = await startST();
+        let connectionURI, apiDomain, websiteDomain, scope, redirectUri, client, state, tokenResp, session;
 
-            const apiDomain = `http://localhost:${API_PORT}`;
-            const websiteDomain = "http://supertokens.io";
-            const scope = "profile openid";
+        beforeEach(async function () {
+            connectionURI = await startST();
+
+            apiDomain = `http://localhost:${API_PORT}`;
+            websiteDomain = "http://supertokens.io";
+            scope = "profile openid";
 
             SuperTokens.init({
                 supertokens: {
@@ -627,9 +629,9 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init({ antiCsrf: "NONE" })],
             });
 
-            const redirectUri = "http://localhost:4000/redirect-url";
-            const postLogoutRedirectUri = "http://localhost:4000/post-logout-redirect-url";
-            const { client } = await OAuth2Provider.createOAuth2Client(
+            redirectUri = "http://localhost:4000/redirect-url";
+            postLogoutRedirectUri = "http://localhost:4000/post-logout-redirect-url";
+            const createClientResponse = await OAuth2Provider.createOAuth2Client(
                 {
                     redirectUris: [redirectUri],
                     scope,
@@ -641,8 +643,9 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 },
                 {}
             );
+            client = createClientResponse.client;
 
-            const state = Buffer.from("some-random-string").toString("base64");
+            state = Buffer.from("some-random-string").toString("base64");
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
@@ -652,7 +655,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 scope,
             });
 
-            const { authorizationCode, session } = await testOAuthFlowAndGetAuthCode({
+            const oauthFlowResponse = await testOAuthFlowAndGetAuthCode({
                 apiDomain,
                 websiteDomain,
                 authorisationUrl,
@@ -662,27 +665,31 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 state,
             });
 
+            session = oauthFlowResponse.session;
+
             const res = await fetch(`${apiDomain}/auth/oauth/token`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    code: authorizationCode,
+                    code: oauthFlowResponse.authorizationCode,
                     client_id: client.clientId,
                     client_secret: client.clientSecret,
                     grant_type: "authorization_code",
                     redirect_uri: redirectUri,
                 }),
             });
-            const tokenResp = await res.json();
+            tokenResp = await res.json();
 
             assert.strictEqual(res.status, 200);
             assert(tokenResp.access_token !== undefined);
             assert(tokenResp.id_token !== undefined);
             assert.strictEqual(tokenResp.token_type, "bearer");
             assert.strictEqual(tokenResp.scope, scope);
+        });
 
+        it("should simulate a successful OAuth2 logout flow", async function () {
             const endSessionEndpoint = createEndSessionUrl({
                 apiDomain,
                 idToken: tokenResp.id_token,
@@ -731,80 +738,6 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         });
 
         it("should simulate a successful OAuth2 logout flow (POST request to end_session_endpoint)", async function () {
-            const connectionURI = await startST();
-
-            const apiDomain = `http://localhost:${API_PORT}`;
-            const websiteDomain = "http://supertokens.io";
-            const scope = "profile openid";
-
-            SuperTokens.init({
-                supertokens: {
-                    connectionURI,
-                },
-                appInfo: {
-                    apiDomain,
-                    appName: "SuperTokens",
-                    websiteDomain,
-                },
-                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init({ antiCsrf: "NONE" })],
-            });
-
-            const redirectUri = "http://localhost:4000/redirect-url";
-            const postLogoutRedirectUri = "http://localhost:4000/post-logout-redirect-url";
-            const { client } = await OAuth2Provider.createOAuth2Client(
-                {
-                    redirectUris: [redirectUri],
-                    scope,
-                    skipConsent: true,
-                    grantTypes: ["authorization_code", "refresh_token"],
-                    responseTypes: ["code", "id_token"],
-                    tokenEndpointAuthMethod: "client_secret_post",
-                    postLogoutRedirectUris: [postLogoutRedirectUri],
-                },
-                {}
-            );
-
-            const state = Buffer.from("some-random-string").toString("base64");
-
-            const authorisationUrl = createAuthorizationUrl({
-                apiDomain,
-                clientId: client.clientId,
-                redirectUri,
-                state,
-                scope,
-            });
-
-            const { authorizationCode, session } = await testOAuthFlowAndGetAuthCode({
-                apiDomain,
-                websiteDomain,
-                authorisationUrl,
-                clientId: client.clientId,
-                redirectUri,
-                scope,
-                state,
-            });
-
-            const res = await fetch(`${apiDomain}/auth/oauth/token`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    code: authorizationCode,
-                    client_id: client.clientId,
-                    client_secret: client.clientSecret,
-                    grant_type: "authorization_code",
-                    redirect_uri: redirectUri,
-                }),
-            });
-            const tokenResp = await res.json();
-
-            assert.strictEqual(res.status, 200);
-            assert(tokenResp.access_token !== undefined);
-            assert(tokenResp.id_token !== undefined);
-            assert.strictEqual(tokenResp.token_type, "bearer");
-            assert.strictEqual(tokenResp.scope, scope);
-
             let logoutRes = await fetch(`${apiDomain}/auth/oauth/end_session`, {
                 method: "POST",
                 redirect: "manual",
@@ -853,80 +786,6 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         });
 
         it("should redirect to post_redirect_logout_uri directly if there is no supertokens session", async function () {
-            const connectionURI = await startST();
-
-            const apiDomain = `http://localhost:${API_PORT}`;
-            const websiteDomain = "http://supertokens.io";
-            const scope = "profile openid";
-
-            SuperTokens.init({
-                supertokens: {
-                    connectionURI,
-                },
-                appInfo: {
-                    apiDomain,
-                    appName: "SuperTokens",
-                    websiteDomain,
-                },
-                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init({ antiCsrf: "NONE" })],
-            });
-
-            const redirectUri = "http://localhost:4000/redirect-url";
-            const postLogoutRedirectUri = "http://localhost:4000/post-logout-redirect-url";
-            const { client } = await OAuth2Provider.createOAuth2Client(
-                {
-                    redirectUris: [redirectUri],
-                    scope,
-                    skipConsent: true,
-                    grantTypes: ["authorization_code", "refresh_token"],
-                    responseTypes: ["code", "id_token"],
-                    tokenEndpointAuthMethod: "client_secret_post",
-                    postLogoutRedirectUris: [postLogoutRedirectUri],
-                },
-                {}
-            );
-
-            const state = Buffer.from("some-random-string").toString("base64");
-
-            const authorisationUrl = createAuthorizationUrl({
-                apiDomain,
-                clientId: client.clientId,
-                redirectUri,
-                state,
-                scope,
-            });
-
-            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({
-                apiDomain,
-                websiteDomain,
-                authorisationUrl,
-                clientId: client.clientId,
-                redirectUri,
-                scope,
-                state,
-            });
-
-            const res = await fetch(`${apiDomain}/auth/oauth/token`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    code: authorizationCode,
-                    client_id: client.clientId,
-                    client_secret: client.clientSecret,
-                    grant_type: "authorization_code",
-                    redirect_uri: redirectUri,
-                }),
-            });
-            const tokenResp = await res.json();
-
-            assert.strictEqual(res.status, 200);
-            assert(tokenResp.access_token !== undefined);
-            assert(tokenResp.id_token !== undefined);
-            assert.strictEqual(tokenResp.token_type, "bearer");
-            assert.strictEqual(tokenResp.scope, scope);
-
             const endSessionEndpoint = createEndSessionUrl({
                 apiDomain,
                 idToken: tokenResp.id_token,
@@ -945,78 +804,6 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         });
 
         it("should redirect to /auth page if no post_redirect_logout_uri is provided", async function () {
-            const connectionURI = await startST();
-
-            const apiDomain = `http://localhost:${API_PORT}`;
-            const websiteDomain = "http://supertokens.io";
-            const scope = "profile openid";
-
-            SuperTokens.init({
-                supertokens: {
-                    connectionURI,
-                },
-                appInfo: {
-                    apiDomain,
-                    appName: "SuperTokens",
-                    websiteDomain,
-                },
-                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init({ antiCsrf: "NONE" })],
-            });
-
-            const redirectUri = "http://localhost:4000/redirect-url";
-            const { client } = await OAuth2Provider.createOAuth2Client(
-                {
-                    redirectUris: [redirectUri],
-                    scope,
-                    skipConsent: true,
-                    grantTypes: ["authorization_code", "refresh_token"],
-                    responseTypes: ["code", "id_token"],
-                    tokenEndpointAuthMethod: "client_secret_post",
-                },
-                {}
-            );
-
-            const state = Buffer.from("some-random-string").toString("base64");
-
-            const authorisationUrl = createAuthorizationUrl({
-                apiDomain,
-                clientId: client.clientId,
-                redirectUri,
-                state,
-                scope,
-            });
-
-            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({
-                apiDomain,
-                websiteDomain,
-                authorisationUrl,
-                clientId: client.clientId,
-                redirectUri,
-                scope,
-                state,
-            });
-
-            const res = await fetch(`${apiDomain}/auth/oauth/token`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    code: authorizationCode,
-                    client_id: client.clientId,
-                    client_secret: client.clientSecret,
-                    grant_type: "authorization_code",
-                    redirect_uri: redirectUri,
-                }),
-            });
-            const tokenResp = await res.json();
-
-            assert.strictEqual(res.status, 200);
-            assert(tokenResp.access_token !== undefined);
-            assert(tokenResp.id_token !== undefined);
-            assert.strictEqual(tokenResp.token_type, "bearer");
-            assert.strictEqual(tokenResp.scope, scope);
-
             const endSessionEndpoint = createEndSessionUrl({
                 apiDomain,
                 idToken: tokenResp.id_token,
@@ -1034,83 +821,10 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         });
 
         it("should error out if post_redirect_logout_uri is not included in client.post_logout_redirect_uris", async function () {
-            const connectionURI = await startST();
-
-            const apiDomain = `http://localhost:${API_PORT}`;
-            const websiteDomain = "http://supertokens.io";
-            const scope = "profile openid";
-
-            SuperTokens.init({
-                supertokens: {
-                    connectionURI,
-                },
-                appInfo: {
-                    apiDomain,
-                    appName: "SuperTokens",
-                    websiteDomain,
-                },
-                recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init({ antiCsrf: "NONE" })],
-            });
-
-            const redirectUri = "http://localhost:4000/redirect-url";
-            const postLogoutRedirectUri = "http://localhost:4000/post-logout-redirect-url";
-            const { client } = await OAuth2Provider.createOAuth2Client(
-                {
-                    redirectUris: [redirectUri],
-                    scope,
-                    skipConsent: true,
-                    grantTypes: ["authorization_code", "refresh_token"],
-                    responseTypes: ["code", "id_token"],
-                    tokenEndpointAuthMethod: "client_secret_post",
-                },
-                {}
-            );
-
-            const state = Buffer.from("some-random-string").toString("base64");
-
-            const authorisationUrl = createAuthorizationUrl({
-                apiDomain,
-                clientId: client.clientId,
-                redirectUri,
-                state,
-                scope,
-            });
-
-            const { authorizationCode } = await testOAuthFlowAndGetAuthCode({
-                apiDomain,
-                websiteDomain,
-                authorisationUrl,
-                clientId: client.clientId,
-                redirectUri,
-                scope,
-                state,
-            });
-
-            const res = await fetch(`${apiDomain}/auth/oauth/token`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    code: authorizationCode,
-                    client_id: client.clientId,
-                    client_secret: client.clientSecret,
-                    grant_type: "authorization_code",
-                    redirect_uri: redirectUri,
-                }),
-            });
-            const tokenResp = await res.json();
-
-            assert.strictEqual(res.status, 200);
-            assert(tokenResp.access_token !== undefined);
-            assert(tokenResp.id_token !== undefined);
-            assert.strictEqual(tokenResp.token_type, "bearer");
-            assert.strictEqual(tokenResp.scope, scope);
-
             const endSessionEndpoint = createEndSessionUrl({
                 apiDomain,
                 idToken: tokenResp.id_token,
-                postLogoutRedirectUri,
+                postLogoutRedirectUri: "http://localhost:4000/invalid-redirect-uri",
                 state,
             });
 
@@ -1131,79 +845,6 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         // TODO: Uncomment after this is implemented in core
 
         // it("should throw an error if client_id is different from the one used to issue the id_token", async function () {
-        //     const connectionURI = await startST();
-
-        //     const apiDomain = `http://localhost:${API_PORT}`;
-        //     const websiteDomain = "http://supertokens.io";
-        //     const scope = "profile openid";
-
-        //     SuperTokens.init({
-        //         supertokens: {
-        //             connectionURI,
-        //         },
-        //         appInfo: {
-        //             apiDomain,
-        //             appName: "SuperTokens",
-        //             websiteDomain,
-        //         },
-        //         recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init({ antiCsrf: "NONE" })],
-        //     });
-
-        //     const redirectUri = "http://localhost:4000/redirect-url";
-        //     const postLogoutRedirectUri = "http://localhost:4000/post-logout-redirect-url";
-        //     const { client } = await OAuth2Provider.createOAuth2Client(
-        //         {
-        //             redirectUris: [redirectUri],
-        //             scope,
-        //             skipConsent: true,
-        //             grantTypes: ["authorization_code", "refresh_token"],
-        //             responseTypes: ["code", "id_token"],
-        //             tokenEndpointAuthMethod: "client_secret_post",
-        //         },
-        //         {}
-        //     );
-
-        //     const state = Buffer.from("some-random-string").toString("base64");
-
-        //     const authorisationUrl = createAuthorizationUrl({
-        //         apiDomain,
-        //         clientId: client.clientId,
-        //         redirectUri,
-        //         state,
-        //         scope,
-        //     });
-
-        //     const { authorizationCode } = await testOAuthFlowAndGetAuthCode({
-        //         apiDomain,
-        //         websiteDomain,
-        //         authorisationUrl,
-        //         clientId: client.clientId,
-        //         redirectUri,
-        //         scope,
-        //         state,
-        //     });
-
-        //     const res = await fetch(`${apiDomain}/auth/oauth/token`, {
-        //         method: "POST",
-        //         headers: {
-        //             "Content-Type": "application/json",
-        //         },
-        //         body: JSON.stringify({
-        //             code: authorizationCode,
-        //             client_id: client.clientId,
-        //             client_secret: client.clientSecret,
-        //             grant_type: "authorization_code",
-        //             redirect_uri: redirectUri,
-        //         }),
-        //     });
-        //     const tokenResp = await res.json();
-
-        //     assert.strictEqual(res.status, 200);
-        //     assert(tokenResp.access_token !== undefined);
-        //     assert(tokenResp.id_token !== undefined);
-        //     assert.strictEqual(tokenResp.token_type, "bearer");
-        //     assert.strictEqual(tokenResp.scope, scope);
-
         //     const endSessionEndpoint = createEndSessionUrl({
         //         apiDomain,
         //         idToken: tokenResp.id_token,
