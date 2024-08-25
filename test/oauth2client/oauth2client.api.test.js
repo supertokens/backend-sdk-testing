@@ -103,7 +103,7 @@ describe(`OAuth2Client-API: ${printPath("[test/oauth2client/oauth2client.api.tes
             ],
         });
 
-        const state = new Buffer.from("some-random-string", "base64").toString();
+        const state = Buffer.from("some-random-string").toString("base64");
 
         const authorisationUrl = createAuthorizationUrl({
             apiDomain,

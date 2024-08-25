@@ -191,3 +191,20 @@ exports.validateIdToken = async function (token, requirements) {
 
     return { status: "OK", payload: payload };
 };
+
+exports.createEndSessionUrl = function ({ apiDomain, idToken, postLogoutRedirectUri, clientId, state }) {
+    const endSessionEndpoint = new URL(`${apiDomain}/auth/oauth/end_session`);
+    if (idToken !== undefined) {
+        endSessionEndpoint.searchParams.set("id_token_hint", idToken);
+    }
+    if (clientId !== undefined) {
+        endSessionEndpoint.searchParams.set("client_id", clientId);
+    }
+    if (postLogoutRedirectUri !== undefined) {
+        endSessionEndpoint.searchParams.set("post_logout_redirect_uri", postLogoutRedirectUri);
+    }
+    if (state !== undefined) {
+        endSessionEndpoint.searchParams.set("state", state);
+    }
+    return endSessionEndpoint.toString();
+};
