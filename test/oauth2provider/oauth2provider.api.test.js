@@ -528,12 +528,12 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         );
     });
 
-    it("should simulate a successful OAuth2 login flow (id_token only implicit flow)", async function () {
+    it("should simulate a successful OAuth2 login flow (id_token implicit flow)", async function () {
         const connectionURI = await startST();
 
         const apiDomain = `http://localhost:${API_PORT}`;
         const websiteDomain = "http://supertokens.io";
-        const scope = "openid";
+        const scope = "openid email profile";
 
         SuperTokens.init({
             supertokens: {
@@ -554,7 +554,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 scope,
                 skipConsent: true,
                 grantTypes: ["implicit"],
-                responseTypes: ["id_token"],
+                responseTypes: ["id_token token", "token"],
                 tokenEndpointAuthMethod: "client_secret_post",
             },
             {}
@@ -569,7 +569,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             redirectUri,
             state,
             scope,
-            responseType: "id_token",
+            responseType: "id_token token",
             extraQueryParams: {
                 nonce,
             },
@@ -732,7 +732,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                     assert.ok(errorDescription);
                 });
 
-                it("should error if there is an expired session", async function () {
+                it("should work even if there is an expired session", async function () {
                     const authorisationUrl = createAuthorizationUrl({
                         apiDomain,
                         clientId: client.clientId,
@@ -753,7 +753,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                     );
 
                     await new Promise((resolve) => setTimeout(resolve, 3000));
-                    const { error, errorDescription } = await testOAuthFlowAndGetAuthCode({
+                    const { authorizationCode } = await testOAuthFlowAndGetAuthCode({
                         apiDomain,
                         websiteDomain,
                         authorisationUrl,
@@ -763,14 +763,56 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                         state,
                         session,
                         skipLogin: true,
-                        expectError: true,
+                        expectSessionRefresh: true,
+                        expectError: false,
                     });
 
-                    assert.strictEqual(error, "login_required");
-                    assert.ok(errorDescription);
+
+                    const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            code: authorizationCode,
+                            client_id: client.clientId,
+                            client_secret: client.clientSecret,
+                            grant_type: "authorization_code",
+                            redirect_uri: redirectUri,
+                        }),
+                    });
+                    assert.strictEqual(res.status, 200);
+                    const tokenResp = await res.json();
+
+                    assert(tokenResp.access_token !== undefined);
+                    assert.strictEqual(tokenResp.token_type, "bearer");
+                    assert.strictEqual(tokenResp.scope, scope);
+
+                    const { payload, status } = await validateIdToken(tokenResp.id_token, {
+                        requiredAudience: client.clientId,
+                        requiredScopes: scope.split(" "),
+                        requiredClientId: client.clientId,
+                    });
+                    assert.strictEqual(status, "OK");
+                    const accessTokenHash = await crypto.subtle.digest(
+                        "SHA-256",
+                        new TextEncoder().encode(tokenResp.access_token)
+                    );
+                    const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
+
+                    assert.strictEqual(payload.aud, client.clientId);
+                    // assert.strictEqual(payload.iss, apiDomain);
+                    assert.strictEqual(payload.sub, session.getUserId());
+                    assert(typeof payload.jti === "string");
+                    assert(Number.isInteger(payload.iat));
+                    assert(Number.isInteger(payload.exp));
+                    assert.strictEqual(payload.at_hash, expectedAtHash);
+
+                    assert.strictEqual(payload.nonce, nonce);
+                    assert.notStrictEqual(payload.auth_time, undefined);
                 });
 
-                it("should error if there is an expired session with oauth cookies", async function () {
+                it("should work even if there is an expired session with oauth cookies", async function () {
                     const authorisationUrl = createAuthorizationUrl({
                         apiDomain,
                         clientId: client.clientId,
@@ -823,7 +865,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
 
                     await new Promise((resolve) => setTimeout(resolve, 3000));
 
-                    const { error, errorDescription } = await testOAuthFlowAndGetAuthCode({
+                    const { authorizationCode: authorizationCode2 } = await testOAuthFlowAndGetAuthCode({
                         apiDomain,
                         websiteDomain,
                         authorisationUrl: authorisationUrl2,
@@ -834,11 +876,52 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                         prevSetCookieHeaders: setCookieHeaders,
                         session,
                         skipLogin: true,
-                        expectError: true,
+                        expectError: false,
+                        expectSessionRefresh: true
                     });
 
-                    assert.strictEqual(error, "login_required");
-                    assert.ok(errorDescription);
+                    const res2 = await fetch(`${apiDomain}/auth/oauth/token`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            code: authorizationCode2,
+                            client_id: client.clientId,
+                            client_secret: client.clientSecret,
+                            grant_type: "authorization_code",
+                            redirect_uri: redirectUri,
+                        }),
+                    });
+                    assert.strictEqual(res2.status, 200);
+                    const tokenResp = await res2.json();
+
+                    assert(tokenResp.access_token !== undefined);
+                    assert.strictEqual(tokenResp.token_type, "bearer");
+                    assert.strictEqual(tokenResp.scope, scope);
+
+                    const { payload, status } = await validateIdToken(tokenResp.id_token, {
+                        requiredAudience: client.clientId,
+                        requiredScopes: scope.split(" "),
+                        requiredClientId: client.clientId,
+                    });
+                    assert.strictEqual(status, "OK");
+                    const accessTokenHash = await crypto.subtle.digest(
+                        "SHA-256",
+                        new TextEncoder().encode(tokenResp.access_token)
+                    );
+                    const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
+
+                    assert.strictEqual(payload.aud, client.clientId);
+                    // assert.strictEqual(payload.iss, apiDomain);
+                    assert.strictEqual(payload.sub, session.getUserId());
+                    assert(typeof payload.jti === "string");
+                    assert(Number.isInteger(payload.iat));
+                    assert(Number.isInteger(payload.exp));
+                    assert.strictEqual(payload.at_hash, expectedAtHash);
+
+                    assert.strictEqual(payload.nonce, nonce);
+                    assert.notStrictEqual(payload.auth_time, undefined);
                 });
 
                 it("should error if there is a revoked session", async function () {
@@ -1014,7 +1097,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                     );
                     const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
 
-                    assert.strictEqual(payload.aud[0], client.clientId);
+                    assert.strictEqual(payload.aud, client.clientId);
                     // assert.strictEqual(payload.iss, apiDomain);
                     assert.strictEqual(payload.sub, createSessionUser.user.id);
                     assert(typeof payload.jti === "string");
@@ -1122,7 +1205,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                     );
                     const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
 
-                    assert.strictEqual(payload.aud[0], client.clientId);
+                    assert.strictEqual(payload.aud, client.clientId);
                     // assert.strictEqual(payload.iss, apiDomain);
                     assert.strictEqual(payload.sub, userId);
                     assert(typeof payload.jti === "string");
@@ -1193,7 +1276,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                     );
                     const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
 
-                    assert.strictEqual(payload.aud[0], client.clientId);
+                    assert.strictEqual(payload.aud, client.clientId);
                     // assert.strictEqual(payload.iss, apiDomain);
                     assert.strictEqual(payload.sub, userId);
                     assert(typeof payload.jti === "string");
@@ -1302,7 +1385,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                     );
                     const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
 
-                    assert.strictEqual(payload.aud[0], client.clientId);
+                    assert.strictEqual(payload.aud, client.clientId);
                     // assert.strictEqual(payload.iss, apiDomain);
                     assert.strictEqual(payload.sub, userId);
                     assert(typeof payload.jti === "string");
@@ -1381,7 +1464,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                     );
                     const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
 
-                    assert.strictEqual(payload.aud[0], client.clientId);
+                    assert.strictEqual(payload.aud, client.clientId);
                     // assert.strictEqual(payload.iss, apiDomain);
                     assert.strictEqual(payload.sub, userId);
                     assert(typeof payload.jti === "string");
@@ -1492,7 +1575,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                     );
                     const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
 
-                    assert.strictEqual(payload.aud[0], client.clientId);
+                    assert.strictEqual(payload.aud, client.clientId);
                     // assert.strictEqual(payload.iss, apiDomain);
                     assert.strictEqual(payload.sub, userId);
                     assert(typeof payload.jti === "string");
@@ -1570,7 +1653,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                     );
                     const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
 
-                    assert.strictEqual(payload.aud[0], client.clientId);
+                    assert.strictEqual(payload.aud, client.clientId);
                     // assert.strictEqual(payload.iss, apiDomain);
                     assert.strictEqual(payload.sub, userId);
                     assert(typeof payload.jti === "string");
@@ -1680,7 +1763,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                     );
                     const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
 
-                    assert.strictEqual(payload.aud[0], client.clientId);
+                    assert.strictEqual(payload.aud, client.clientId);
                     // assert.strictEqual(payload.iss, apiDomain);
                     assert.strictEqual(payload.sub, userId);
                     assert(typeof payload.jti === "string");
@@ -1987,7 +2070,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 );
                 const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
 
-                assert.strictEqual(payload.aud[0], client.clientId);
+                assert.strictEqual(payload.aud, client.clientId);
                 // assert.strictEqual(payload.iss, apiDomain);
                 assert.strictEqual(payload.sub, userId);
                 assert(typeof payload.jti === "string");
@@ -2099,7 +2182,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 );
                 const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
 
-                assert.strictEqual(payload.aud[0], client.clientId);
+                assert.strictEqual(payload.aud, client.clientId);
                 // assert.strictEqual(payload.iss, apiDomain);
                 assert.strictEqual(payload.sub, userId);
                 assert(typeof payload.jti === "string");
@@ -2209,7 +2292,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 );
                 const expectedAtHash = Buffer.from(accessTokenHash.slice(0, 16)).toString("base64url");
 
-                assert.strictEqual(payload.aud[0], client.clientId);
+                assert.strictEqual(payload.aud, client.clientId);
                 // assert.strictEqual(payload.iss, apiDomain);
                 assert.strictEqual(payload.sub, userId);
                 assert(typeof payload.jti === "string");

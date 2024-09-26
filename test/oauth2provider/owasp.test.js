@@ -84,13 +84,10 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
             // Start the OAuth Flow
             let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
 
-            let nextUrl = res.headers.get("Location");
-            let nextUrlObj = new URL(nextUrl);
-            // TODO: check host & path
-            assert(nextUrlObj.searchParams.get("error"), "invalid_request");
+            const body = await res.json();
+            assert.strictEqual(body.error, ("invalid_request"));
             assert(
-                nextUrlObj.searchParams
-                    .get("error_description")
+                body.error_description
                     .includes(
                         "The 'redirect_uri' parameter does not match any of the OAuth 2.0 Client's pre-registered redirect urls"
                     )
@@ -130,13 +127,10 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
             // Start the OAuth Flow
             let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
 
-            let nextUrl = res.headers.get("Location");
-            let nextUrlObj = new URL(nextUrl);
-            // TODO: check host & path
-            assert(nextUrlObj.searchParams.get("error"), "invalid_request");
+            const body = await res.json();
+            assert.strictEqual(body.error, ("invalid_request"));
             assert(
-                nextUrlObj.searchParams
-                    .get("error_description")
+                body.error_description
                     .includes(
                         "The 'redirect_uri' parameter does not match any of the OAuth 2.0 Client's pre-registered redirect urls"
                     )
@@ -175,13 +169,11 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             // Start the OAuth Flow
             let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
-            let nextUrl = res.headers.get("Location");
-            let nextUrlObj = new URL(nextUrl);
-            // TODO: check host & path
-            assert(nextUrlObj.searchParams.get("error"), "invalid_request");
+            
+            const body = await res.json();
+            assert.strictEqual(body.error, ("invalid_request"));
             assert(
-                nextUrlObj.searchParams
-                    .get("error_description")
+                body.error_description
                     .includes(
                         "The 'redirect_uri' parameter does not match any of the OAuth 2.0 Client's pre-registered redirect urls"
                     )
@@ -219,13 +211,10 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
             });
             let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
 
-            let nextUrl = res.headers.get("Location");
-            let nextUrlObj = new URL(nextUrl);
-            // TODO: check host & path
-            assert(nextUrlObj.searchParams.get("error"), "invalid_request");
+            const body = await res.json();
+            assert.strictEqual(body.error, ("invalid_request"));
             assert(
-                nextUrlObj.searchParams
-                    .get("error_description")
+                body.error_description
                     .includes(
                         "The 'redirect_uri' parameter does not match any of the OAuth 2.0 Client's pre-registered redirect urls"
                     )

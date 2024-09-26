@@ -90,14 +90,12 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
 
         const { client } = await OAuth2Provider.createOAuth2Client(
             {
-                client_id: "client_id",
-                client_secret: "client_secret",
+                audience: ["storageAPI", "calendarAPI"],
             },
             {}
         );
 
-        assert.strictEqual(client.clientId, "client_id");
-        assert.strictEqual(client.clientSecret, "client_secret");
+        assert.deepStrictEqual(client.audience, ["storageAPI", "calendarAPI"]);
     });
 
     it("should not allow creating a client with a redirect URI containing a URL fragment", async function () {
@@ -115,16 +113,13 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
             recipeList: [OAuth2Provider.init()],
         });
 
-        const { error } = await OAuth2Provider.createOAuth2Client(
+        const resp = await OAuth2Provider.createOAuth2Client(
             {
-                client_id: "client_id",
-                client_secret: "client_secret",
-                redirect_uris: ["http://localhost:3000/#fragment"],
-            },
-            {}
+                redirectUris: ["http://localhost:3000/redirect-url#asdf"],
+            }
         );
 
-        assert.strictEqual(error, "invalid_redirect_uri");
+        assert.strictEqual(resp.client.redirectUris, null);
     });
 
     it("should update the OAuth2Client", async function () {
@@ -144,16 +139,12 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
         // Create a client
         const { client } = await OAuth2Provider.createOAuth2Client(
             {
-                client_id: "client_id",
-                client_secret: "client_secret",
                 scope: "offline_access offline",
                 redirectUris: ["http://localhost:3000"],
             },
             {}
         );
 
-        assert.strictEqual(client.clientId, "client_id");
-        assert.strictEqual(client.clientSecret, "client_secret");
         assert.strictEqual(client.scope, "offline_access offline");
         assert.strictEqual(JSON.stringify(client.redirectUris), JSON.stringify(["http://localhost:3000"]));
         assert.strictEqual(JSON.stringify(client.metadata), JSON.stringify({}));
@@ -191,16 +182,7 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
         });
 
         // Create a client
-        const { client } = await OAuth2Provider.createOAuth2Client(
-            {
-                client_id: "client_id",
-                client_secret: "client_secret",
-            },
-            {}
-        );
-
-        assert.strictEqual(client.clientId, "client_id");
-        assert.strictEqual(client.clientSecret, "client_secret");
+        const { client } = await OAuth2Provider.createOAuth2Client();
 
         // Delete the client
         const { status } = await OAuth2Provider.deleteOAuth2Client(
@@ -227,14 +209,11 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
             recipeList: [OAuth2Provider.init()],
         });
 
+        let clientIds = [];
         // Create 10 clients
         for (let i = 0; i < 10; i++) {
-            await OAuth2Provider.createOAuth2Client(
-                {
-                    client_id: `client_id_${i}`,
-                },
-                {}
-            );
+            const { client } = await OAuth2Provider.createOAuth2Client();
+            clientIds.push(client.clientId);
         }
 
         let allClients = [];
@@ -247,14 +226,13 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
                 {}
             );
             assert.strictEqual(result.status, "OK");
+            assert.strictEqual(result.clients.length, Math.min(3, 10 - allClients.length));
             nextPaginationToken = result.nextPaginationToken;
             allClients.push(...result.clients);
         } while (nextPaginationToken);
 
         // Check the client IDs
-        for (let i = 0; i < 10; i++) {
-            assert.strictEqual(allClients[i].clientId, `client_id_${i}`);
-        }
+        assert.deepStrictEqual(new Set(allClients.map((client) => client.clientId)), new Set(clientIds));
     });
 
     it("should get OAuth2Clients with filter", async function () {
@@ -276,18 +254,19 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
             await OAuth2Provider.createOAuth2Client({ clientName: "customClientName" }, {});
         }
 
-        // Create 5 clients with owner = "test"
+        // Create 5 clients without the above prop
         for (let i = 0; i < 5; i++) {
-            await OAuth2Provider.createOAuth2Client({ owner: "test" }, {});
+            await OAuth2Provider.createOAuth2Client();
         }
 
-        let result = await OAuth2Provider.getOAuth2Clients({ clientName: "customClientName" }, {});
+        let result = await OAuth2Provider.getOAuth2Clients();
+        assert.strictEqual(result.status, "OK");
+        assert.strictEqual(result.clients.length, 10);
+
+        result = await OAuth2Provider.getOAuth2Clients({ clientName: "customClientName" }, {});
         assert.strictEqual(result.status, "OK");
         assert.strictEqual(result.clients.length, 5);
 
-        result = await OAuth2Provider.getOAuth2Clients({ owner: "test" }, {});
-        assert.strictEqual(result.status, "OK");
-        assert.strictEqual(result.clients.length, 5);
     });
 
     describe("validateAccessToken", function () {
@@ -367,7 +346,7 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
             });
             assert.strictEqual(status, "OK");
             assert.strictEqual(payload.client_id, client.clientId);
-            assert.strictEqual(payload.ext.sessionHandle, sessionId);
+            assert.strictEqual(payload.sessionHandle, sessionId);
             assert.strictEqual(payload.scp.length, 3);
             assert.strictEqual(payload.scp[0], "profile");
             assert.strictEqual(payload.scp[1], "offline_access");
@@ -610,6 +589,7 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
                 },
                 true
             );
+
             assert.strictEqual(status, "OK");
             assert.strictEqual(payload.client_id, client.clientId);
             assert.strictEqual(payload.scp.length, 3);

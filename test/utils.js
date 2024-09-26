@@ -31,7 +31,6 @@ let MultitenancyRecipe = require("supertokens-node/lib/build/recipe/multitenancy
 let MultiFactorAuthRecipe = require("supertokens-node/lib/build/recipe/multifactorauth/recipe").default;
 const UserRolesRecipe = require("supertokens-node/lib/build/recipe/userroles/recipe").default;
 let { ProcessState } = require("supertokens-node/lib/build/processState");
-const { default: OpenIDRecipe } = require("supertokens-node/lib/build/recipe/openid/recipe");
 let debug = require("debug");
 let assert = require("assert");
 const { CollectingResponse } = require("supertokens-node/framework/custom");
@@ -228,7 +227,6 @@ module.exports.resetAll = function (disableLogging = true) {
     UserMetadataRecipe.reset();
     UserRolesRecipe.reset();
     PasswordlessRecipe.reset();
-    OpenIDRecipe.reset();
     DashboardRecipe.reset();
     ProcessState.getInstance().reset();
     MultitenancyRecipe.reset();

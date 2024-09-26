@@ -1,6 +1,6 @@
 const assert = require("assert");
 const setCookieParser = require("set-cookie-parser");
-const { recipesMock } = require("../../api-mock");
+const { recipesMock, API_PORT } = require("../../api-mock");
 const { EmailPassword, Session } = recipesMock;
 
 exports.createAuthorizationUrl = function ({
@@ -39,6 +39,7 @@ exports.testOAuthFlowAndGetAuthCode = async function ({
     skipLogin = false,
     session,
     expectError = false,
+    expectSessionRefresh = false,
 }) {
     // This will be used to store all Set-Cookie headers in the subsequent requests
     let allSetCookieHeaders = [...prevSetCookieHeaders];
@@ -64,6 +65,27 @@ exports.testOAuthFlowAndGetAuthCode = async function ({
         },
     });
     saveCookies(res);
+
+    if (expectSessionRefresh) {
+        nextUrl = res.headers.get("Location");
+        nextUrlObj = new URL(nextUrl);
+        const loginChallenge = nextUrlObj.searchParams.get("loginChallenge");
+
+        assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, `${websiteDomain}/auth/try-refresh`);
+
+        session = await Session.refreshSessionWithoutRequestResponse(session.getAllSessionTokensDangerously().refreshToken);
+
+        res = await fetch(`${apiDomain}/auth/oauth/login?loginChallenge=${loginChallenge}`, {
+            method: "GET",
+            redirect: "manual",
+            headers: {
+                Authorization: `Bearer ${session.getAccessToken()}`,
+                Cookie: getCookieHeader(),
+            },
+        });
+
+        saveCookies(res);
+    }
 
     if (!skipLogin) {
         nextUrl = res.headers.get("Location");
@@ -162,7 +184,7 @@ const jose = require("jose");
 exports.validateIdToken = async function (token, requirements) {
     // TODO: this is a temporary solution to validate the token. We need to get the JWKS from the core and validate the token accordingly.
     const payload = (
-        await jose.jwtVerify(token, jose.createRemoteJWKSet(new URL("http://localhost:4444/.well-known/jwks.json")))
+        await jose.jwtVerify(token, jose.createRemoteJWKSet(new URL(`http://localhost:${API_PORT}/auth/jwt/jwks.json`)))
     ).payload;
 
     // TODO: we should be able uncomment this after we get proper core support

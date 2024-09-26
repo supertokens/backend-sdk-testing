@@ -289,7 +289,7 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             let user = await createThirdPartyUser(email, true);
             const session = await getSessionForUser(user);
             await resetOverrideParams();
-            const resp = await signUpPOST(email, session);
+            const resp = await signUpPOST(email, session, undefined, true);
             assert.strictEqual(resp.body.status, "OK");
 
             let overrideParams = await getOverrideParams();
@@ -306,7 +306,7 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             let user = await createThirdPartyUser(email, false);
             const session = await getSessionForUser(user);
             await resetOverrideParams();
-            const resp = await signUpPOST(email, session);
+            const resp = await signUpPOST(email, session, undefined, true);
             assert.strictEqual(resp.body.status, "OK");
 
             let overrideParams = await getOverrideParams();
@@ -324,7 +324,7 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             user = await makeUserPrimary(user);
             const session = await getSessionForUser(user);
             await resetOverrideParams();
-            const resp = await signUpPOST(email, session);
+            const resp = await signUpPOST(email, session, undefined, true);
             assert.strictEqual(resp.body.status, "OK");
 
             let overrideParams = await getOverrideParams();
@@ -343,7 +343,7 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             const session = await getSessionForUser(user);
             await session.fetchAndSetClaim(MultiFactorAuth.MultiFactorAuthClaim);
             await resetOverrideParams();
-            const resp = await signUpPOST(email, session);
+            const resp = await signUpPOST(email, session, undefined, true);
             assert.strictEqual(resp.body.status, "OK");
 
             let overrideParams = await getOverrideParams();

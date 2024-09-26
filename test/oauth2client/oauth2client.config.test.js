@@ -68,7 +68,7 @@ describe(`OAuth2Client-Config: ${printPath("[test/oauth2client/oauth2client.conf
                 caught = err;
             }
             assert.ok(caught);
-            assert.strictEqual(caught.message, "Please pass providerConfig argument in the OAuth2Client recipe.");
+            assert.strictEqual(caught.message, "Please pass providerConfigs argument in the OAuth2Client recipe.");
         }
 
         // Missing clientId
@@ -79,7 +79,7 @@ describe(`OAuth2Client-Config: ${printPath("[test/oauth2client/oauth2client.conf
                     ...initParams,
                     recipeList: [
                         OAuth2Client.init({
-                            providerConfig: {},
+                            providerConfigs: [{}],
                         }),
                     ],
                 });
@@ -90,7 +90,7 @@ describe(`OAuth2Client-Config: ${printPath("[test/oauth2client/oauth2client.conf
                 caught = err;
             }
             assert.ok(caught);
-            assert.strictEqual(caught.message, "Please pass clientId argument in the OAuth2Client providerConfig.");
+            assert.strictEqual(caught.message, "Please pass clientId for all providerConfigs.");
         }
 
         // Missing oidcDiscoveryEndpoint
@@ -101,9 +101,11 @@ describe(`OAuth2Client-Config: ${printPath("[test/oauth2client/oauth2client.conf
                     ...initParams,
                     recipeList: [
                         OAuth2Client.init({
-                            providerConfig: {
-                                clientId: "client_id",
-                            },
+                            providerConfigs: [
+                                {
+                                    clientId: "stcl_client_id",
+                                },
+                            ],
                         }),
                     ],
                 });
@@ -116,7 +118,7 @@ describe(`OAuth2Client-Config: ${printPath("[test/oauth2client/oauth2client.conf
             assert.ok(caught);
             assert.strictEqual(
                 caught.message,
-                "Please pass oidcDiscoveryEndpoint argument in the OAuth2Client providerConfig."
+                "Please pass oidcDiscoveryEndpoint for all providerConfigs."
             );
         }
     });

@@ -37,20 +37,6 @@ describe(`OAuth2Client-API: ${printPath("[test/oauth2client/oauth2client.api.tes
         await cleanST();
     });
 
-    // TODO: Remove this once we've stopped calling Hydra directly from
-    // the SDK and found an alternate way to clear clients before each test run.
-    beforeEach(async function () {
-        const allClients = await fetch(`http://localhost:4445/admin/clients`).then((res) => res.json());
-
-        const deleteClientPromies = await allClients.map((client) => {
-            return fetch(`http://localhost:4445/admin/clients/${client.client_id}`, {
-                method: "DELETE",
-            });
-        });
-
-        await Promise.all(deleteClientPromies);
-    });
-
     it("should successfully signin", async function () {
         const connectionURI = await startST();
 
@@ -92,11 +78,12 @@ describe(`OAuth2Client-API: ${printPath("[test/oauth2client/oauth2client.api.tes
             recipeList: [
                 OAuth2Provider.init(),
                 OAuth2Client.init({
-                    providerConfig: {
-                        clientId: client.clientId,
-                        clientSecret: client.clientSecret,
-                        oidcDiscoveryEndpoint: `${apiDomain}/auth/.well-known/openid-configuration`,
-                    },
+                    providerConfigs: [{
+                            clientId: client.clientId,
+                            clientSecret: client.clientSecret,
+                            oidcDiscoveryEndpoint: `${apiDomain}/auth/.well-known/openid-configuration`,
+                        },
+                    ],
                 }),
                 Session.init(),
                 EmailPassword.init(),
@@ -123,7 +110,7 @@ describe(`OAuth2Client-API: ${printPath("[test/oauth2client/oauth2client.api.tes
             state,
         });
 
-        let signInRes = await new Promise((resolve) =>
+        let signInRes = await new Promise((resolve,reject) =>
             request()
                 .post("/auth/oauth/client/signin")
                 .send({
@@ -137,7 +124,7 @@ describe(`OAuth2Client-API: ${printPath("[test/oauth2client/oauth2client.api.tes
                 .expect(200)
                 .end((err, res) => {
                     if (err) {
-                        resolve(undefined);
+                        reject(err);
                     } else {
                         resolve(res);
                     }
