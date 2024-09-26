@@ -19,8 +19,6 @@ import { SuperTokensMock } from "./mocks/SuperTokensMock";
 import { TOTPMock } from "./mocks/TOTP";
 import { ThirdPartyMock } from "./mocks/ThirdPartyMock";
 import { UserMetadataMock } from "./mocks/UserMetadataMock";
-import { OAuth2ProviderMock } from "./mocks/OAuth2ProviderMock";
-import { OAuth2ClientMock } from "./mocks/OAuth2ClientMock";
 import { randomString } from "./utils";
 
 const recipesMock = {
@@ -38,8 +36,6 @@ const recipesMock = {
     MultiFactorAuth: MultiFactorAuthMock,
     UserMetadata: UserMetadataMock,
     TOTP: TOTPMock,
-    OAuth2Provider: OAuth2ProviderMock,
-    OAuth2Client: OAuth2ClientMock,
     TestPrimitiveClaim,
     TestPrimitiveArrayClaim,
 };
