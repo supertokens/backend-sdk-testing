@@ -15,7 +15,7 @@ const { createTenant } = require("../utils");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 
 exports.setup = async function setup(config = {}) {
-    const connectionURI = await createTenant(config.globalConnectionURI, randomString());
+    const connectionURI = await createTenant(config.globalConnectionURI, randomString(), config.coreConfig);
     supertokens.init({
         // debug: true,
         supertokens: {
@@ -186,7 +186,7 @@ exports.getSessionForUser = async function getSessionForUser(user, tenantId = "p
     return Session.createNewSessionWithoutRequestResponse(tenantId, user.loginMethods[0].recipeUserId);
 };
 
-exports.postAPI = async function post(path, body, session) {
+exports.postToAuthAPI = async function post(path, body, session) {
     let headers = {};
     if (session) {
         const sessionTokens = session.getAllSessionTokensDangerously();
@@ -194,6 +194,10 @@ exports.postAPI = async function post(path, body, session) {
             Authorization: `Bearer ${sessionTokens.accessToken}`,
         };
     }
+    if (!("shouldTryLinkingWithSessionUser" in body)) {
+        body.shouldTryLinkingWithSessionUser = !!session;
+    }
+
     let response = await queryAPI({
         method: "post",
         path,
