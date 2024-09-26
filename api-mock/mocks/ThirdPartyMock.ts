@@ -77,4 +77,39 @@ export const ThirdPartyMock: Partial<typeof ThirdParty> = {
                 : {}),
         };
     },
+
+    getProvider: async (
+        tenantId: string,
+        thirdPartyId: string,
+        clientType: string | undefined,
+        userContext?: Record<string, any>
+    ) => {
+        const response = await queryAPI({
+            method: "post",
+            path: "/test/thirdparty/getprovider",
+            input: { tenantId, thirdPartyId, clientType, userContext },
+        });
+
+        return {
+            id: response.id,
+            config: response.config,
+            getConfigForClientType: async () => {
+                return response.config;
+            },
+            getAuthorisationRedirectURL: async (input) => {
+                return {
+                    urlWithQueryParams: "",
+                };
+            },
+            exchangeAuthCodeForOAuthTokens: async (input) => {
+                return {};
+            },
+            getUserInfo: async (input) => {
+                return {
+                    thirdPartyUserId: "test",
+                    rawUserInfoFromProvider: {},
+                };
+            },
+        };
+    },
 };

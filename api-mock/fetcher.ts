@@ -22,6 +22,7 @@ interface ChainedRequest {
     post: (path: string) => ChainedRequest;
     put: (path: string) => ChainedRequest;
     get: (path: string) => ChainedRequest;
+    del: (path: string) => ChainedRequest;
     set: (header: string, value: string) => ChainedRequest;
     send: (data: any) => ChainedRequest;
     expect: (status: number, cb?: Callback) => ChainedRequest;
@@ -30,7 +31,7 @@ interface ChainedRequest {
 
 export function request(): ChainedRequest {
     let path: string = "";
-    let method: "get" | "post" | "put" = "get";
+    let method: "get" | "post" | "put" | "delete" = "get";
     let headers: Record<string, string> = {
         "Content-Type": "application/json",
         "fdi-version": fdiVersion,
@@ -97,6 +98,12 @@ export function request(): ChainedRequest {
         return this;
     }
 
+    function del(pathValue: string): ChainedRequest {
+        path = pathValue;
+        method = "delete";
+        return this;
+    }
+
     function set(header: string, value: string): ChainedRequest {
         headers[header] = value;
         return this;
@@ -124,6 +131,7 @@ export function request(): ChainedRequest {
         post,
         put,
         get,
+        del,
         set,
         send,
         expect,
