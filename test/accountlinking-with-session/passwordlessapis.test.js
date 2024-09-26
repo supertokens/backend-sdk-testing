@@ -16,7 +16,7 @@ const { printPath, setupST, killAllST, cleanST, startST: globalStartST } = requi
 const {
     getTestEmail,
     setup,
-    postAPI,
+    postToAuthAPI,
     createEmailPasswordUser,
     makeUserPrimary,
     getSessionForUser,
@@ -232,14 +232,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                         session,
                     });
                     const resp = await consumeCodePOST(code, session);
-                    assert.strictEqual(resp.status, 200);
-                    assert.ok(resp.body);
-
-                    const body = resp.body;
-                    assert.strictEqual(body.status, "OK");
-
-                    assert.strictEqual(body.user.id, otherUser.id);
-                    assert.deepStrictEqual(body.user, await getUpdatedUserFromDBForRespCompare(otherUser));
+                    assert.strictEqual(resp.status, 400);
+                    assert.deepStrictEqual(resp.body, {
+                        message:
+                            "shouldDoAutomaticAccountLinking returned false when creating primary user but shouldTryLinkingWithSessionUser is true",
+                    });
                 });
 
                 it("should make the authenticating user primary if shouldDoAutomaticAccountLinking returns false while making the session user primary", async () => {
@@ -260,15 +257,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                         session,
                     });
                     const resp = await consumeCodePOST(code, session);
-                    assert.strictEqual(resp.status, 200);
-                    assert.ok(resp.body);
-
-                    const body = resp.body;
-                    assert.strictEqual(body.status, "OK");
-
-                    assert.notStrictEqual(body.user.id, sessionUser.id);
-                    assert(body.user.isPrimaryUser);
-                    assert.strictEqual(body.user.loginMethods.length, 1);
+                    assert.strictEqual(resp.status, 400);
+                    assert.deepStrictEqual(resp.body, {
+                        message:
+                            "shouldDoAutomaticAccountLinking returned false when creating primary user but shouldTryLinkingWithSessionUser is true",
+                    });
                 });
 
                 it("should link by account info and make the session user primary if shouldDoAutomaticAccountLinking returns false while linking to the session user and the session user is primary", async () => {
@@ -292,17 +285,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                         session,
                     });
                     const resp = await consumeCodePOST(code, session);
-                    assert.strictEqual(resp.status, 200);
-                    assert.ok(resp.body);
-
-                    const body = resp.body;
-                    assert.strictEqual(body.status, "OK");
-
-                    assert.strictEqual(body.user.id, otherUser.id);
-                    assert.deepStrictEqual(body.user, await getUpdatedUserFromDBForRespCompare(otherUser));
-
-                    sessionUser = await supertokens.getUser(sessionUser.id);
-                    assert(sessionUser.isPrimaryUser);
+                    assert.strictEqual(resp.status, 400);
+                    assert.deepStrictEqual(resp.body, {
+                        message:
+                            "shouldDoAutomaticAccountLinking returned false when creating primary user but shouldTryLinkingWithSessionUser is true",
+                    });
                 });
 
                 it("should make the authenticating primary if shouldDoAutomaticAccountLinking returns false while linking to the session user and the session user is primary", async () => {
@@ -324,15 +311,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                         session,
                     });
                     const resp = await consumeCodePOST(code, session);
-                    assert.strictEqual(resp.status, 200);
-                    assert.ok(resp.body);
-
-                    const body = resp.body;
-                    assert.strictEqual(body.status, "OK");
-
-                    assert.notStrictEqual(body.user.id, sessionUser.id);
-                    assert(body.user.isPrimaryUser);
-                    assert.strictEqual(body.user.loginMethods.length, 1);
+                    assert.strictEqual(resp.status, 400);
+                    assert.deepStrictEqual(resp.body, {
+                        message:
+                            "shouldDoAutomaticAccountLinking returned false when creating primary user but shouldTryLinkingWithSessionUser is true",
+                    });
                 });
 
                 it("should link by account info and make the session user primary if shouldDoAutomaticAccountLinking returns false while linking to the session user", async () => {
@@ -355,17 +338,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                         session,
                     });
                     const resp = await consumeCodePOST(code, session);
-                    assert.strictEqual(resp.status, 200);
-                    assert.ok(resp.body);
-
-                    const body = resp.body;
-                    assert.strictEqual(body.status, "OK");
-
-                    assert.strictEqual(body.user.id, otherUser.id);
-                    assert.deepStrictEqual(body.user, await getUpdatedUserFromDBForRespCompare(otherUser));
-
-                    sessionUser = await supertokens.getUser(sessionUser.id);
-                    assert(sessionUser.isPrimaryUser);
+                    assert.strictEqual(resp.status, 400);
+                    assert.deepStrictEqual(resp.body, {
+                        message:
+                            "shouldDoAutomaticAccountLinking returned false when creating primary user but shouldTryLinkingWithSessionUser is true",
+                    });
                 });
 
                 it("should make the authenticating and session user primary if shouldDoAutomaticAccountLinking returns false while linking to the session user", async () => {
@@ -386,18 +363,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                         session,
                     });
                     const resp = await consumeCodePOST(code, session);
-                    assert.strictEqual(resp.status, 200);
-                    assert.ok(resp.body);
-
-                    const body = resp.body;
-                    assert.strictEqual(body.status, "OK");
-
-                    assert.notStrictEqual(body.user.id, sessionUser.id);
-                    assert(body.user.isPrimaryUser);
-                    assert.strictEqual(body.user.loginMethods.length, 1);
-
-                    sessionUser = await supertokens.getUser(sessionUser.id);
-                    assert(sessionUser.isPrimaryUser);
+                    assert.strictEqual(resp.status, 400);
+                    assert.deepStrictEqual(resp.body, {
+                        message:
+                            "shouldDoAutomaticAccountLinking returned false when creating primary user but shouldTryLinkingWithSessionUser is true",
+                    });
                 });
             });
         });
@@ -563,14 +533,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                         session,
                     });
                     const resp = await consumeCodePOST(code, session);
-                    assert.strictEqual(resp.status, 200);
-                    assert.ok(resp.body);
-
-                    const body = resp.body;
-                    assert.strictEqual(body.status, "OK");
-
-                    assert.strictEqual(body.user.id, otherUser.id);
-                    assert.deepStrictEqual(body.user, await getUpdatedUserFromDBForRespCompare(otherUser));
+                    assert.strictEqual(resp.status, 400);
+                    assert.deepStrictEqual(resp.body, {
+                        message:
+                            "shouldDoAutomaticAccountLinking returned false when creating primary user but shouldTryLinkingWithSessionUser is true",
+                    });
                 });
 
                 it("should make the authenticating user primary if shouldDoAutomaticAccountLinking returns false while making the session user primary", async () => {
@@ -592,15 +559,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                         session,
                     });
                     const resp = await consumeCodePOST(code, session);
-                    assert.strictEqual(resp.status, 200);
-                    assert.ok(resp.body);
-
-                    const body = resp.body;
-                    assert.strictEqual(body.status, "OK");
-
-                    assert.notStrictEqual(body.user.id, sessionUser.id);
-                    assert(body.user.isPrimaryUser);
-                    assert.strictEqual(body.user.loginMethods.length, 1);
+                    assert.strictEqual(resp.status, 400);
+                    assert.deepStrictEqual(resp.body, {
+                        message:
+                            "shouldDoAutomaticAccountLinking returned false when creating primary user but shouldTryLinkingWithSessionUser is true",
+                    });
                 });
 
                 it("should link by account info and make the session user primary if shouldDoAutomaticAccountLinking returns false while linking to the session user and the session user is primary", async () => {
@@ -625,17 +588,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                         session,
                     });
                     const resp = await consumeCodePOST(code, session);
-                    assert.strictEqual(resp.status, 200);
-                    assert.ok(resp.body);
-
-                    const body = resp.body;
-                    assert.strictEqual(body.status, "OK");
-
-                    assert.strictEqual(body.user.id, otherUser.id);
-                    assert.deepStrictEqual(body.user, await getUpdatedUserFromDBForRespCompare(otherUser));
-
-                    sessionUser = await supertokens.getUser(sessionUser.id);
-                    assert(sessionUser.isPrimaryUser);
+                    assert.strictEqual(resp.status, 400);
+                    assert.deepStrictEqual(resp.body, {
+                        message:
+                            "shouldDoAutomaticAccountLinking returned false when creating primary user but shouldTryLinkingWithSessionUser is true",
+                    });
                 });
 
                 it("should make the authenticating user primary if shouldDoAutomaticAccountLinking returns false while linking to the session user and the session user is primary", async () => {
@@ -659,15 +616,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                         session,
                     });
                     const resp = await consumeCodePOST(code, session);
-                    assert.strictEqual(resp.status, 200);
-                    assert.ok(resp.body);
-
-                    const body = resp.body;
-                    assert.strictEqual(body.status, "OK");
-
-                    assert.notStrictEqual(body.user.id, sessionUser.id);
-                    assert(body.user.isPrimaryUser);
-                    assert.strictEqual(body.user.loginMethods.length, 1);
+                    assert.strictEqual(resp.status, 400);
+                    assert.deepStrictEqual(resp.body, {
+                        message:
+                            "shouldDoAutomaticAccountLinking returned false when creating primary user but shouldTryLinkingWithSessionUser is true",
+                    });
                 });
 
                 it("should link by account info and make the session user primary if shouldDoAutomaticAccountLinking returns false while linking to the session user", async () => {
@@ -691,17 +644,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                         session,
                     });
                     const resp = await consumeCodePOST(code, session);
-                    assert.strictEqual(resp.status, 200);
-                    assert.ok(resp.body);
-
-                    const body = resp.body;
-                    assert.strictEqual(body.status, "OK");
-
-                    assert.strictEqual(body.user.id, otherUser.id);
-                    assert.deepStrictEqual(body.user, await getUpdatedUserFromDBForRespCompare(otherUser));
-
-                    sessionUser = await supertokens.getUser(sessionUser.id);
-                    assert(sessionUser.isPrimaryUser);
+                    assert.strictEqual(resp.status, 400);
+                    assert.deepStrictEqual(resp.body, {
+                        message:
+                            "shouldDoAutomaticAccountLinking returned false when creating primary user but shouldTryLinkingWithSessionUser is true",
+                    });
                 });
 
                 it("should make the authenticating and session user primary if shouldDoAutomaticAccountLinking returns false while linking to the session user", async () => {
@@ -723,18 +670,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                         session,
                     });
                     const resp = await consumeCodePOST(code, session);
-                    assert.strictEqual(resp.status, 200);
-                    assert.ok(resp.body);
-
-                    const body = resp.body;
-                    assert.strictEqual(body.status, "OK");
-
-                    assert.notStrictEqual(body.user.id, sessionUser.id);
-                    assert(body.user.isPrimaryUser);
-                    assert.strictEqual(body.user.loginMethods.length, 1);
-
-                    sessionUser = await supertokens.getUser(sessionUser.id);
-                    assert(sessionUser.isPrimaryUser);
+                    assert.strictEqual(resp.status, 400);
+                    assert.deepStrictEqual(resp.body, {
+                        message:
+                            "shouldDoAutomaticAccountLinking returned false when creating primary user but shouldTryLinkingWithSessionUser is true",
+                    });
                 });
             });
         });
@@ -976,11 +916,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
 
             const session = await getSessionForUser(sessionUser);
             const resp = await createCodePOST({ email: email2 }, session);
-            assert.strictEqual(resp.status, 200);
-            assert.ok(resp.body);
-
-            const body = resp.body;
-            assert.strictEqual(body.status, "OK");
+            assert.strictEqual(resp.status, 400);
+            assert.deepStrictEqual(resp.body, {
+                message:
+                    "shouldDoAutomaticAccountLinking returned false when creating primary user but shouldTryLinkingWithSessionUser is true",
+            });
         });
 
         it("should create a code if shouldDoAutomaticAccountLinking returns false while linking to the session user and the session user is primary", async () => {
@@ -997,11 +937,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
 
             const session = await getSessionForUser(sessionUser);
             const resp = await createCodePOST({ email: email2 }, session);
-            assert.strictEqual(resp.status, 200);
-            assert.ok(resp.body);
-
-            const body = resp.body;
-            assert.strictEqual(body.status, "OK");
+            assert.strictEqual(resp.status, 400);
+            assert.deepStrictEqual(resp.body, {
+                message:
+                    "shouldDoAutomaticAccountLinking returned false when creating primary user but shouldTryLinkingWithSessionUser is true",
+            });
         });
 
         it("should create a code if shouldDoAutomaticAccountLinking returns false while linking to the session user", async () => {
@@ -1017,11 +957,11 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
 
             const session = await getSessionForUser(sessionUser);
             const resp = await createCodePOST({ email: email2 }, session);
-            assert.strictEqual(resp.status, 200);
-            assert.ok(resp.body);
-
-            const body = resp.body;
-            assert.strictEqual(body.status, "OK");
+            assert.strictEqual(resp.status, 400);
+            assert.deepStrictEqual(resp.body, {
+                message:
+                    "shouldDoAutomaticAccountLinking returned false when creating primary user but shouldTryLinkingWithSessionUser is true",
+            });
         });
     });
 
@@ -1068,7 +1008,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
 });
 
 async function consumeCodePOST(code, session) {
-    return postAPI(
+    return postToAuthAPI(
         "/auth/signinup/code/consume",
         code.userInputCode !== undefined
             ? {
@@ -1085,9 +1025,9 @@ async function consumeCodePOST(code, session) {
 }
 
 async function createCodePOST(accountInfo, session) {
-    return postAPI("/auth/signinup/code", accountInfo, session);
+    return postToAuthAPI("/auth/signinup/code", accountInfo, session);
 }
 
 async function resendCodePOST(deviceInfo, session) {
-    return postAPI("/auth/signinup/code/resend", deviceInfo, session);
+    return postToAuthAPI("/auth/signinup/code/resend", deviceInfo, session);
 }
