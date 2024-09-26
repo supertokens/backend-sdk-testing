@@ -302,7 +302,7 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
                 {}
             );
 
-            const state = new Buffer.from("some-random-string", "base64").toString();
+            const state = Buffer.from("some-random-string").toString("base64");
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,

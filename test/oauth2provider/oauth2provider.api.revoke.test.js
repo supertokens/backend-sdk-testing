@@ -155,7 +155,6 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
 
         assert.strictEqual(revokeRes.status, 200);
         revokeRes = await revokeRes.json();
-        console.log("revokeRes", revokeRes);
 
         assert.strictEqual(await isTokenRevoked(apiDomain, refreshTokenRes.refresh_token), true);
         assert.strictEqual(await isTokenRevoked(apiDomain, refreshTokenRes.access_token), true);
@@ -180,6 +179,5 @@ async function isTokenRevoked(apiDomain, token) {
     }
 
     const result = await response.json();
-    console.log("result", result);
     return !result.active;
 }
