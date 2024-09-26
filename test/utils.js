@@ -12,7 +12,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { exec } = require("child_process");
+const { exec, spawn } = require("child_process");
 const nock = require("nock");
 let fs = require("fs");
 const { default: fetch } = require("cross-fetch");
@@ -260,22 +260,43 @@ module.exports.startST = async function (config = {}) {
         let installationPath = process.env.INSTALL_PATH;
         let pidsBefore = await getListOfPids();
         let returned = false;
-        module.exports
-            .executeCommand(
-                "cd " +
-                    installationPath +
-                    ` && java -Djava.security.egd=file:/dev/urandom -classpath "./core/*:./plugin-interface/*" io.supertokens.Main ./ DEV host=` +
-                    host +
-                    " port=" +
-                    port +
-                    " test_mode"
-            )
-            .catch((err) => {
-                if (!returned) {
-                    returned = true;
-                    reject(err);
+        const child = spawn("java", [
+            "-Djava.security.egd=file:/dev/urandom",
+            "-classpath",
+            "./core/*:./plugin-interface/*",
+            "io.supertokens.Main",
+            "./",
+            "DEV",
+            "host=" + host,
+            "port=" + port,
+            "test_mode",
+        ], {
+            stdio: "pipe",
+            cwd: installationPath,
+        });
+        child.on("error", (err) => {
+            reject(err);
+        });
+        const stdout = [];
+        child.stdio.on("data", (data) => {
+            // console.log("[Core log]", data);
+            stdout.push(data);
+        });
+        const stderr = [];
+        child.stderr.on("data", (data) => {
+            stderr.push(data);
+        });
+        child.on("close", (code) => {
+            if (!returned) {
+                returned = true;
+                if (code !== 0) {
+                    console.log("error starting ST", code);
+                    console.log("stdout", stdout);
+                    console.log("stderr", stderr);
+                    reject(code);
                 }
-            });
+            }
+        });
         let startTime = Date.now();
         while (Date.now() - startTime < 30000) {
             let pidsAfter = await getListOfPids();

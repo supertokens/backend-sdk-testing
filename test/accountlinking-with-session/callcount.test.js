@@ -241,7 +241,7 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
     });
 
     describe("sign up w/ session", function () {
-        it("should call the core <=3 times without MFA or AL", async () => {
+        it("should call the core <=3 times without MFA or AL and not overwriting the session", async () => {
             await setup({
                 initAccountLinking: false,
                 initMFA: false,
