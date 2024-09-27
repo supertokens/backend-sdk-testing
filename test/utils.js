@@ -278,7 +278,7 @@ module.exports.startST = async function (config = {}) {
             reject(err);
         });
         const stdout = [];
-        child.stdio.on("data", (data) => {
+        child.stdout.on("data", (data) => {
             // console.log("[Core log]", data);
             stdout.push(data);
         });
