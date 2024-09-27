@@ -54,7 +54,7 @@
         "set-cookie-parser": "^2.6.0",
         "sinon": "^14.0.0",
         "supertest": "4.0.2",
-        "supertokens-node": "github:supertokens/supertokens-node#feat/oauth2/initial_apis",
+        "supertokens-node": "github:supertokens/supertokens-node#feat/oauth2/base",
         "terser": "^5.31.0",
         "tsx": "^4.10.2",
         "typescript": "4.2"
