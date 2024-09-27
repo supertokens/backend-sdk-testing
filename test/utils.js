@@ -279,12 +279,12 @@ module.exports.startST = async function (config = {}) {
         });
         const stdout = [];
         child.stdout.on("data", (data) => {
-            console.log("[Core log]", data);
+            // console.log("[Core log]", data);
             stdout.push(data);
         });
         const stderr = [];
         child.stderr.on("data", (data) => {
-            console.log("[Core log-err]", data);
+            // console.log("[Core log-err]", data);
             stderr.push(data);
         });
         child.on("close", (code) => {
