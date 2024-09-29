@@ -113,13 +113,16 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
             recipeList: [OAuth2Provider.init()],
         });
 
-        const resp = await OAuth2Provider.createOAuth2Client(
-            {
-                redirectUris: ["http://localhost:3000/redirect-url#asdf"],
-            }
-        );
+        const resp = await OAuth2Provider.createOAuth2Client({
+            redirectUris: ["http://localhost:3000/redirect-url#asdf"],
+        });
 
-        assert.strictEqual(resp.client.redirectUris, null);
+        assert.deepStrictEqual(resp, {
+            status: "ERROR",
+            error: "invalid_redirect_uri",
+            errorDescription:
+                "The value of one or more redirect_uris is invalid. Redirect URIs must not contain fragments (#).",
+        });
     });
 
     it("should update the OAuth2Client", async function () {
@@ -266,7 +269,6 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
         result = await OAuth2Provider.getOAuth2Clients({ clientName: "customClientName" }, {});
         assert.strictEqual(result.status, "OK");
         assert.strictEqual(result.clients.length, 5);
-
     });
 
     describe("validateAccessToken", function () {
