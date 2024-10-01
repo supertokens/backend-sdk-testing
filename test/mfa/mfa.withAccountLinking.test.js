@@ -198,7 +198,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
         assert.strictEqual(res.status, 400);
         assert.deepStrictEqual(res.body, {
             message:
-                "shouldDoAutomaticAccountLinking returned false when creating primary user but shouldTryLinkingWithSessionUser is true",
+                "shouldDoAutomaticAccountLinking returned false when making the session user primary but shouldTryLinkingWithSessionUser is true",
         });
     });
 
