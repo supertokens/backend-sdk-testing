@@ -317,7 +317,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                     appName: "SuperTokens",
                     websiteDomain,
                 },
-                recipeList: [OAuth2Provider.init()],
+                recipeList: [Session.init(), OAuth2Provider.init()],
             });
 
             const redirectUri = "http://localhost:4000/redirect-url";
@@ -370,7 +370,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                     appName: "SuperTokens",
                     websiteDomain,
                 },
-                recipeList: [EmailPassword.init(), OAuth2Provider.init()],
+                recipeList: [EmailPassword.init(), Session.init(), OAuth2Provider.init()],
             });
 
             const redirectUri = "http://localhost:4000/redirect-url";
@@ -836,8 +836,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
 
             assert.deepStrictEqual(respBody, {
                 error: "invalid_request",
-                error_description:
-                    "The post_logout_redirect_uri is not valid for this client.",
+                error_description: "The post_logout_redirect_uri is not valid for this client.",
             });
         });
 
@@ -1107,7 +1106,6 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                         expectError: false,
                     });
 
-
                     const res = await fetch(`${apiDomain}/auth/oauth/token`, {
                         method: "POST",
                         headers: {
@@ -1217,7 +1215,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                         session,
                         skipLogin: true,
                         expectError: false,
-                        expectSessionRefresh: true
+                        expectSessionRefresh: true,
                     });
 
                     const res2 = await fetch(`${apiDomain}/auth/oauth/token`, {
@@ -2778,7 +2776,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                     skipLogin: true,
                 });
 
-                assert.strictEqual(error, "error");
+                assert.strictEqual(error, "invalid_request");
                 assert.ok(errorDescription);
             });
         });
