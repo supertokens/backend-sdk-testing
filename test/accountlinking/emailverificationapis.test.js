@@ -33,6 +33,7 @@ const {
     supertokens,
     ThirdParty,
     EmailVerificationRecipe,
+    Multitenancy,
 } = recipesMock;
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 
@@ -440,6 +441,119 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             let tokens = extractInfoFromResponse(response);
             let accessToken = tokens.accessTokenFromAny;
             assert(accessToken === undefined);
+        });
+
+        it("updateSessionIfRequiredPostEmailVerification creates a new session if the user is linked to another user on a non-default tenant", async function () {
+            const connectionURI = await startST();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    EmailPassword.init(),
+                    EmailVerification.init({
+                        mode: "OPTIONAL",
+                    }),
+                    Session.init(),
+                    ThirdParty.init({
+                        signInAndUpFeature: {
+                            providers: [
+                                {
+                                    config: {
+                                        thirdPartyId: "google",
+                                        clients: [
+                                            {
+                                                clientId: "",
+                                                clientSecret: "",
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    }),
+                    AccountLinking.init({
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
+                    }),
+                    Multitenancy.init(),
+                ],
+            });
+
+            await Multitenancy.createOrUpdateTenant("tenant1", {
+                firstFactors: null,
+            });
+
+            let epUser = (await EmailPassword.signUp("tenant1", "test@example.com", "password123")).user;
+            assert(epUser.isPrimaryUser === false);
+
+            let token = (
+                await EmailVerification.createEmailVerificationToken("tenant1", epUser.loginMethods[0].recipeUserId)
+            ).token;
+
+            let session = await Session.createNewSessionWithoutRequestResponse(
+                "tenant1",
+                epUser.loginMethods[0].recipeUserId
+            );
+            assert(session.getTenantId() === "tenant1");
+            let sessionOnPublic = await Session.createNewSessionWithoutRequestResponse(
+                "public",
+                epUser.loginMethods[0].recipeUserId
+            );
+            assert(sessionOnPublic.getTenantId() === "public");
+
+            let payloadBefore = session.getAccessTokenPayload();
+            assert(payloadBefore["st-ev"]["v"] === false);
+
+            let tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
+                "tenant1",
+                "google",
+                "abc",
+                "test@example.com",
+                false
+            );
+            assert(tpUser.user.isPrimaryUser === false);
+            await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.user.id));
+            await AccountLinking.linkAccounts(epUser.loginMethods[0].recipeUserId, tpUser.user.id);
+
+            let response = await new Promise((resolve, reject) =>
+                request()
+                    .post("/auth/tenant1/user/email/verify")
+                    .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
+                    .send({
+                        method: "token",
+                        token,
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(res);
+                        }
+                    })
+            );
+            assert(response !== undefined);
+            let tokens = extractInfoFromResponse(response);
+            let accessToken = tokens.accessTokenFromHeader;
+
+            let sessionAfter = await Session.getSessionWithoutRequestResponse(accessToken);
+            let payloadAfter = sessionAfter.getAccessTokenPayload();
+            assert(payloadAfter["st-ev"]["v"] === true);
+            assert(sessionAfter.getUserId() === tpUser.user.id);
+            assert(sessionAfter.getRecipeUserId().getAsString() === epUser.id);
+
+            // check that old session is revoked
+            let sessionInformation = await Session.getSessionInformation(session.getHandle());
+            assert(sessionInformation === undefined);
+
+            let sessionInformationOnPublic = await Session.getSessionInformation(sessionOnPublic.getHandle());
+            assert(sessionInformationOnPublic === undefined);
         });
     });
 
