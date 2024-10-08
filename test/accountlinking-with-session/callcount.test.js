@@ -23,7 +23,7 @@ const {
     testPassword,
 } = require("./utils");
 let assert = require("assert");
-const { recipesMock, randomString, resetOverrideParams, getOverrideParams } = require("../../api-mock");
+const { recipesMock, randomString, resetOverrideParams, getOverrideParams, hasFeatureFlag } = require("../../api-mock");
 const {
     AccountLinking,
     EmailPassword,
@@ -239,7 +239,11 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
     });
 
     describe("sign up w/ session", function () {
-        it("should call the core <=3 times without MFA or AL", async () => {
+        it("should call the core <=3 times without MFA or AL if not overwriting the session", async function () {
+            if (await hasFeatureFlag("removedOverwriteSessionDuringSignInUp")) {
+                this.skip();
+            }
+
             await setup({
                 initAccountLinking: false,
                 initMFA: false,

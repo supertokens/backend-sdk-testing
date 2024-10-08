@@ -19,7 +19,7 @@ import { SuperTokensMock } from "./mocks/SuperTokensMock";
 import { TOTPMock } from "./mocks/TOTP";
 import { ThirdPartyMock } from "./mocks/ThirdPartyMock";
 import { UserMetadataMock } from "./mocks/UserMetadataMock";
-import { randomString } from "./utils";
+import { randomString, hasFeatureFlag } from "./utils";
 
 const recipesMock = {
     EmailPassword: EmailPasswordMock,
@@ -50,4 +50,5 @@ export {
     request,
     resetOverrideParams,
     API_PORT,
+    hasFeatureFlag,
 };
