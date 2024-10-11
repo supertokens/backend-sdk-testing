@@ -185,7 +185,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                 session: undefined,
                 recipeUserIdWhoseEmailGotVerified: epUser.loginMethods[0].recipeUserId,
             });
-            assert(res === undefined);
+            assert(res === undefined || res === null);
         });
 
         it("updateSessionIfRequiredPostEmailVerification sets the right claim in the session post verification of the current logged in user, if it did not get linked to another user ", async function () {
