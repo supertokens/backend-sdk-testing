@@ -56,7 +56,10 @@ export function deserializeOverrideParams(vars) {
             loginMethods: vars.userPostPasswordReset.loginMethods.map((lm) => ({
                 ...lm,
                 // @ts-ignore
-                recipeUserId: lm.recipeUserId.recipeUserId,
+                recipeUserId:
+                    typeof lm.recipeUserId === "string"
+                        ? SuperTokens.convertToRecipeUserId(lm.recipeUserId)
+                        : SuperTokens.convertToRecipeUserId(lm.recipeUserId.recipeUserId),
             })),
         } as any);
     }
