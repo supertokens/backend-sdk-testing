@@ -161,16 +161,40 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         it("the reset password flow should link to the oldest user", async function () {
             const email = "test@example.com";
 
-            const { user: tpUser1} = await ThirdParty.manuallyCreateOrUpdateUser("public", "sso", "user1", email, true, undefined, { DO_NOT_LINK: true });
+            const { user: tpUser1 } = await ThirdParty.manuallyCreateOrUpdateUser(
+                "public",
+                "sso",
+                "user1",
+                email,
+                true,
+                undefined,
+                { DO_NOT_LINK: true }
+            );
             assert.notStrictEqual(tpUser1, undefined);
-            const { user: tpUser2} = await ThirdParty.manuallyCreateOrUpdateUser("public", "sso", "user2", email, true, undefined, { DO_NOT_LINK: true });
+            const { user: tpUser2 } = await ThirdParty.manuallyCreateOrUpdateUser(
+                "public",
+                "sso",
+                "user2",
+                email,
+                true,
+                undefined,
+                { DO_NOT_LINK: true }
+            );
             assert.notStrictEqual(tpUser2, undefined);
-            const { user: tpUser3} = await ThirdParty.manuallyCreateOrUpdateUser("public", "sso", "user3", email, true, undefined, { DO_NOT_LINK: true });
+            const { user: tpUser3 } = await ThirdParty.manuallyCreateOrUpdateUser(
+                "public",
+                "sso",
+                "user3",
+                email,
+                true,
+                undefined,
+                { DO_NOT_LINK: true }
+            );
             assert.notStrictEqual(tpUser3, undefined);
 
             const { sentEmail, sendEmailToUserId, token } = await callGenerateTokenPOST(email);
             assert(sentEmail);
-            
+
             assert.strictEqual(sendEmailToUserId, tpUser1.id);
 
             const { userPostPasswordReset } = await callPasswordResetPOST(token);
@@ -269,6 +293,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                         redirectURIOnProviderDashboard: "http://127.0.0.1/callback",
                         redirectURIQueryParams: {
                             code: "abcdefghj",
+                            email,
+                            userId,
                         },
                         email,
                         userId,
@@ -352,12 +378,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         );
 
         logs = await getOverrideLogs();
-
         const passwordResetPOSTRes = logs
             .filter((l) => l.name === "EmailPassword.override.apis.passwordResetPOST" && l.type === "RES")
             .map((l) => l.data);
         assert.strictEqual(passwordResetPOSTRes.length, 1);
-
         const passwordResetPOSTResInput = passwordResetPOSTRes[0];
         emailPostPasswordReset = passwordResetPOSTResInput.email;
         userPostPasswordReset = passwordResetPOSTResInput.user;
