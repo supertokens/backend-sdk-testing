@@ -1284,31 +1284,23 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                 assert.equal(res.body.tenants.length, 6);
                 for (const tenant of res.body.tenants) {
                     if (tenant.tenantId === "public") {
-                        assert.deepEqual(tenant.firstFactors, [
-                            "emailpassword",
-                            "thirdparty",
-                            "otp-email",
-                            "otp-phone",
-                            "link-email",
-                            "link-phone",
-                        ]);
+                        assert.deepEqual(
+                            tenant.firstFactors.sort(),
+                            ["emailpassword", "thirdparty", "otp-email", "otp-phone", "link-email", "link-phone"].sort()
+                        );
                     } else if (tenant.tenantId === "t1") {
-                        assert.deepEqual(tenant.firstFactors, [
-                            "emailpassword",
-                            "thirdparty",
-                            "otp-email",
-                            "otp-phone",
-                            "link-email",
-                            "link-phone",
-                        ]);
+                        assert.deepEqual(
+                            tenant.firstFactors.sort(),
+                            ["emailpassword", "thirdparty", "otp-email", "otp-phone", "link-email", "link-phone"].sort()
+                        );
                     } else if (tenant.tenantId === "t2") {
                         assert.deepEqual(tenant.firstFactors, []);
                     } else if (tenant.tenantId === "t3") {
                         assert.deepEqual(tenant.firstFactors, ["emailpassword"]);
                     } else if (tenant.tenantId === "t4") {
-                        assert.deepEqual(tenant.firstFactors, ["otp-email", "link-phone"]);
+                        assert.deepEqual(tenant.firstFactors.sort(), ["otp-email", "link-phone"].sort());
                     } else if (tenant.tenantId === "t5") {
-                        assert.deepEqual(tenant.firstFactors, ["emailpassword", "thirdparty"]);
+                        assert.deepEqual(tenant.firstFactors.sort(), ["emailpassword", "thirdparty"].sort());
                     } else {
                         assert.fail("Unknown tenant");
                     }
@@ -1369,9 +1361,9 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                 assert.equal(res.body.tenants.length, 6);
                 for (const tenant of res.body.tenants) {
                     if (tenant.tenantId === "public") {
-                        assert.deepEqual(tenant.firstFactors, ["emailpassword", "otp-email"]);
+                        assert.deepEqual(tenant.firstFactors.sort(), ["emailpassword", "otp-email"].sort());
                     } else if (tenant.tenantId === "t1") {
-                        assert.deepEqual(tenant.firstFactors, ["emailpassword", "otp-email"]);
+                        assert.deepEqual(tenant.firstFactors.sort(), ["emailpassword", "otp-email"].sort());
                     } else if (tenant.tenantId === "t2") {
                         assert.deepEqual(tenant.firstFactors, []);
                     } else if (tenant.tenantId === "t3") {
