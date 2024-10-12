@@ -1746,6 +1746,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
                 response.user.loginMethods[0].recipeUserId,
                 "test@example.com",
                 false,
+                undefined,
                 {
                     DO_NOT_LINK: true,
                 }
@@ -1802,6 +1803,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
                 response.user.loginMethods[0].recipeUserId,
                 "test@example.com",
                 false,
+                undefined,
                 {
                     DO_NOT_LINK: true,
                 }
