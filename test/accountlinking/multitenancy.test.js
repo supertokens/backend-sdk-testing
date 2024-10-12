@@ -877,10 +877,14 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
             const shareRes = await MultiTenancy.associateUserToTenant("tenant1", primUser.loginMethods[0].recipeUserId);
             assert.strictEqual(shareRes.status, "OK");
 
-            const resp = await AccountLinking.isSignUpAllowed("tenant1", {
-                email,
-                recipeId: "passwordless",
-            });
+            const resp = await AccountLinking.isSignUpAllowed(
+                "tenant1",
+                {
+                    email,
+                    recipeId: "passwordless",
+                },
+                true
+            );
             assert.deepStrictEqual(resp, false);
         });
 
