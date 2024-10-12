@@ -64,10 +64,10 @@ export function deserializeOverrideParams(vars) {
         vars.userInCallback = {
             ...vars.userInCallback,
             recipeUserId:
-                // @ts-ignore
-                vars.userInCallback.recipeUserId?.recipeUserId &&
-                // @ts-ignore
-                SuperTokens.convertToRecipeUserId(vars.userInCallback.recipeUserId.recipeUserId),
+                typeof vars.userInCallback.recipeUserId === "string"
+                    ? SuperTokens.convertToRecipeUserId(vars.userInCallback.recipeUserId)
+                    : vars.userInCallback.recipeUserId?.recipeUserId &&
+                      SuperTokens.convertToRecipeUserId(vars.userInCallback.recipeUserId.recipeUserId),
         };
     }
     if (vars.primaryUserInCallback) {

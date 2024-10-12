@@ -951,7 +951,6 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
             let overrideParams = await getOverrideParams();
             userInCallback = overrideParams.userInCallback;
-
             assert(userInCallback.id === epUser.id);
             assert(userInCallback.email === "test@example.com");
             assert(userInCallback.recipeUserId.getAsString() === epUser.loginMethods[0].recipeUserId.getAsString());
