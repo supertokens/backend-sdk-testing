@@ -953,7 +953,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             userInCallback = overrideParams.userInCallback;
             assert(userInCallback.id === epUser.id);
             assert(userInCallback.email === "test@example.com");
-            assert(userInCallback.recipeUserId.getAsString() === epUser.loginMethods[0].recipeUserId.getAsString());
+            assert(userInCallback.recipeUserId === epUser.loginMethods[0].recipeUserId.getAsString());
         });
 
         it("calling generateEmailVerifyTokenPOST gives already verified for currently logged in user if email is verified, and updates session", async function () {
@@ -1143,7 +1143,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
             assert(userInCallback.id === epUser.id);
             assert(userInCallback.email === "test@example.com");
-            assert(userInCallback.recipeUserId.getAsString() === epUser.loginMethods[0].recipeUserId.getAsString());
+            assert(userInCallback.recipeUserId === epUser.loginMethods[0].recipeUserId.getAsString());
         });
 
         it("calling generateEmailVerifyTokenPOST gives email already verified for currently logged in user if email is verified, and updates session if needed", async function () {

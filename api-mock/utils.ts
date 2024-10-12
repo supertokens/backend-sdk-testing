@@ -63,12 +63,23 @@ export function deserializeOverrideParams(vars) {
     if (vars.userInCallback) {
         vars.userInCallback = {
             ...vars.userInCallback,
+            loginMethods:
+                vars.userInCallback.loginMethods !== undefined &&
+                vars.userInCallback.loginMethods.map((lm) => ({
+                    email: undefined, // this is there cause the user object json adds them as undefined as opposed to omitting it entirely
+                    thirdParty: undefined,
+                    phoneNumber: undefined,
+                    ...lm,
+                    recipeUserId: typeof lm.recipeUserId === "string" ? lm.recipeUserId : lm.recipeUserId.recipeUserId,
+                })),
             recipeUserId:
-                typeof vars.userInCallback.recipeUserId === "string"
-                    ? SuperTokens.convertToRecipeUserId(vars.userInCallback.recipeUserId)
-                    : vars.userInCallback.recipeUserId?.recipeUserId &&
-                      SuperTokens.convertToRecipeUserId(vars.userInCallback.recipeUserId.recipeUserId),
+                typeof vars.recipeUserId === "string"
+                    ? vars.userInCallback.recipeUserId
+                    : vars.userInCallback.recipeUserId?.recipeUserId && vars.userInCallback.recipeUserId.recipeUserId,
         };
+        if (vars.userInCallback.recipeUserId === undefined) {
+            delete vars.userInCallback.recipeUserId;
+        }
     }
     if (vars.primaryUserInCallback) {
         vars.primaryUserInCallback = new UserClass(vars.primaryUserInCallback as any);
