@@ -1678,6 +1678,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                                 redirectURIOnProviderDashboard: "http://127.0.0.1/callback",
                                 redirectURIQueryParams: {
                                     code: "abcdefghj",
+                                    email,
+                                    userId: "user" + date,
                                 },
                                 email,
                                 userId: "user" + date,
