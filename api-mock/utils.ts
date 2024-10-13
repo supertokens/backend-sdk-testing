@@ -73,7 +73,7 @@ export function deserializeOverrideParams(vars) {
                     recipeUserId: typeof lm.recipeUserId === "string" ? lm.recipeUserId : lm.recipeUserId.recipeUserId,
                 })),
             recipeUserId:
-                typeof vars.recipeUserId === "string"
+                typeof vars.userInCallback.recipeUserId === "string"
                     ? vars.userInCallback.recipeUserId
                     : vars.userInCallback.recipeUserId?.recipeUserId && vars.userInCallback.recipeUserId.recipeUserId,
         };
