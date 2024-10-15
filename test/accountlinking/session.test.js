@@ -23,7 +23,15 @@ const {
 } = require("../utils");
 let assert = require("assert");
 const { recipesMock, randomString, request, getOverrideParams, getOverrideLogs } = require("../../api-mock");
-const { AccountLinking, EmailPassword, Session, supertokens, EmailVerification, TestPrimitiveClaim } = recipesMock;
+const {
+    AccountLinking,
+    EmailPassword,
+    Session,
+    supertokens,
+    EmailVerification,
+    TestPrimitiveClaim,
+    Multitenancy,
+} = recipesMock;
 let { protectedProps } = require("supertokens-node/lib/build/recipe/session/constants");
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js]")}`, function () {
@@ -843,118 +851,353 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js
     });
 
     describe("revokeAllSessionsForUser test", function () {
-        it("revokeAllSessionsForUser with linked accounts should delete all the sessions if revokeSessionsForLinkedAccounts is true", async function () {
-            const connectionURI = await startST();
-            supertokens.init({
-                supertokens: {
-                    connectionURI,
-                },
-                appInfo: {
-                    apiDomain: "api.supertokens.io",
-                    appName: "SuperTokens",
-                    websiteDomain: "supertokens.io",
-                },
-                recipeList: [EmailPassword.init(), Session.init()],
+        describe("without multitenancy", () => {
+            it("revokeAllSessionsForUser with linked accounts should delete all the sessions if revokeSessionsForLinkedAccounts is true", async function () {
+                const connectionURI = await startST();
+                supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        apiDomain: "api.supertokens.io",
+                        appName: "SuperTokens",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [EmailPassword.init(), Session.init()],
+                });
+
+                let epUser = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
+                await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
+
+                let epUser2 = (await EmailPassword.signUp("public", "test2@example.com", "password123")).user;
+
+                await AccountLinking.linkAccounts(epUser2.loginMethods[0].recipeUserId, epUser.id);
+
+                let epuser2session = await Session.createNewSessionWithoutRequestResponse(
+                    "public",
+                    epUser2.loginMethods[0].recipeUserId
+                );
+
+                let epuser1session = await Session.createNewSessionWithoutRequestResponse(
+                    "public",
+                    epUser.loginMethods[0].recipeUserId
+                );
+
+                let result = await Session.revokeAllSessionsForUser(epUser2.id);
+                assert(result.length === 2);
+
+                assert((await Session.getSessionInformation(epuser2session.getHandle())) === undefined);
+                assert((await Session.getSessionInformation(epuser1session.getHandle())) === undefined);
             });
 
-            let epUser = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
-            await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
+            it("revokeAllSessionsForUser with linked accounts should delete only specific account's sessions if revokeSessionsForLinkedAccounts is false", async function () {
+                const connectionURI = await startST();
+                supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        apiDomain: "api.supertokens.io",
+                        appName: "SuperTokens",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [EmailPassword.init(), Session.init()],
+                });
 
-            let epUser2 = (await EmailPassword.signUp("public", "test2@example.com", "password123")).user;
+                let epUser = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
+                await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
 
-            await AccountLinking.linkAccounts(epUser2.loginMethods[0].recipeUserId, epUser.id);
+                let epUser2 = (await EmailPassword.signUp("public", "test2@example.com", "password123")).user;
 
-            let epuser2session = await Session.createNewSessionWithoutRequestResponse(
-                "public",
-                epUser2.loginMethods[0].recipeUserId
-            );
+                await AccountLinking.linkAccounts(epUser2.loginMethods[0].recipeUserId, epUser.id);
 
-            let epuser1session = await Session.createNewSessionWithoutRequestResponse(
-                "public",
-                epUser.loginMethods[0].recipeUserId
-            );
+                let epuser2session = await Session.createNewSessionWithoutRequestResponse(
+                    "public",
+                    epUser2.loginMethods[0].recipeUserId
+                );
 
-            let result = await Session.revokeAllSessionsForUser(epUser2.id);
-            assert(result.length === 2);
+                let epuser1session = await Session.createNewSessionWithoutRequestResponse(
+                    "public",
+                    epUser.loginMethods[0].recipeUserId
+                );
 
-            assert((await Session.getSessionInformation(epuser2session.getHandle())) === undefined);
-            assert((await Session.getSessionInformation(epuser1session.getHandle())) === undefined);
+                let result = await Session.revokeAllSessionsForUser(epUser2.id, false);
+                assert(result.length === 1);
+
+                assert((await Session.getSessionInformation(epuser2session.getHandle())) === undefined);
+                assert((await Session.getSessionInformation(epuser1session.getHandle())) !== undefined);
+            });
+
+            it("revokeAllSessionsForUser with linked accounts should delete only the primary user's session if that id is passed and if revokeSessionsForLinkedAccounts is false", async function () {
+                const connectionURI = await startST();
+                supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        apiDomain: "api.supertokens.io",
+                        appName: "SuperTokens",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [EmailPassword.init(), Session.init()],
+                });
+
+                let epUser = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
+                await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
+
+                let epUser2 = (await EmailPassword.signUp("public", "test2@example.com", "password123")).user;
+
+                await AccountLinking.linkAccounts(epUser2.loginMethods[0].recipeUserId, epUser.id);
+
+                let epuser2session = await Session.createNewSessionWithoutRequestResponse(
+                    "public",
+                    epUser2.loginMethods[0].recipeUserId
+                );
+
+                let epuser1session = await Session.createNewSessionWithoutRequestResponse(
+                    "public",
+                    epUser.loginMethods[0].recipeUserId
+                );
+
+                let result = await Session.revokeAllSessionsForUser(epUser.id, false);
+                assert(result.length === 1);
+
+                assert((await Session.getSessionInformation(epuser2session.getHandle())) !== undefined);
+                assert((await Session.getSessionInformation(epuser1session.getHandle())) === undefined);
+            });
+        });
+        describe("on the public tenant", () => {
+            it("revokeAllSessionsForUser with linked accounts should delete all the sessions if revokeSessionsForLinkedAccounts is true", async function () {
+                const connectionURI = await startST();
+                supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        apiDomain: "api.supertokens.io",
+                        appName: "SuperTokens",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [EmailPassword.init(), Session.init(), Multitenancy.init()],
+                });
+                await Multitenancy.createOrUpdateTenant("tenant1", {
+                    firstFactors: null,
+                });
+
+                let epUser = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
+                await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
+
+                let epUser2 = (await EmailPassword.signUp("public", "test2@example.com", "password123")).user;
+
+                await AccountLinking.linkAccounts(epUser2.loginMethods[0].recipeUserId, epUser.id);
+
+                let epuser2session = await Session.createNewSessionWithoutRequestResponse(
+                    "public",
+                    epUser2.loginMethods[0].recipeUserId
+                );
+                let epuser2tenant1session = await Session.createNewSessionWithoutRequestResponse(
+                    "tenant1",
+                    epUser2.loginMethods[0].recipeUserId
+                );
+
+                let epuser1session = await Session.createNewSessionWithoutRequestResponse(
+                    "public",
+                    epUser.loginMethods[0].recipeUserId
+                );
+
+                let result = await Session.revokeAllSessionsForUser(epUser2.id, undefined, "public");
+                assert(result.length === 2);
+
+                assert((await Session.getSessionInformation(epuser2session.getHandle())) === undefined);
+                assert((await Session.getSessionInformation(epuser1session.getHandle())) === undefined);
+                assert((await Session.getSessionInformation(epuser2tenant1session.getHandle())) !== undefined);
+            });
+
+            it("revokeAllSessionsForUser with linked accounts should delete only specific account's sessions if revokeSessionsForLinkedAccounts is false", async function () {
+                const connectionURI = await startST();
+                supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        apiDomain: "api.supertokens.io",
+                        appName: "SuperTokens",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [EmailPassword.init(), Session.init(), Multitenancy.init()],
+                });
+                await Multitenancy.createOrUpdateTenant("tenant1", {
+                    firstFactors: null,
+                });
+
+                let epUser = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
+                await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
+
+                let epUser2 = (await EmailPassword.signUp("public", "test2@example.com", "password123")).user;
+
+                await AccountLinking.linkAccounts(epUser2.loginMethods[0].recipeUserId, epUser.id);
+
+                let epuser2session = await Session.createNewSessionWithoutRequestResponse(
+                    "public",
+                    epUser2.loginMethods[0].recipeUserId
+                );
+                let epuser2tenant1session = await Session.createNewSessionWithoutRequestResponse(
+                    "tenant1",
+                    epUser2.loginMethods[0].recipeUserId
+                );
+
+                let epuser1session = await Session.createNewSessionWithoutRequestResponse(
+                    "public",
+                    epUser.loginMethods[0].recipeUserId
+                );
+
+                let result = await Session.revokeAllSessionsForUser(epUser2.id, false, "public");
+                assert(result.length === 1);
+
+                assert((await Session.getSessionInformation(epuser2session.getHandle())) === undefined);
+                assert((await Session.getSessionInformation(epuser1session.getHandle())) !== undefined);
+                assert((await Session.getSessionInformation(epuser2tenant1session.getHandle())) !== undefined);
+            });
         });
 
-        it("revokeAllSessionsForUser with linked accounts should delete only specific account's sessions if revokeSessionsForLinkedAccounts is false", async function () {
-            const connectionURI = await startST();
-            supertokens.init({
-                supertokens: {
-                    connectionURI,
-                },
-                appInfo: {
-                    apiDomain: "api.supertokens.io",
-                    appName: "SuperTokens",
-                    websiteDomain: "supertokens.io",
-                },
-                recipeList: [EmailPassword.init(), Session.init()],
+        describe("on a subtenant", () => {
+            it("revokeAllSessionsForUser with linked accounts should delete all the sessions if revokeSessionsForLinkedAccounts is true", async function () {
+                const connectionURI = await startST();
+                supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        apiDomain: "api.supertokens.io",
+                        appName: "SuperTokens",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [EmailPassword.init(), Session.init(), Multitenancy.init()],
+                });
+                await Multitenancy.createOrUpdateTenant("tenant1", {
+                    firstFactors: null,
+                });
+
+                let epUser = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
+                await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
+
+                let epUser2 = (await EmailPassword.signUp("public", "test2@example.com", "password123")).user;
+
+                await AccountLinking.linkAccounts(epUser2.loginMethods[0].recipeUserId, epUser.id);
+
+                let epuser2session = await Session.createNewSessionWithoutRequestResponse(
+                    "tenant1",
+                    epUser2.loginMethods[0].recipeUserId
+                );
+                let epuser2publictenantsession = await Session.createNewSessionWithoutRequestResponse(
+                    "public",
+                    epUser2.loginMethods[0].recipeUserId
+                );
+
+                let epuser1session = await Session.createNewSessionWithoutRequestResponse(
+                    "tenant1",
+                    epUser.loginMethods[0].recipeUserId
+                );
+
+                let result = await Session.revokeAllSessionsForUser(epUser2.id, undefined, "tenant1");
+                assert(result.length === 2);
+
+                assert((await Session.getSessionInformation(epuser2session.getHandle())) === undefined);
+                assert((await Session.getSessionInformation(epuser1session.getHandle())) === undefined);
+                assert((await Session.getSessionInformation(epuser2publictenantsession.getHandle())) !== undefined);
             });
 
-            let epUser = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
-            await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
+            it("revokeAllSessionsForUser with linked accounts should delete only specific account's sessions if revokeSessionsForLinkedAccounts is false", async function () {
+                const connectionURI = await startST();
+                supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        apiDomain: "api.supertokens.io",
+                        appName: "SuperTokens",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [EmailPassword.init(), Session.init(), Multitenancy.init()],
+                });
+                await Multitenancy.createOrUpdateTenant("tenant1", {
+                    firstFactors: null,
+                });
 
-            let epUser2 = (await EmailPassword.signUp("public", "test2@example.com", "password123")).user;
+                let epUser = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
+                await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
 
-            await AccountLinking.linkAccounts(epUser2.loginMethods[0].recipeUserId, epUser.id);
+                let epUser2 = (await EmailPassword.signUp("public", "test2@example.com", "password123")).user;
 
-            let epuser2session = await Session.createNewSessionWithoutRequestResponse(
-                "public",
-                epUser2.loginMethods[0].recipeUserId
-            );
+                await AccountLinking.linkAccounts(epUser2.loginMethods[0].recipeUserId, epUser.id);
 
-            let epuser1session = await Session.createNewSessionWithoutRequestResponse(
-                "public",
-                epUser.loginMethods[0].recipeUserId
-            );
+                let epuser2session = await Session.createNewSessionWithoutRequestResponse(
+                    "tenant1",
+                    epUser2.loginMethods[0].recipeUserId
+                );
+                let epuser2publictenantsession = await Session.createNewSessionWithoutRequestResponse(
+                    "public",
+                    epUser2.loginMethods[0].recipeUserId
+                );
 
-            let result = await Session.revokeAllSessionsForUser(epUser2.id, false);
-            assert(result.length === 1);
+                let epuser1session = await Session.createNewSessionWithoutRequestResponse(
+                    "tenant1",
+                    epUser.loginMethods[0].recipeUserId
+                );
 
-            assert((await Session.getSessionInformation(epuser2session.getHandle())) === undefined);
-            assert((await Session.getSessionInformation(epuser1session.getHandle())) !== undefined);
-        });
+                let result = await Session.revokeAllSessionsForUser(epUser2.id, false, "tenant1");
+                assert(result.length === 1);
 
-        it("revokeAllSessionsForUser with linked accounts should delete only the primary user's session if that id is passed and if revokeSessionsForLinkedAccounts is false", async function () {
-            const connectionURI = await startST();
-            supertokens.init({
-                supertokens: {
-                    connectionURI,
-                },
-                appInfo: {
-                    apiDomain: "api.supertokens.io",
-                    appName: "SuperTokens",
-                    websiteDomain: "supertokens.io",
-                },
-                recipeList: [EmailPassword.init(), Session.init()],
+                assert((await Session.getSessionInformation(epuser2session.getHandle())) === undefined);
+                assert((await Session.getSessionInformation(epuser1session.getHandle())) !== undefined);
+                assert((await Session.getSessionInformation(epuser2publictenantsession.getHandle())) !== undefined);
             });
 
-            let epUser = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
-            await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
+            it("revokeAllSessionsForUser with linked accounts should revoke across tenants if the tenantId is undefined", async function () {
+                const connectionURI = await startST();
+                supertokens.init({
+                    supertokens: {
+                        connectionURI,
+                    },
+                    appInfo: {
+                        apiDomain: "api.supertokens.io",
+                        appName: "SuperTokens",
+                        websiteDomain: "supertokens.io",
+                    },
+                    recipeList: [EmailPassword.init(), Session.init(), Multitenancy.init()],
+                });
+                await Multitenancy.createOrUpdateTenant("tenant1", {
+                    firstFactors: null,
+                });
 
-            let epUser2 = (await EmailPassword.signUp("public", "test2@example.com", "password123")).user;
+                let epUser = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
+                await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
 
-            await AccountLinking.linkAccounts(epUser2.loginMethods[0].recipeUserId, epUser.id);
+                let epUser2 = (await EmailPassword.signUp("public", "test2@example.com", "password123")).user;
 
-            let epuser2session = await Session.createNewSessionWithoutRequestResponse(
-                "public",
-                epUser2.loginMethods[0].recipeUserId
-            );
+                await AccountLinking.linkAccounts(epUser2.loginMethods[0].recipeUserId, epUser.id);
 
-            let epuser1session = await Session.createNewSessionWithoutRequestResponse(
-                "public",
-                epUser.loginMethods[0].recipeUserId
-            );
+                let epuser2session = await Session.createNewSessionWithoutRequestResponse(
+                    "tenant1",
+                    epUser2.loginMethods[0].recipeUserId
+                );
+                let epuser2publictenantsession = await Session.createNewSessionWithoutRequestResponse(
+                    "public",
+                    epUser2.loginMethods[0].recipeUserId
+                );
 
-            let result = await Session.revokeAllSessionsForUser(epUser.id, false);
-            assert(result.length === 1);
+                let epuser1session = await Session.createNewSessionWithoutRequestResponse(
+                    "tenant1",
+                    epUser.loginMethods[0].recipeUserId
+                );
 
-            assert((await Session.getSessionInformation(epuser2session.getHandle())) !== undefined);
-            assert((await Session.getSessionInformation(epuser1session.getHandle())) === undefined);
+                let result = await Session.revokeAllSessionsForUser(epUser2.id);
+                assert.strictEqual(result.length, 3);
+
+                assert.strictEqual((await Session.getSessionInformation(epuser2session.getHandle())), undefined);
+                assert.strictEqual((await Session.getSessionInformation(epuser1session.getHandle())), undefined);
+                assert.strictEqual((await Session.getSessionInformation(epuser2publictenantsession.getHandle())), undefined);
+            });
         });
     });
 
@@ -1222,7 +1465,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js
             await session.fetchAndSetClaim(primitiveClaim);
 
             const logs = await getOverrideLogs();
-            const callLogs = logs.filter(l => l.type === "CALL" && l.name === `claim-some-key.fetchValue`)
+            const callLogs = logs.filter((l) => l.type === "CALL" && l.name === `claim-some-key.fetchValue`);
             assert.strictEqual(callLogs.length, 1);
             assert.strictEqual(callLogs[0].data.userId, epUser.id);
             assert.strictEqual(callLogs[0].data.recipeUserId, epUser2.loginMethods[0].recipeUserId.getAsString());
@@ -1259,7 +1502,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js
             await Session.fetchAndSetClaim(session.getHandle(), primitiveClaim);
 
             const logs = await getOverrideLogs();
-            const callLogs = logs.filter(l => l.type === "CALL" && l.name === `claim-some-key.fetchValue`)
+            const callLogs = logs.filter((l) => l.type === "CALL" && l.name === `claim-some-key.fetchValue`);
             assert.strictEqual(callLogs.length, 1);
             assert.strictEqual(callLogs[0].data.userId, epUser.id);
             assert.strictEqual(callLogs[0].data.recipeUserId, epUser2.loginMethods[0].recipeUserId.getAsString());

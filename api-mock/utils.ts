@@ -56,19 +56,30 @@ export function deserializeOverrideParams(vars) {
             loginMethods: vars.userPostPasswordReset.loginMethods.map((lm) => ({
                 ...lm,
                 // @ts-ignore
-                recipeUserId: lm.recipeUserId.recipeUserId,
+                recipeUserId: typeof lm.recipeUserId === "string" ? lm.recipeUserId : lm.recipeUserId.recipeUserId,
             })),
         } as any);
     }
     if (vars.userInCallback) {
         vars.userInCallback = {
             ...vars.userInCallback,
+            loginMethods:
+                vars.userInCallback.loginMethods !== undefined &&
+                vars.userInCallback.loginMethods.map((lm) => ({
+                    email: undefined, // this is there cause the user object json adds them as undefined as opposed to omitting it entirely
+                    thirdParty: undefined,
+                    phoneNumber: undefined,
+                    ...lm,
+                    recipeUserId: typeof lm.recipeUserId === "string" ? lm.recipeUserId : lm.recipeUserId.recipeUserId,
+                })),
             recipeUserId:
-                // @ts-ignore
-                vars.userInCallback.recipeUserId?.recipeUserId &&
-                // @ts-ignore
-                SuperTokens.convertToRecipeUserId(vars.userInCallback.recipeUserId.recipeUserId),
+                typeof vars.userInCallback.recipeUserId === "string"
+                    ? vars.userInCallback.recipeUserId
+                    : vars.userInCallback.recipeUserId?.recipeUserId && vars.userInCallback.recipeUserId.recipeUserId,
         };
+        if (vars.userInCallback.recipeUserId === undefined) {
+            delete vars.userInCallback.recipeUserId;
+        }
     }
     if (vars.primaryUserInCallback) {
         vars.primaryUserInCallback = new UserClass(vars.primaryUserInCallback as any);
