@@ -5,6 +5,7 @@ import { User as UserClass } from "supertokens-node/lib/build/user";
 import { SessionClaim, SessionClaimValidator } from "supertokens-node/lib/build/recipe/session/types";
 import { UserContext } from "supertokens-node/lib/build/types";
 import { JSONObject } from "supertokens-node/recipe/usermetadata";
+import { API_PORT, request } from "./fetcher";
 
 const uniqueFn = new Map<string, string>();
 
@@ -109,4 +110,11 @@ export function makeBuiltInClaimSerializable<
     }
 
     return serializableClaim;
+}
+
+export async function hasFeatureFlag(featureFlag: string) {
+    const response = await fetch(`http://localhost:${API_PORT}/test/featureflag`);
+
+    const flags = await response.json();
+    return flags.includes(featureFlag);
 }

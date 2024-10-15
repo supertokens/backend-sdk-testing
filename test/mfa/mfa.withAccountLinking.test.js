@@ -24,7 +24,7 @@ const {
 } = require("../utils");
 let assert = require("assert");
 const { epSignIn, epSignUp, plessEmailSignInUp, tpSignInUp, validateUserEmail } = require("./utils");
-const { recipesMock, getOverrideParams, randomString } = require("../../api-mock");
+const { recipesMock, getOverrideParams, randomString, hasFeatureFlag } = require("../../api-mock");
 const {
     AccountLinking,
     Session,
@@ -198,7 +198,11 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
         assert.strictEqual("OK", res.body.status);
         assert.strictEqual(false, res.body.user.isPrimaryUser);
         assert.strictEqual(1, res.body.user.loginMethods.length);
-        assert.strictEqual(undefined, cookies.accessTokenFromAny);
+        if (await hasFeatureFlag("removedOverwriteSessionDuringSignInUp")) {
+            assert.notStrictEqual(undefined, cookies.accessTokenFromAny);
+        } else {
+            assert.strictEqual(undefined, cookies.accessTokenFromAny);
+        }
     });
 
     it("test factor setup with same email as another existing user when automatic account linking is turned on but verification not required", async function () {
