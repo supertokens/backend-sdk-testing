@@ -33,7 +33,7 @@ export const SuperTokensMock: Partial<typeof SuperTokens> = {
                 userContext,
             },
         });
-        return user ? new UserClass(user) : user;
+        return user !== undefined && user !== null ? new UserClass(user) : undefined;
     },
     deleteUser: async (userId, removeAllLinkedAccounts, userContext) => {
         return await queryAPI({

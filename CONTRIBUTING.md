@@ -60,11 +60,18 @@ git clone https://github.com/supertokens/supertokens-python.git
 3. Navigate to the `supertokens-node` repository
 4. Start the API test server, and keep it running
    `cd test/test-server && npm i && npm run start`
-5. In another terminal run all tests against node-sdk
+5. In another terminal run all tests against node-sdk (run the following in the backend-sdk-testing repository)
    `INSTALL_PATH=../supertokens-root npm test`
 
 ## Python Testing
-TODO
+1. Navigate to the `supertokens-root` repository
+2. Start the testing environment  
+   `./startTestEnv --wait`
+3. Navigate to the `supertokens-python` repository
+4. Start the API test server, and keep it running
+   `cd tests/test-server && SUPERTOKENS_ENV=testing API_PORT=3030 ST_CONNECTION_URI=http://localhost:8081 python3 app.py`
+5. In another terminal run all tests against python-sdk (run the following in the backend-sdk-testing repository)
+   `INSTALL_PATH=../supertokens-root npm test`
 
 ## Golang Testing
 TODO

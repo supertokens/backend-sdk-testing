@@ -14,7 +14,7 @@
  */
 const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
 let assert = require("assert");
-const { getOverrideParams, randomString, recipesMock, request } = require("../../api-mock");
+const { getOverrideParams, randomString, recipesMock, request, getOverrideLogs } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const { AccountLinking, EmailPassword, EmailVerification, Session, supertokens, ThirdParty } = recipesMock;
 
@@ -123,6 +123,166 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             sendEmailCallbackCalled = overrideParams.sendEmailCallbackCalled;
 
             assert(sendEmailCallbackCalled === false);
+        });
+
+        it("calling generatePasswordResetTokenPOST with single recipe users and no email password user should be OK, and send email", async function () {
+            const connectionURI = await startST();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    EmailPassword.init(),
+                    Session.init(),
+                    ThirdParty.init({
+                        signInAndUpFeature: {
+                            providers: [
+                                {
+                                    config: {
+                                        thirdPartyId: "google",
+                                        clients: [
+                                            {
+                                                clientId: "",
+                                                clientSecret: "",
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    }),
+                    AccountLinking.init({
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
+                    }),
+                ],
+            });
+
+            let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
+                "public",
+                "google",
+                "abc",
+                "test@example.com",
+                true,
+                undefined,
+                { DO_NOT_LINK: true }
+            );
+            assert(tpUser.isPrimaryUser === false);
+
+            let res = await new Promise((resolve) =>
+                request()
+                    .post("/auth/user/password/reset/token")
+                    .send({
+                        formFields: [
+                            {
+                                id: "email",
+                                value: "test@example.com",
+                            },
+                        ],
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            resolve(undefined);
+                        } else {
+                            resolve(res);
+                        }
+                    })
+            );
+            assert(res !== undefined);
+            assert(res.body.status === "OK");
+
+            const logs = await getOverrideLogs();
+            const sendEmailCallParams = logs
+                .filter((l) => l.name === "EmailPassword.emailDelivery.override.sendEmail" && l.type === "CALL")
+                .map((l) => l.data);
+            assert.strictEqual(sendEmailCallParams.length, 1);
+            const sendEmailInput = sendEmailCallParams[0][0];
+            assert.deepStrictEqual(sendEmailInput.type, "PASSWORD_RESET");
+            assert.deepStrictEqual(sendEmailInput.user, { id: tpUser.id, email: "test@example.com" });
+        });
+
+        it("calling generatePasswordResetTokenPOST with single unverified recipe users and no email password user should be OK, and not send any email if linking requires verification", async function () {
+            let sendEmailCallbackCalled = false;
+            const connectionURI = await startST();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    EmailPassword.init(),
+                    Session.init(),
+                    ThirdParty.init({
+                        signInAndUpFeature: {
+                            providers: [
+                                {
+                                    config: {
+                                        thirdPartyId: "google",
+                                        clients: [
+                                            {
+                                                clientId: "",
+                                                clientSecret: "",
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    }),
+                    AccountLinking.init({
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
+                    }),
+                ],
+            });
+
+            let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser(
+                "public",
+                "google",
+                "abc",
+                "test@example.com",
+                false
+            );
+            assert(tpUser.isPrimaryUser === false);
+
+            let res = await new Promise((resolve) =>
+                request()
+                    .post("/auth/user/password/reset/token")
+                    .send({
+                        formFields: [
+                            {
+                                id: "email",
+                                value: "test@example.com",
+                            },
+                        ],
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            resolve(undefined);
+                        } else {
+                            resolve(res);
+                        }
+                    })
+            );
+            assert(res !== undefined);
+            assert(res.body.status === "OK");
+
+            const logs = await getOverrideLogs();
+            const sendEmailCallParams = logs
+                .filter((l) => l.name === "EmailPassword.emailDelivery.override.sendEmail" && l.type === "CALL")
+                .map((l) => l.data);
+            assert.strictEqual(sendEmailCallParams.length, 0);
         });
 
         it("calling generatePasswordResetTokenPOST with no primary user and existing email password user should be OK, and should send an email", async function () {
@@ -797,7 +957,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.id));
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
-            const evToken = await EmailVerification.createEmailVerificationToken("public", epUser.recipeUserId, "test@example.com");
+            const evToken = await EmailVerification.createEmailVerificationToken(
+                "public",
+                epUser.recipeUserId,
+                "test@example.com"
+            );
             assert.strictEqual(evToken.status, "OK");
             await EmailVerification.verifyEmailUsingToken("public", evToken.token, false);
             await AccountLinking.linkAccounts(epUser.user.loginMethods[0].recipeUserId, tpUser.id);
@@ -1174,7 +1338,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert(sendEmailToUserId === tpUser.id);
         });
 
-        it("calling generatePasswordResetTokenPOST with recipe user existing, and no email password user existing, primary user is not verified, and email verification is not required, should not send email - cause no primary user exists", async function () {
+        it("calling generatePasswordResetTokenPOST with recipe user existing, and no email password user existing, primary user is not verified, and email verification is not required, should send email", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
             const connectionURI = await startST();
@@ -1266,8 +1430,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
             sendEmailToUserId = overrideParams.sendEmailToUserId;
 
-            assert(sendEmailToUserEmail === undefined);
-            assert(sendEmailToUserId === undefined);
+            assert(sendEmailToUserEmail === "test2@example.com");
+            assert(sendEmailToUserId === tpUser.id);
         });
 
         it("calling generatePasswordResetTokenPOST with primary user existing, and email password user existing, but account linking is disabled should send email, but for email password user", async function () {
@@ -1756,6 +1920,107 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
                             {
                                 id: "email",
                                 value: "test@example.com",
+                            },
+                        ],
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            resolve(undefined);
+                        } else {
+                            resolve(res);
+                        }
+                    })
+            );
+            assert(res !== undefined);
+            assert.strictEqual(res.body.status, "PASSWORD_RESET_NOT_ALLOWED");
+            assert.strictEqual(
+                res.body.reason,
+                "Reset password link was not created because of account take over risk. Please contact support. (ERR_CODE_001)"
+            );
+
+            let overrideParams = await getOverrideParams();
+            sendEmailToUserId = overrideParams.sendEmailToUserId;
+            sendEmailToUserEmail = overrideParams.sendEmailToUserEmail;
+
+            assert.strictEqual(sendEmailToUserId, undefined);
+            assert.strictEqual(sendEmailToUserEmail, undefined);
+        });
+
+        it("calling generatePasswordResetTokenPOST with primary user existing, with a verified TP user (for emailA) and an unverified email password user (for emailV), account linking enabled, email verification required should say not allowed for emailV", async function () {
+            let sendEmailToUserId = undefined;
+            let sendEmailToUserEmail = undefined;
+            const emailA = "test@example.com";
+            const emailV = "test2@example.com";
+
+            const connectionURI = await startST();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    EmailPassword.init({
+                        emailDelivery: {
+                            override: (oI) => {
+                                return {
+                                    ...oI,
+                                    sendEmail: async function (input) {
+                                        sendEmailToUserId = input.user.id;
+                                        sendEmailToUserEmail = input.user.email;
+                                    },
+                                };
+                            },
+                        },
+                    }),
+                    Session.init(),
+                    EmailVerification.init({
+                        mode: "OPTIONAL",
+                    }),
+                    ThirdParty.init({
+                        signInAndUpFeature: {
+                            providers: [
+                                {
+                                    config: {
+                                        thirdPartyId: "google",
+                                        clients: [
+                                            {
+                                                clientId: "",
+                                                clientSecret: "",
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    }),
+                    AccountLinking.init({
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
+                    }),
+                ],
+            });
+
+            let { user: tpUser } = await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "abc", emailA, true);
+            assert(tpUser.isPrimaryUser === true);
+            await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.id));
+
+            let epUser2 = await EmailPassword.signUp("public", emailV, "password1234");
+            assert(epUser2.user.isPrimaryUser === false);
+            await AccountLinking.linkAccounts(epUser2.user.loginMethods[0].recipeUserId, tpUser.id);
+
+            let res = await new Promise((resolve) =>
+                request()
+                    .post("/auth/user/password/reset/token")
+                    .send({
+                        formFields: [
+                            {
+                                id: "email",
+                                value: emailV,
                             },
                         ],
                     })
@@ -3158,7 +3423,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.id));
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
-            const evToken = await EmailVerification.createEmailVerificationToken("public", epUser.recipeUserId, "test@example.com");
+            const evToken = await EmailVerification.createEmailVerificationToken(
+                "public",
+                epUser.recipeUserId,
+                "test@example.com"
+            );
             assert.strictEqual(evToken.status, "OK");
             await EmailVerification.verifyEmailUsingToken("public", evToken.token, false);
             await AccountLinking.linkAccounts(epUser.user.loginMethods[0].recipeUserId, tpUser.id);
@@ -3330,7 +3599,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.id));
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
-            const evToken = await EmailVerification.createEmailVerificationToken("public", epUser.recipeUserId, "test@example.com");
+            const evToken = await EmailVerification.createEmailVerificationToken(
+                "public",
+                epUser.recipeUserId,
+                "test@example.com"
+            );
             assert.strictEqual(evToken.status, "OK");
             await EmailVerification.verifyEmailUsingToken("public", evToken.token, false);
             await AccountLinking.linkAccounts(epUser.user.loginMethods[0].recipeUserId, tpUser.id);
@@ -3500,7 +3773,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.id));
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
-            const evToken = await EmailVerification.createEmailVerificationToken("public", epUser.recipeUserId, "test@example.com");
+            const evToken = await EmailVerification.createEmailVerificationToken(
+                "public",
+                epUser.recipeUserId,
+                "test@example.com"
+            );
             assert.strictEqual(evToken.status, "OK");
             await EmailVerification.verifyEmailUsingToken("public", evToken.token, false);
             await AccountLinking.linkAccounts(epUser.user.loginMethods[0].recipeUserId, tpUser.id);
@@ -3689,7 +3966,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.id));
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
-            const evToken = await EmailVerification.createEmailVerificationToken("public", epUser.recipeUserId, "test@example.com");
+            const evToken = await EmailVerification.createEmailVerificationToken(
+                "public",
+                epUser.recipeUserId,
+                "test@example.com"
+            );
             assert.strictEqual(evToken.status, "OK");
             await EmailVerification.verifyEmailUsingToken("public", evToken.token, false);
             await AccountLinking.linkAccounts(epUser.user.loginMethods[0].recipeUserId, tpUser.id);

@@ -5,6 +5,7 @@ import {
     queryAPI,
     request,
     resetOverrideParams,
+    resetOverrideLogs,
     API_PORT,
 } from "./fetcher";
 import { AccountLinkingMock, AccountLinkingRecipeMock } from "./mocks/AccountLinkingMock";
@@ -49,6 +50,7 @@ export {
     recipesMock,
     request,
     resetOverrideParams,
+    resetOverrideLogs,
     API_PORT,
     hasFeatureFlag,
 };

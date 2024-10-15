@@ -397,8 +397,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
 
             await mockExternalAPI("https://test.com").post("/oauth/token").reply(200, {});
 
-            const { user: epUser } = await EmailPassword.signUp("public", "email@test.com", "Asdf12..")
-            assert(!epUser.isPrimaryUser)
+            const { user: epUser } = await EmailPassword.signUp("public", "email@test.com", "Asdf12..");
+            assert(!epUser.isPrimaryUser);
 
             let response = await new Promise((resolve, reject) =>
                 request()
@@ -730,7 +730,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             userInCallback = overrideParams.userInCallback;
 
             assert(userInCallback !== undefined);
-            assert.equal(JSON.stringify(pUser), JSON.stringify(userInCallback));
+            assert.deepStrictEqual(pUser.toJson(), userInCallback);
         });
 
         it("signInUpPOST returns SIGN_IN_NOT_ALLOWED if the sign in user's email has changed to another primary user's email", async function () {
@@ -903,11 +903,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                 "Cannot sign in / up due to security reasons. Please try a different login method or contact support. (ERR_CODE_004)"
             );
             assert.strictEqual(
-                (await ProcessState.getInstance().waitForEvent(PROCESS_STATE.IS_SIGN_UP_ALLOWED_CALLED)), undefined
+                await ProcessState.getInstance().waitForEvent(PROCESS_STATE.IS_SIGN_UP_ALLOWED_CALLED),
+                undefined
             );
             // We check if the email change is allowed after we check if the sign in would be allowed.
             assert.notStrictEqual(
-                (await ProcessState.getInstance().waitForEvent(PROCESS_STATE.IS_SIGN_IN_ALLOWED_CALLED)), undefined
+                await ProcessState.getInstance().waitForEvent(PROCESS_STATE.IS_SIGN_IN_ALLOWED_CALLED),
+                undefined
             );
         });
 
@@ -1406,9 +1408,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                     Session.init(),
                     ThirdParty.init({
                         signInAndUpFeature: {
-                            providers: [
-                                this.customProviderWithEmailNotVerified,
-                            ],
+                            providers: [this.customProviderWithEmailNotVerified],
                         },
                     }),
                     AccountLinking.init({
@@ -1421,13 +1421,14 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             let epUser = (await EmailPassword.signUp("public", email, "differentvalidpass123")).user;
             await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
 
-            let tpUser = (await ThirdParty.manuallyCreateOrUpdateUser("public", "custom-no-ev", "user" + date, email, true))
-                .user;
+            let tpUser = (
+                await ThirdParty.manuallyCreateOrUpdateUser("public", "custom-no-ev", "user" + date, email, true)
+            ).user;
 
             const linkRes = await AccountLinking.linkAccounts(tpUser.loginMethods[0].recipeUserId, epUser.id);
             assert.strictEqual(linkRes.status, "OK");
 
-            const epSignUp2 = (await EmailPassword.signUp("public", email2, "differentvalidpass123"));
+            const epSignUp2 = await EmailPassword.signUp("public", email2, "differentvalidpass123");
             assert.strictEqual(epSignUp2.status, "OK");
 
             let response = await new Promise((resolve, reject) =>
@@ -1452,7 +1453,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                     })
             );
             assert.strictEqual(response.body.status, "SIGN_IN_UP_NOT_ALLOWED");
-            assert.strictEqual(response.body.reason, "Cannot sign in / up due to security reasons. Please try a different login method or contact support. (ERR_CODE_006)");
+            assert.strictEqual(
+                response.body.reason,
+                "Cannot sign in / up due to security reasons. Please try a different login method or contact support. (ERR_CODE_006)"
+            );
         });
 
         it("should not allow a changing the email of a recipe user to one associated with a primary user if the email is unverified but linking requires verification", async function () {
@@ -1477,9 +1481,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                     Session.init(),
                     ThirdParty.init({
                         signInAndUpFeature: {
-                            providers: [
-                                this.customProviderWithEmailNotVerified,
-                            ],
+                            providers: [this.customProviderWithEmailNotVerified],
                         },
                     }),
                     AccountLinking.init({
@@ -1489,7 +1491,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                 ],
             });
 
-            const { user: user1} = await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "user", email2, true);
+            const { user: user1 } = await ThirdParty.manuallyCreateOrUpdateUser(
+                "public",
+                "google",
+                "user",
+                email2,
+                true
+            );
             assert(user1.isPrimaryUser);
             // await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
 
@@ -1517,7 +1525,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                     })
             );
             assert.strictEqual(response.body.status, "SIGN_IN_UP_NOT_ALLOWED");
-            assert.strictEqual(response.body.reason, "Cannot sign in / up due to security reasons. Please try a different login method or contact support. (ERR_CODE_004)");
+            assert.strictEqual(
+                response.body.reason,
+                "Cannot sign in / up due to security reasons. Please try a different login method or contact support. (ERR_CODE_004)"
+            );
         });
 
         it("should not allow a changing the email of a primary user to one associated with another user if the email is unverified but linking requires verification", async function () {
@@ -1542,9 +1553,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                     Session.init(),
                     ThirdParty.init({
                         signInAndUpFeature: {
-                            providers: [
-                                this.customProviderWithEmailNotVerified,
-                            ],
+                            providers: [this.customProviderWithEmailNotVerified],
                         },
                     }),
                     AccountLinking.init({
@@ -1554,7 +1563,13 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                 ],
             });
 
-            const { user: user1} = await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "user", email2, false);
+            const { user: user1 } = await ThirdParty.manuallyCreateOrUpdateUser(
+                "public",
+                "google",
+                "user",
+                email2,
+                false
+            );
             assert(!user1.isPrimaryUser);
             // await AccountLinking.createPrimaryUser(epUser.loginMethods[0].recipeUserId);
 
@@ -1582,7 +1597,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                     })
             );
             assert.strictEqual(response.body.status, "SIGN_IN_UP_NOT_ALLOWED");
-            assert.strictEqual(response.body.reason, "Cannot sign in / up because new email cannot be applied to existing account. Please contact support. (ERR_CODE_024)");
+            assert.strictEqual(
+                response.body.reason,
+                "Cannot sign in / up because new email cannot be applied to existing account. Please contact support. (ERR_CODE_024)"
+            );
         });
 
         describe("with primary user that has both unverified and verified login methods", () => {
@@ -1660,6 +1678,8 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                                 redirectURIOnProviderDashboard: "http://127.0.0.1/callback",
                                 redirectURIQueryParams: {
                                     code: "abcdefghj",
+                                    email,
+                                    userId: "user" + date,
                                 },
                                 email,
                                 userId: "user" + date,

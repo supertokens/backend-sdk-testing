@@ -300,6 +300,9 @@ export const SessionMock: Partial<typeof Session> = {
                 userContext,
             },
         });
+        if (response === null) {
+            return undefined;
+        }
         if (response) {
             response.recipeUserId = SuperTokens.convertToRecipeUserId(
                 response.recipeUserId.recipeUserId ?? response.recipeUserId

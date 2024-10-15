@@ -632,6 +632,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
             let isAllowed = await AccountLinking.isSignUpAllowed(
                 "public",
                 {
+                    recipeId: "emailpassword",
                     email: "test@example.com",
                 },
                 true
@@ -658,6 +659,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
                 await AccountLinking.isSignUpAllowed(
                     "public",
                     {
+                        recipeId: "emailpassword",
                         phoneNumber: "",
                         email: "test@example.com",
                     },
@@ -697,6 +699,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
             let isAllowed = await AccountLinking.isSignUpAllowed(
                 "public",
                 {
+                    recipeId: "emailpassword",
                     email: "test@example.com",
                 },
                 false
@@ -733,6 +736,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
             let isAllowed = await AccountLinking.isSignUpAllowed(
                 "public",
                 {
+                    recipeId: "emailpassword",
                     email: "test@example.com",
                 },
                 false
@@ -769,6 +773,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
             let isAllowed = await AccountLinking.isSignUpAllowed(
                 "public",
                 {
+                    recipeId: "emailpassword",
                     email: "test@example.com",
                 },
                 false
@@ -805,6 +810,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
             let isAllowed = await AccountLinking.isSignUpAllowed(
                 "public",
                 {
+                    recipeId: "emailpassword",
                     email: "test@example.com",
                 },
                 false
@@ -889,6 +895,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
             let isAllowed = await AccountLinking.isSignUpAllowed(
                 "public",
                 {
+                    recipeId: "emailpassword",
                     email: "test@example.com",
                 },
                 false
@@ -931,6 +938,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
             let isAllowed = await AccountLinking.isSignUpAllowed(
                 "public",
                 {
+                    recipeId: "emailpassword",
                     email: "test@example.com",
                 },
                 false
@@ -968,6 +976,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
             let isAllowed = await AccountLinking.isSignUpAllowed(
                 "public",
                 {
+                    recipeId: "emailpassword",
                     email: "test@example.com",
                 },
                 false
@@ -1014,6 +1023,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
             let isAllowed = await AccountLinking.isSignUpAllowed(
                 "public",
                 {
+                    recipeId: "emailpassword",
                     email: "test@example.com",
                 },
                 true
@@ -1079,6 +1089,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
             let isAllowed = await AccountLinking.isSignUpAllowed(
                 "public",
                 {
+                    recipeId: "emailpassword",
                     email: "test@example.com",
                 },
                 true
@@ -1735,6 +1746,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
                 response.user.loginMethods[0].recipeUserId,
                 "test@example.com",
                 false,
+                undefined,
                 {
                     DO_NOT_LINK: true,
                 }
@@ -1791,6 +1803,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
                 response.user.loginMethods[0].recipeUserId,
                 "test@example.com",
                 false,
+                undefined,
                 {
                     DO_NOT_LINK: true,
                 }
