@@ -4,6 +4,7 @@ import { waitForProcessState } from "../fetcher";
 export const ProcessStateMock = {
     getInstance: () => ProcessStateMock,
     waitForEvent: async (eventName: PROCESS_STATE) => {
-        return await waitForProcessState(eventName);
+        let resp = await waitForProcessState(eventName);
+        return resp === undefined || resp === null ? undefined : resp;
     },
 };

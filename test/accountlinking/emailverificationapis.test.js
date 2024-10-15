@@ -33,6 +33,7 @@ const {
     supertokens,
     ThirdParty,
     EmailVerificationRecipe,
+    Multitenancy,
 } = recipesMock;
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 
@@ -184,7 +185,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
                 session: undefined,
                 recipeUserIdWhoseEmailGotVerified: epUser.loginMethods[0].recipeUserId,
             });
-            assert(res === undefined);
+            assert(res === undefined || res === null);
         });
 
         it("updateSessionIfRequiredPostEmailVerification sets the right claim in the session post verification of the current logged in user, if it did not get linked to another user ", async function () {
@@ -440,6 +441,119 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
             let tokens = extractInfoFromResponse(response);
             let accessToken = tokens.accessTokenFromAny;
             assert(accessToken === undefined);
+        });
+
+        it("updateSessionIfRequiredPostEmailVerification creates a new session if the user is linked to another user on a non-default tenant", async function () {
+            const connectionURI = await startST();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    EmailPassword.init(),
+                    EmailVerification.init({
+                        mode: "OPTIONAL",
+                    }),
+                    Session.init(),
+                    ThirdParty.init({
+                        signInAndUpFeature: {
+                            providers: [
+                                {
+                                    config: {
+                                        thirdPartyId: "google",
+                                        clients: [
+                                            {
+                                                clientId: "",
+                                                clientSecret: "",
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    }),
+                    AccountLinking.init({
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
+                    }),
+                    Multitenancy.init(),
+                ],
+            });
+
+            await Multitenancy.createOrUpdateTenant("tenant1", {
+                firstFactors: null,
+            });
+
+            let epUser = (await EmailPassword.signUp("tenant1", "test@example.com", "password123")).user;
+            assert(epUser.isPrimaryUser === false);
+
+            let token = (
+                await EmailVerification.createEmailVerificationToken("tenant1", epUser.loginMethods[0].recipeUserId)
+            ).token;
+
+            let session = await Session.createNewSessionWithoutRequestResponse(
+                "tenant1",
+                epUser.loginMethods[0].recipeUserId
+            );
+            assert(session.getTenantId() === "tenant1");
+            let sessionOnPublic = await Session.createNewSessionWithoutRequestResponse(
+                "public",
+                epUser.loginMethods[0].recipeUserId
+            );
+            assert(sessionOnPublic.getTenantId() === "public");
+
+            let payloadBefore = session.getAccessTokenPayload();
+            assert(payloadBefore["st-ev"]["v"] === false);
+
+            let tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
+                "tenant1",
+                "google",
+                "abc",
+                "test@example.com",
+                false
+            );
+            assert(tpUser.user.isPrimaryUser === false);
+            await AccountLinking.createPrimaryUser(supertokens.convertToRecipeUserId(tpUser.user.id));
+            await AccountLinking.linkAccounts(epUser.loginMethods[0].recipeUserId, tpUser.user.id);
+
+            let response = await new Promise((resolve, reject) =>
+                request()
+                    .post("/auth/tenant1/user/email/verify")
+                    .set("Cookie", ["sAccessToken=" + session.getAccessToken()])
+                    .send({
+                        method: "token",
+                        token,
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(res);
+                        }
+                    })
+            );
+            assert(response !== undefined);
+            let tokens = extractInfoFromResponse(response);
+            let accessToken = tokens.accessTokenFromHeader;
+
+            let sessionAfter = await Session.getSessionWithoutRequestResponse(accessToken);
+            let payloadAfter = sessionAfter.getAccessTokenPayload();
+            assert(payloadAfter["st-ev"]["v"] === true);
+            assert(sessionAfter.getUserId() === tpUser.user.id);
+            assert(sessionAfter.getRecipeUserId().getAsString() === epUser.id);
+
+            // check that old session is revoked
+            let sessionInformation = await Session.getSessionInformation(session.getHandle());
+            assert(sessionInformation === undefined);
+
+            let sessionInformationOnPublic = await Session.getSessionInformation(sessionOnPublic.getHandle());
+            assert(sessionInformationOnPublic === undefined);
         });
     });
 
@@ -837,10 +951,9 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
             let overrideParams = await getOverrideParams();
             userInCallback = overrideParams.userInCallback;
-
             assert(userInCallback.id === epUser.id);
             assert(userInCallback.email === "test@example.com");
-            assert(userInCallback.recipeUserId.getAsString() === epUser.loginMethods[0].recipeUserId.getAsString());
+            assert(userInCallback.recipeUserId === epUser.loginMethods[0].recipeUserId.getAsString());
         });
 
         it("calling generateEmailVerifyTokenPOST gives already verified for currently logged in user if email is verified, and updates session", async function () {
@@ -1030,7 +1143,7 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
 
             assert(userInCallback.id === epUser.id);
             assert(userInCallback.email === "test@example.com");
-            assert(userInCallback.recipeUserId.getAsString() === epUser.loginMethods[0].recipeUserId.getAsString());
+            assert(userInCallback.recipeUserId === epUser.loginMethods[0].recipeUserId.getAsString());
         });
 
         it("calling generateEmailVerifyTokenPOST gives email already verified for currently logged in user if email is verified, and updates session if needed", async function () {

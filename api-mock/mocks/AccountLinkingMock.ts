@@ -99,7 +99,7 @@ export const AccountLinkingMock: Partial<typeof AccountLinking> = {
                 userContext,
             },
         });
-        return user === undefined ? undefined : new UserClass(user);
+        return user === undefined || user === null ? undefined : new UserClass(user);
     },
     isSignUpAllowed: async (tenantId, newUser, isVerified, session, userContext) => {
         return await queryAPI({
