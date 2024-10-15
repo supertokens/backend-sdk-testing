@@ -22,7 +22,7 @@ import { ThirdPartyMock } from "./mocks/ThirdPartyMock";
 import { UserMetadataMock } from "./mocks/UserMetadataMock";
 import { OAuth2ProviderMock } from "./mocks/OAuth2ProviderMock";
 import { OAuth2ClientMock } from "./mocks/OAuth2ClientMock";
-import { randomString } from "./utils";
+import { randomString, hasFeatureFlag } from "./utils";
 
 const recipesMock = {
     EmailPassword: EmailPasswordMock,
@@ -56,4 +56,5 @@ export {
     resetOverrideParams,
     resetOverrideLogs,
     API_PORT,
+    hasFeatureFlag,
 };

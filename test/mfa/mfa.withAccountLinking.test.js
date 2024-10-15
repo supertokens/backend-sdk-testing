@@ -24,7 +24,7 @@ const {
 } = require("../utils");
 let assert = require("assert");
 const { epSignIn, epSignUp, plessEmailSignInUp, tpSignInUp, validateUserEmail } = require("./utils");
-const { recipesMock, getOverrideParams, randomString } = require("../../api-mock");
+const { recipesMock, getOverrideParams, randomString, hasFeatureFlag } = require("../../api-mock");
 const {
     AccountLinking,
     Session,
