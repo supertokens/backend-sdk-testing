@@ -108,9 +108,9 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         assert.strictEqual(res.status, 200);
-        assert(tokenResp.access_token !== undefined);
-        assert(tokenResp.refresh_token !== undefined);
-        assert(tokenResp.id_token !== undefined);
+        assert.notStrictEqual(tokenResp.access_token, undefined);
+        assert.notStrictEqual(tokenResp.refresh_token, undefined);
+        assert.notStrictEqual(tokenResp.id_token, undefined);
         assert.strictEqual(tokenResp.token_type, "bearer");
         assert.strictEqual(tokenResp.scope, scope);
 
@@ -129,12 +129,11 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
 
         refreshTokenRes = await refreshTokenRes.json();
 
-        assert(refreshTokenRes.access_token !== undefined);
-        assert(refreshTokenRes.refresh_token !== undefined);
-        assert(refreshTokenRes.id_token !== undefined);
+        assert.notStrictEqual(refreshTokenRes.access_token, undefined);
+        assert.notStrictEqual(refreshTokenRes.refresh_token, undefined);
+        assert.notStrictEqual(refreshTokenRes.id_token, undefined);
         assert.strictEqual(refreshTokenRes.token_type, "bearer");
         assert.strictEqual(refreshTokenRes.scope, scope);
-
 
         assert.strictEqual(await isTokenRevoked(apiDomain, refreshTokenRes.refresh_token), false);
         assert.strictEqual(await isTokenRevoked(apiDomain, refreshTokenRes.access_token), false);
@@ -233,9 +232,9 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         assert.strictEqual(res.status, 200);
-        assert(tokenResp.access_token !== undefined);
-        assert(tokenResp.refresh_token !== undefined);
-        assert(tokenResp.id_token !== undefined);
+        assert.notStrictEqual(tokenResp.access_token, undefined);
+        assert.notStrictEqual(tokenResp.refresh_token, undefined);
+        assert.notStrictEqual(tokenResp.id_token, undefined);
         assert.strictEqual(tokenResp.token_type, "bearer");
         assert.strictEqual(tokenResp.scope, scope);
 
@@ -254,12 +253,11 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
 
         refreshTokenRes = await refreshTokenRes.json();
 
-        assert(refreshTokenRes.access_token !== undefined);
-        assert(refreshTokenRes.refresh_token === undefined);
-        assert(refreshTokenRes.id_token !== undefined);
+        assert.notStrictEqual(refreshTokenRes.access_token, undefined);
+        assert.strictEqual(refreshTokenRes.refresh_token, undefined);
+        assert.notStrictEqual(refreshTokenRes.id_token, undefined);
         assert.strictEqual(refreshTokenRes.token_type, "bearer");
         assert.strictEqual(refreshTokenRes.scope, scope);
-
 
         assert.strictEqual(await isTokenRevoked(apiDomain, refreshTokenRes.access_token), false);
         assert.strictEqual(await isTokenRevoked(apiDomain, tokenResp.access_token), false);
