@@ -89,6 +89,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
                 clientId: client.clientId,
+                responseType: "code",
                 redirectUri,
                 state,
                 scope,
@@ -97,6 +98,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             const { authorizationCode } = await testOAuthFlowAndGetAuthCode({
                 apiDomain,
                 websiteDomain,
+                responseType: "code",
                 authorisationUrl,
                 clientId: client.clientId,
                 redirectUri,
@@ -162,6 +164,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri,
                 state,
@@ -258,6 +261,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri,
                 state,
@@ -356,6 +360,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri,
                 state,
@@ -545,6 +550,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri,
                 state,
@@ -618,6 +624,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri,
                 state,
@@ -745,6 +752,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri,
                 state,
@@ -1074,6 +1082,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 it("should error if there is no active session", async function () {
                     const authorisationUrl = createAuthorizationUrl({
                         apiDomain,
+                        responseType: "code",
                         clientId: client.clientId,
                         redirectUri,
                         state,
@@ -1103,6 +1112,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 it("should error if there is a no session with oauth cookies", async function () {
                     const authorisationUrl = createAuthorizationUrl({
                         apiDomain,
+                        responseType: "code",
                         clientId: client.clientId,
                         redirectUri,
                         state,
@@ -1171,6 +1181,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 it("should work even if there is an expired session", async function () {
                     const authorisationUrl = createAuthorizationUrl({
                         apiDomain,
+                        responseType: "code",
                         clientId: client.clientId,
                         redirectUri,
                         state,
@@ -1250,6 +1261,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 it("should work even if there is an expired session with oauth cookies", async function () {
                     const authorisationUrl = createAuthorizationUrl({
                         apiDomain,
+                        responseType: "code",
                         clientId: client.clientId,
                         redirectUri,
                         state,
@@ -1362,6 +1374,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 it("should error if there is a revoked session", async function () {
                     const authorisationUrl = createAuthorizationUrl({
                         apiDomain,
+                        responseType: "code",
                         clientId: client.clientId,
                         redirectUri,
                         state,
@@ -1400,6 +1413,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 it("should error if there is a revoked session with oauth cookies", async function () {
                     const authorisationUrl = createAuthorizationUrl({
                         apiDomain,
+                        responseType: "code",
                         clientId: client.clientId,
                         redirectUri,
                         state,
@@ -1437,6 +1451,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
 
                     const authorisationUrl2 = createAuthorizationUrl({
                         apiDomain,
+                        responseType: "code",
                         clientId: client.clientId,
                         redirectUri,
                         state: state2,
@@ -1478,6 +1493,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
 
                     const authorisationUrl = createAuthorizationUrl({
                         apiDomain,
+                        responseType: "code",
                         clientId: client.clientId,
                         redirectUri,
                         state,
@@ -1547,6 +1563,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 it("should succeed if there is an active session with oauth cookies", async function () {
                     const authorisationUrl = createAuthorizationUrl({
                         apiDomain,
+                        responseType: "code",
                         clientId: client.clientId,
                         redirectUri,
                         state,
@@ -1657,6 +1674,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 it("should work normally if there is no session without oauth cookies", async function () {
                     const authorisationUrl = createAuthorizationUrl({
                         apiDomain,
+                        responseType: "code",
                         clientId: client.clientId,
                         redirectUri,
                         state,
@@ -1726,6 +1744,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 it("should work normally if there is no session with oauth cookies", async function () {
                     const authorisationUrl = createAuthorizationUrl({
                         apiDomain,
+                        responseType: "code",
                         clientId: client.clientId,
                         redirectUri,
                         state,
@@ -1842,6 +1861,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
 
                     const authorisationUrl = createAuthorizationUrl({
                         apiDomain,
+                        responseType: "code",
                         clientId: client.clientId,
                         redirectUri,
                         state,
@@ -1914,6 +1934,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 it("should redirect to auth even if there is an expired session with oauth cookies", async function () {
                     const authorisationUrl = createAuthorizationUrl({
                         apiDomain,
+                        responseType: "code",
                         clientId: client.clientId,
                         redirectUri,
                         state,
@@ -2032,6 +2053,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
 
                     const authorisationUrl = createAuthorizationUrl({
                         apiDomain,
+                        responseType: "code",
                         clientId: client.clientId,
                         redirectUri,
                         state,
@@ -2103,6 +2125,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 it("should redirect to auth even if there is an active session with oauth cookies", async function () {
                     const authorisationUrl = createAuthorizationUrl({
                         apiDomain,
+                        responseType: "code",
                         clientId: client.clientId,
                         redirectUri,
                         state,
@@ -2214,6 +2237,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             it("should error if there is anything else besides none", async function () {
                 const authorisationUrl = createAuthorizationUrl({
                     apiDomain,
+                    responseType: "code",
                     clientId: client.clientId,
                     redirectUri,
                     state,
@@ -2243,6 +2267,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             it("should error for unknown values (without session)", async function () {
                 const authorisationUrl = createAuthorizationUrl({
                     apiDomain,
+                    responseType: "code",
                     clientId: client.clientId,
                     redirectUri,
                     state,
@@ -2278,6 +2303,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
 
                 const authorisationUrl = createAuthorizationUrl({
                     apiDomain,
+                    responseType: "code",
                     clientId: client.clientId,
                     redirectUri,
                     state,
@@ -2306,6 +2332,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             it("should error for unsupported values (without session)", async function () {
                 const authorisationUrl = createAuthorizationUrl({
                     apiDomain,
+                    responseType: "code",
                     clientId: client.clientId,
                     redirectUri,
                     state,
@@ -2341,6 +2368,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
 
                 const authorisationUrl = createAuthorizationUrl({
                     apiDomain,
+                    responseType: "code",
                     clientId: client.clientId,
                     redirectUri,
                     state,
@@ -2412,6 +2440,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             it("should not require fresh sign in if max_age is larger than the session age", async function () {
                 const authorisationUrl = createAuthorizationUrl({
                     apiDomain,
+                    responseType: "code",
                     clientId: client.clientId,
                     redirectUri,
                     state,
@@ -2520,6 +2549,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             it("should require fresh sign in if max_age is less than the session age", async function () {
                 const authorisationUrl = createAuthorizationUrl({
                     apiDomain,
+                    responseType: "code",
                     clientId: client.clientId,
                     redirectUri,
                     state,
@@ -2632,6 +2662,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             it("should require fresh sign in if max_age is 0", async function () {
                 const authorisationUrl = createAuthorizationUrl({
                     apiDomain,
+                    responseType: "code",
                     clientId: client.clientId,
                     redirectUri,
                     state,
@@ -2742,6 +2773,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             it("should require fresh sign in if max_age is negative", async function () {
                 const authorisationUrl = createAuthorizationUrl({
                     apiDomain,
+                    responseType: "code",
                     clientId: client.clientId,
                     redirectUri,
                     state,
@@ -2811,6 +2843,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             it("should error if fresh sign in if max_age is not a number", async function () {
                 const authorisationUrl = createAuthorizationUrl({
                     apiDomain,
+                    responseType: "code",
                     clientId: client.clientId,
                     redirectUri,
                     state,
@@ -2922,6 +2955,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             it("should not error for valid values", async () => {
                 const authorisationUrl = createAuthorizationUrl({
                     apiDomain,
+                    responseType: "code",
                     clientId: client.clientId,
                     redirectUri,
                     state,
@@ -2946,6 +2980,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             it("should not error for non-standard values", async () => {
                 const authorisationUrl = createAuthorizationUrl({
                     apiDomain,
+                    responseType: "code",
                     clientId: client.clientId,
                     redirectUri,
                     state,
@@ -3013,6 +3048,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             it("should not error for valid values", async () => {
                 const authorisationUrl = createAuthorizationUrl({
                     apiDomain,
+                    responseType: "code",
                     clientId: client.clientId,
                     redirectUri,
                     state,
@@ -3037,6 +3073,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             it("should not error for non-standard values", async () => {
                 const authorisationUrl = createAuthorizationUrl({
                     apiDomain,
+                    responseType: "code",
                     clientId: client.clientId,
                     redirectUri,
                     state,

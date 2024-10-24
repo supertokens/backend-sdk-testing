@@ -13,7 +13,7 @@ exports.createAuthorizationUrl = function ({
     extraQueryParams = {},
 }) {
     const queryParams = {
-        client_id: clientId,
+        ...(clientId !== undefined ? { client_id: clientId } : {}),
         ...(redirectUri !== undefined ? { redirect_uri: redirectUri } : {}),
         ...(responseType !== undefined ? { response_type: responseType } : {}),
         ...(scope !== undefined ? { scope } : {}),
