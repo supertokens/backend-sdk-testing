@@ -28,20 +28,6 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
         return createTenant(globalConnectionURI, randomString());
     };
 
-    // TODO: Remove this once we've stopped calling Hydra directly from
-    // the SDK and found an alternate way to clear clients before each test run.
-    beforeEach(async function () {
-        const allClients = await fetch(`http://localhost:4445/admin/clients`).then((res) => res.json());
-
-        const deleteClientPromies = await allClients.map((client) => {
-            return fetch(`http://localhost:4445/admin/clients/${client.client_id}`, {
-                method: "DELETE",
-            });
-        });
-
-        await Promise.all(deleteClientPromies);
-    });
-
     before(async function () {
         await killAllST();
         await setupST();

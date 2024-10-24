@@ -9,13 +9,13 @@ exports.createAuthorizationUrl = function ({
     redirectUri,
     state,
     scope,
-    responseType = "code",
+    responseType,
     extraQueryParams = {},
 }) {
     const queryParams = {
         client_id: clientId,
-        redirect_uri: redirectUri,
-        response_type: responseType,
+        ...(redirectUri !== undefined ? { redirect_uri: redirectUri } : {}),
+        ...(responseType !== undefined ? { response_type: responseType } : {}),
         ...(scope !== undefined ? { scope } : {}),
         ...(state !== undefined ? { state } : {}),
         ...extraQueryParams,
@@ -73,7 +73,9 @@ exports.testOAuthFlowAndGetAuthCode = async function ({
 
         assert.strictEqual(nextUrlObj.origin + nextUrlObj.pathname, `${websiteDomain}/auth/try-refresh`);
 
-        session = await Session.refreshSessionWithoutRequestResponse(session.getAllSessionTokensDangerously().refreshToken);
+        session = await Session.refreshSessionWithoutRequestResponse(
+            session.getAllSessionTokensDangerously().refreshToken
+        );
 
         res = await fetch(`${apiDomain}/auth/oauth/login?loginChallenge=${loginChallenge}`, {
             method: "GET",
@@ -144,7 +146,7 @@ exports.testOAuthFlowAndGetAuthCode = async function ({
     if (responseType === "code") {
         const authorizationCode = nextUrlObj.searchParams.get("code");
 
-        assert.strictEqual(nextUrlObj.searchParams.get("scope"), scope);
+        assert.strictEqual(nextUrlObj.searchParams.get("scope"), scope ?? "");
 
         if (state !== undefined) {
             assert.strictEqual(nextUrlObj.searchParams.get("state"), state);
@@ -182,21 +184,17 @@ exports.testOAuthFlowAndGetAuthCode = async function ({
 const jose = require("jose");
 
 exports.validateIdToken = async function (token, requirements) {
-    // TODO: this is a temporary solution to validate the token. We need to get the JWKS from the core and validate the token accordingly.
     const payload = (
         await jose.jwtVerify(token, jose.createRemoteJWKSet(new URL(`http://localhost:${API_PORT}/auth/jwt/jwks.json`)))
     ).payload;
 
-    // TODO: we should be able uncomment this after we get proper core support
-    // TODO: make this configurable?
-    // const expectedIssuer =
-    //     appInfo.apiDomain.getAsStringDangerous() + appInfo.apiBasePath.getAsStringDangerous();
-    // if (payload.iss !== expectedIssuer) {
-    //     throw new Error("Issuer mismatch: this token was likely issued by another application or spoofed");
-    // }
-    // if (payload.stt !== 2) {
-    //     throw new Error("Wrong token type");
-    // }
+    const expectedIssuer = appInfo.apiDomain.getAsStringDangerous() + appInfo.apiBasePath.getAsStringDangerous();
+    if (payload.iss !== expectedIssuer) {
+        throw new Error("Issuer mismatch: this token was likely issued by another application or spoofed");
+    }
+    if (payload.stt !== 2) {
+        throw new Error("Wrong token type");
+    }
 
     if (requirements?.clientId !== undefined && payload.client_id !== requirements.clientId) {
         throw new Error("The token doesn't belong to the specified client");
@@ -229,4 +227,8 @@ exports.createEndSessionUrl = function ({ apiDomain, idToken, postLogoutRedirect
         endSessionEndpoint.searchParams.set("state", state);
     }
     return endSessionEndpoint.toString();
+};
+
+exports.getBasicAuthHeader = function ({ clientId, clientSecret }) {
+    return "Basic " + Buffer.from(`${encodeURIComponent(clientId)}:${clientSecret}`).toString("base64");
 };
