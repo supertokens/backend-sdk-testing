@@ -266,6 +266,10 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
         });
 
         it("should call the core <=9 times with AL without MFA", async () => {
+            if (await hasFeatureFlag("removedOverwriteSessionDuringSignInUp")) {
+                this.skip();
+            }
+
             await setup({
                 initAccountLinking: true,
                 initMFA: false,
