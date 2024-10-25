@@ -265,7 +265,7 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             assert.strictEqual(info.coreCallCount, 3);
         });
 
-        it("should call the core <=9 times with AL without MFA", async () => {
+        it("should call the core <=9 times with AL without MFA if linking", async () => {
             await setup({
                 initAccountLinking: true,
                 initMFA: false,
@@ -276,7 +276,7 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             const session = await getSessionForUser(user);
             await resetOverrideParams();
 
-            const resp = await signUpPOST(email, session);
+            const resp = await signUpPOST(email, session, undefined, true);
             assert.strictEqual(resp.body.status, "OK");
             let overrideParams = await getOverrideParams();
             let info = overrideParams.info;
