@@ -265,7 +265,7 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             assert.strictEqual(info.coreCallCount, 3);
         });
 
-        it("should call the core <=9 times with AL without MFA", async () => {
+        it("should call the core <=9 times with AL without MFA", async function () {
             if (await hasFeatureFlag("removedOverwriteSessionDuringSignInUp")) {
                 this.skip();
             }
