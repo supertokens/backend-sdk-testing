@@ -76,6 +76,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri: redirectUri + "/subpath",
                 state,
@@ -85,12 +86,11 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
             let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
 
             const body = await res.json();
-            assert.strictEqual(body.error, ("invalid_request"));
+            assert.strictEqual(body.error, "invalid_request");
             assert(
-                body.error_description
-                    .includes(
-                        "The 'redirect_uri' parameter does not match any of the OAuth 2.0 Client's pre-registered redirect urls"
-                    )
+                body.error_description.includes(
+                    "The 'redirect_uri' parameter does not match any of the OAuth 2.0 Client's pre-registered redirect urls"
+                )
             );
         });
 
@@ -118,6 +118,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri: redirectUri.replace("localhost", "localhost.org"),
                 state,
@@ -128,12 +129,11 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
             let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
 
             const body = await res.json();
-            assert.strictEqual(body.error, ("invalid_request"));
+            assert.strictEqual(body.error, "invalid_request");
             assert(
-                body.error_description
-                    .includes(
-                        "The 'redirect_uri' parameter does not match any of the OAuth 2.0 Client's pre-registered redirect urls"
-                    )
+                body.error_description.includes(
+                    "The 'redirect_uri' parameter does not match any of the OAuth 2.0 Client's pre-registered redirect urls"
+                )
             );
         });
 
@@ -161,6 +161,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri: redirectUri.replace("localhost", "127.1"),
                 state,
@@ -169,14 +170,13 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             // Start the OAuth Flow
             let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
-            
+
             const body = await res.json();
-            assert.strictEqual(body.error, ("invalid_request"));
+            assert.strictEqual(body.error, "invalid_request");
             assert(
-                body.error_description
-                    .includes(
-                        "The 'redirect_uri' parameter does not match any of the OAuth 2.0 Client's pre-registered redirect urls"
-                    )
+                body.error_description.includes(
+                    "The 'redirect_uri' parameter does not match any of the OAuth 2.0 Client's pre-registered redirect urls"
+                )
             );
         });
 
@@ -204,6 +204,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri: redirectUri.replace("localhost", "2130706433"),
                 state,
@@ -212,12 +213,11 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
             let res = await fetch(authorisationUrl, { method: "GET", redirect: "manual" });
 
             const body = await res.json();
-            assert.strictEqual(body.error, ("invalid_request"));
+            assert.strictEqual(body.error, "invalid_request");
             assert(
-                body.error_description
-                    .includes(
-                        "The 'redirect_uri' parameter does not match any of the OAuth 2.0 Client's pre-registered redirect urls"
-                    )
+                body.error_description.includes(
+                    "The 'redirect_uri' parameter does not match any of the OAuth 2.0 Client's pre-registered redirect urls"
+                )
             );
         });
     });
@@ -247,6 +247,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri,
                 state,
@@ -306,6 +307,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri,
                 state,
@@ -382,6 +384,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri,
                 state,
@@ -445,6 +448,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri,
                 state,
@@ -506,6 +510,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri,
                 state,
@@ -571,6 +576,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri,
                 state,
@@ -593,6 +599,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
             const authorisationUrl2 = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri,
                 state,

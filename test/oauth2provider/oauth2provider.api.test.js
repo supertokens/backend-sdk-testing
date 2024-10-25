@@ -23,7 +23,7 @@ const {
     extractInfoFromResponse,
 } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString, API_PORT, request } = require("../../api-mock");
+const { recipesMock, randomString, API_PORT, request, getOverrideLogs } = require("../../api-mock");
 const { OAuth2Provider, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
 const {
     createAuthorizationUrl,
@@ -1456,7 +1456,6 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                         redirectUri,
                         state: state2,
                         scope,
-                        responseType: "code",
                         extraQueryParams: {
                             prompt: "none",
                             nonce,

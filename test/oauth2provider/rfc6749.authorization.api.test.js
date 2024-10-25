@@ -38,7 +38,9 @@ const websiteDomain = "http://supertokens.io";
 const redirectUri = "http://localhost:4000/redirect-url";
 const state = Buffer.from("some-random-string").toString("base64");
 
-describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rfc6749.authorization.api.test.js]")}`, function () {
+describe(`OAuth2Provider-Authorization API: ${printPath(
+    "[test/oauth2provider/rfc6749.authorization.api.test.js]"
+)}`, function () {
     let globalConnectionURI;
     let user, session;
 
@@ -78,6 +80,7 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
     describe("clientid validation", () => {
         it("should error out if the client is not found", async function () {
             const authorisationUrl = createAuthorizationUrl({
+                responseType: "code",
                 apiDomain,
                 clientId: "nope",
                 redirectUri,
@@ -97,6 +100,7 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
         });
         it("should error out if the clientid is omitted", async function () {
             const authorisationUrl = createAuthorizationUrl({
+                responseType: "code",
                 apiDomain,
                 clientId: undefined,
                 redirectUri,
@@ -116,6 +120,7 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
         });
         it("should error out if the clientid is empty", async function () {
             const authorisationUrl = createAuthorizationUrl({
+                responseType: "code",
                 apiDomain,
                 clientId: "",
                 redirectUri,
@@ -161,6 +166,7 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
             const { client } = await OAuth2Provider.createOAuth2Client();
 
             const authorisationUrl = createAuthorizationUrl({
+                responseType: "code",
                 apiDomain,
                 clientId: client.clientId,
                 state,
@@ -185,6 +191,7 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
             });
 
             const authorisationUrl = createAuthorizationUrl({
+                responseType: "code",
                 apiDomain,
                 clientId: client.clientId,
                 state,
@@ -209,6 +216,7 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
             });
 
             const authorisationUrl = createAuthorizationUrl({
+                responseType: "code",
                 apiDomain,
                 clientId: client.clientId,
                 redirectUri: "http://nope.localhost/redirect-url",
@@ -234,6 +242,7 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
             });
 
             const authorisationUrl = createAuthorizationUrl({
+                responseType: "code",
                 apiDomain,
                 clientId: client.clientId,
                 redirectUri: redirectUri + "/",
@@ -259,6 +268,7 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
             });
 
             const authorisationUrl = createAuthorizationUrl({
+                responseType: "code",
                 apiDomain,
                 clientId: client.clientId,
                 redirectUri: redirectUri + "?test=value",
@@ -284,6 +294,7 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
             });
 
             const authorisationUrl = createAuthorizationUrl({
+                responseType: "code",
                 apiDomain,
                 clientId: client.clientId,
                 redirectUri: redirectUri + "#asdfasdfa",
@@ -311,9 +322,9 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
             });
 
             const authorisationUrl = createAuthorizationUrl({
+                responseType: "code",
                 apiDomain,
                 clientId: client.clientId,
-                responseType: "code",
                 redirectUri,
                 state,
             });
@@ -519,7 +530,7 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
                 state,
                 extraQueryParams: {
                     asdfasdf: "asdfasdf",
-                }
+                },
             });
 
             const res = await fetch(authorisationUrl, {
@@ -543,7 +554,7 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
                 state,
                 extraQueryParams: {
                     asdfasdf: "asdfasdf",
-                }
+                },
             });
 
             const res = await fetch(authorisationUrl, {
@@ -567,14 +578,14 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
                 state,
                 extraQueryParams: {
                     asdfasdf: "asdfasdf",
-                }
+                },
             });
 
             const res = await fetch(authorisationUrl, {
                 method: "GET",
                 redirect: "manual",
                 headers: {
-                    "Authorization": `Bearer !!!${session.accessToken}`,
+                    Authorization: `Bearer !!!${session.accessToken}`,
                 },
             });
 
@@ -597,13 +608,13 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
                 state,
                 extraQueryParams: {
                     asdfasdf: "asdfasdf",
-                }
+                },
             });
 
             const res = await fetch(authorisationUrl, {
                 method: "GET",
                 headers: {
-                    "Authorization": `Bearer ${session.accessToken}`,
+                    Authorization: `Bearer ${session.accessToken}`,
                 },
                 redirect: "manual",
             });
@@ -630,14 +641,14 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
                 state,
                 extraQueryParams: {
                     asdfasdf: "asdfasdf",
-                }
+                },
             });
 
             const res = await fetch(authorisationUrl, {
                 method: "GET",
                 redirect: "manual",
                 headers: {
-                    "Authorization": `Bearer ${session.accessToken}`,
+                    Authorization: `Bearer ${session.accessToken}`,
                 },
             });
 
@@ -674,7 +685,7 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
                 method: "GET",
                 redirect: "manual",
                 headers: {
-                    "Authorization": `Bearer ${session.accessToken}`,
+                    Authorization: `Bearer ${session.accessToken}`,
                 },
             });
 
@@ -711,7 +722,7 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
                 method: "GET",
                 redirect: "manual",
                 headers: {
-                    "Authorization": `Bearer ${session.accessToken}`,
+                    Authorization: `Bearer ${session.accessToken}`,
                 },
             });
 
@@ -729,9 +740,8 @@ describe(`OAuth2Provider-Authorization API: ${printPath("[test/oauth2provider/rf
             assert.notStrictEqual(url.searchParams.get("expires_in"), undefined);
             assert(Number.parseInt(url.searchParams.get("expires_in")) > 3595); // 5 seconds minus the default 1h expiry
         });
-    })
+    });
 });
-
 
 function checkErrorRedirection(res, expectedError, expectedErrorDescription, customState) {
     assert.strictEqual(res.status, 302);

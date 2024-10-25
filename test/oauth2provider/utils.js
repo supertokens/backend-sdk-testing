@@ -188,16 +188,10 @@ exports.validateIdToken = async function (token, requirements) {
         await jose.jwtVerify(token, jose.createRemoteJWKSet(new URL(`http://localhost:${API_PORT}/auth/jwt/jwks.json`)))
     ).payload;
 
-    const expectedIssuer = appInfo.apiDomain.getAsStringDangerous() + appInfo.apiBasePath.getAsStringDangerous();
-    if (payload.iss !== expectedIssuer) {
-        throw new Error("Issuer mismatch: this token was likely issued by another application or spoofed");
-    }
-    if (payload.stt !== 2) {
-        throw new Error("Wrong token type");
-    }
-
-    if (requirements?.clientId !== undefined && payload.client_id !== requirements.clientId) {
-        throw new Error("The token doesn't belong to the specified client");
+    assert.strictEqual(payload.iss, `http://localhost:${API_PORT}/auth`);
+    assert.strictEqual(payload.stt, 2);
+    if (requirements?.clientId !== undefined) {
+        assert.strictEqual(payload.client_id, requirements.clientId);
     }
 
     if (requirements?.scopes !== undefined && requirements.scopes.some((scope) => !payload.scp.includes(scope))) {

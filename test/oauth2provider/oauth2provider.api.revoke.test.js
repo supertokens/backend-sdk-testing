@@ -75,6 +75,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         const authorisationUrl = createAuthorizationUrl({
             apiDomain,
             clientId: client.clientId,
+            responseType: "code",
             redirectUri,
             state,
             scope,
@@ -199,6 +200,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         const authorisationUrl = createAuthorizationUrl({
             apiDomain,
             clientId: client.clientId,
+            responseType: "code",
             redirectUri,
             state,
             scope,

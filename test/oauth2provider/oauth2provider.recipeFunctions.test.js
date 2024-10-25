@@ -294,6 +294,7 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
 
             const authorisationUrl = createAuthorizationUrl({
                 apiDomain,
+                responseType: "code",
                 clientId: client.clientId,
                 redirectUri,
                 state,

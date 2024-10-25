@@ -90,7 +90,7 @@ describe(`OAuth2Provider-Token API: ${printPath("[test/oauth2provider/rfc6749.to
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: getBasicAuthHeader(client.clientId, client.clientSecret),
+                    Authorization: getBasicAuthHeader(client),
                 },
                 body: JSON.stringify({
                     code: authorizationCode,
@@ -123,7 +123,7 @@ describe(`OAuth2Provider-Token API: ${printPath("[test/oauth2provider/rfc6749.to
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: getBasicAuthHeader(client.clientId, client.clientSecret),
+                    Authorization: getBasicAuthHeader(client),
                 },
                 body: JSON.stringify({
                     code: authorizationCode,
@@ -156,7 +156,7 @@ describe(`OAuth2Provider-Token API: ${printPath("[test/oauth2provider/rfc6749.to
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: getBasicAuthHeader(client.clientId, client.clientSecret),
+                    Authorization: getBasicAuthHeader(client),
                 },
                 body: JSON.stringify({
                     code: authorizationCode,
@@ -175,7 +175,7 @@ describe(`OAuth2Provider-Token API: ${printPath("[test/oauth2provider/rfc6749.to
                     "Client authentication failed (e.g., unknown client, no client authentication included, or unsupported authentication method). The OAuth 2.0 Client supports client authentication method 'none', but method 'client_secret_basic' was requested. You must configure the OAuth 2.0 client's 'token_endpoint_auth_method' value to accept 'client_secret_basic'.",
             });
         });
-        
+
         it("should error out if the authorization is passed using the wrong method (set client_secret_basic, using client_secret_post)", async function () {
             const { client } = await OAuth2Provider.createOAuth2Client({
                 tokenEndpointAuthMethod: "client_secret_post",
@@ -189,7 +189,7 @@ describe(`OAuth2Provider-Token API: ${printPath("[test/oauth2provider/rfc6749.to
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: getBasicAuthHeader(client.clientId, client.clientSecret),
+                    Authorization: getBasicAuthHeader(client),
                 },
                 body: JSON.stringify({
                     code: authorizationCode,
