@@ -13,7 +13,7 @@
  * under the License.
  */
 
-const { recipesMock, request } = require("../../api-mock");
+const { recipesMock, request, queryAPI } = require("../../api-mock");
 const { EmailVerification, Passwordless, supertokens } = recipesMock;
 
 module.exports.epSignUp = async function (email, password, accessToken, userContext = {}) {
@@ -370,6 +370,66 @@ module.exports.getMfaInfo = async function (accessToken, statusCode = 200, userC
                     resolve(res);
                 }
             });
+    });
+};
+
+module.exports.totpListDevices = async function (accessToken, deviceName, userContext) {
+    return await queryAPI({
+        method: "get",
+        path: "/auth/totp/device/list",
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+};
+module.exports.totpCreateDevice = async function (accessToken, deviceName, userContext) {
+    return await queryAPI({
+        method: "post",
+        path: "/auth/totp/device",
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+        input: { deviceName, userContext },
+    });
+};
+module.exports.totpVerifyDevice = async function (accessToken, deviceName, totp, userContext) {
+    const response = await queryAPI({
+        returnResponse: true,
+        method: "post",
+        path: "/auth/totp/device/verify",
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+        input: { deviceName, totp, userContext },
+    });
+
+    const responseAccessToken = response.headers.get("st-access-token");
+    const body = await response.json();
+    return { body, accessToken: responseAccessToken };
+};
+module.exports.totpVerifyTOTP = async function (accessToken, totp, userContext) {
+    const response = await queryAPI({
+        returnResponse: true,
+        method: "post",
+        path: "/auth/totp/verify",
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+        input: { totp, userContext },
+    });
+
+    const responseAccessToken = response.headers.get("st-access-token");
+    const body = await response.json();
+    return { body, accessToken: responseAccessToken };
+};
+module.exports.totpRemoveDevice = async function (accessToken, deviceName, userContext) {
+    return await queryAPI({
+        method: "post",
+        path: "/auth/totp/device/remove",
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+        input: { deviceName, userContext },
     });
 };
 

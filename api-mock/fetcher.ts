@@ -176,9 +176,13 @@ export async function queryAPI({
             throw response;
         }
 
-        return await response.json().catch(() => undefined);
+        return await response.json().catch(() => response.text());
     } catch (error) {
-        throw await error.json().catch(() => undefined);
+        if (error instanceof Response) {
+            const text = await error.text();
+            throw new Error(text);
+        }
+        throw error;
     }
 }
 
