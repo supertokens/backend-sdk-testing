@@ -150,14 +150,14 @@ describe(`mfa-api w/ TOTP: ${printPath("[test/mfa/mfa.api.test.js]")}`, function
             removalError = e;
         }
         assert.ok(removalError);
-        assert.strictEqual(
-            removalError.message,
-            JSON.stringify({
+        assert.deepStrictEqual(
+            removalError,
+            {
                 message: "invalid claim",
                 claimValidationErrors: [
                     { id: "st-mfa", reason: { message: "MFA requirement for auth is not satisfied" } },
                 ],
-            })
+            }
         );
 
         assert.deepStrictEqual(await totpListDevices(accessToken), {

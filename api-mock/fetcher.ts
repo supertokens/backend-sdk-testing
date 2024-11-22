@@ -176,11 +176,31 @@ export async function queryAPI({
             throw response;
         }
 
-        return await response.json().catch(() => response.text());
+        try {
+            const text =  await response.text();
+            // TODO: we need this for legacy tests (which should probably be updated)
+            if (text === "") {
+                return undefined;
+            }
+            
+            try {   
+                return JSON.parse(text);
+            } catch {
+                return text;
+            }
+        } catch {
+            return undefined;
+        }
     } catch (error) {
         if (error instanceof Response) {
             const text = await error.text();
-            throw new Error(text);
+            let errorBody;
+            try {
+                errorBody = JSON.parse(text);
+            } catch (e) {
+                throw new Error(text);
+            }
+            throw errorBody;
         }
         throw error;
     }
