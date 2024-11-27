@@ -22,7 +22,7 @@ const {
     createTenant,
 } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString, request, getOverrideParams, getOverrideLogs } = require("../../api-mock");
+const { recipesMock, randomString, request, getOverrideParams, getOverrideLogs, hasFeatureFlag } = require("../../api-mock");
 const {
     AccountLinking,
     EmailPassword,
@@ -967,6 +967,12 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js
             });
         });
         describe("on the public tenant", () => {
+            before(async function () {
+                if (!(await hasFeatureFlag("revokeAllSessionsForUserFixes"))) {
+                    this.skip();
+                }
+            });
+
             it("revokeAllSessionsForUser with linked accounts should delete all the sessions if revokeSessionsForLinkedAccounts is true", async function () {
                 const connectionURI = await startST();
                 supertokens.init({
@@ -1061,6 +1067,12 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/session.test.js
         });
 
         describe("on a subtenant", () => {
+            before(async function () {
+                if (!(await hasFeatureFlag("revokeAllSessionsForUserFixes"))) {
+                    this.skip();
+                }
+            });
+
             it("revokeAllSessionsForUser with linked accounts should delete all the sessions if revokeSessionsForLinkedAccounts is true", async function () {
                 const connectionURI = await startST();
                 supertokens.init({

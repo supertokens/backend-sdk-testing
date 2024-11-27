@@ -24,7 +24,7 @@ const {
 let assert = require("assert");
 let fs = require("fs");
 let path = require("path");
-const { recipesMock, randomString, getOverrideParams, request } = require("../../api-mock");
+const { recipesMock, randomString, getOverrideParams, request, hasFeatureFlag } = require("../../api-mock");
 const {
     AccountLinking,
     EmailPassword,
@@ -444,6 +444,9 @@ describe(`emailverificationapiTests: ${printPath("[test/accountlinking/emailveri
         });
 
         it("updateSessionIfRequiredPostEmailVerification creates a new session if the user is linked to another user on a non-default tenant", async function () {
+            if (!(await hasFeatureFlag("isEmailChangeAllowedCrossTenantFixes"))) {
+                this.skip();
+            }
             const connectionURI = await startST();
             supertokens.init({
                 supertokens: {

@@ -14,7 +14,7 @@
  */
 const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString, request } = require("../../api-mock");
+const { recipesMock, randomString, request, hasFeatureFlag } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const {
     Session,
@@ -27,6 +27,12 @@ describe(`thirdPartyTests: ${printPath(
     "[test/thirdparty/includeInNonPublicTenantsByDefault.test.js]"
 )}`, function () {
     let globalConnectionURI;
+
+    before(async function () {
+        if (!(await hasFeatureFlag("includeInNonPublicTenantsByDefaultTPProviderFlag"))) {
+            this.skip();
+        }
+    });
 
     beforeEach(async function () {
         await killAllST();

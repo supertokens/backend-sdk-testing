@@ -14,7 +14,7 @@
  */
 const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
 let assert = require("assert");
-const { getOverrideParams, randomString, recipesMock, request, getOverrideLogs } = require("../../api-mock");
+const { getOverrideParams, randomString, recipesMock, request, getOverrideLogs, hasFeatureFlag } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const { AccountLinking, EmailPassword, EmailVerification, Session, supertokens, ThirdParty } = recipesMock;
 
@@ -126,6 +126,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling generatePasswordResetTokenPOST with single recipe users and no email password user should be OK, and send email", async function () {
+            if (!(await hasFeatureFlag("allowPasswordResetTokenGenerationWithoutPrimaryUser"))) {
+                this.skip();
+            }
             const connectionURI = await startST();
             supertokens.init({
                 supertokens: {
@@ -1339,6 +1342,9 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling generatePasswordResetTokenPOST with recipe user existing, and no email password user existing, primary user is not verified, and email verification is not required, should send email", async function () {
+            if (!(await hasFeatureFlag("allowPasswordResetTokenGenerationWithoutPrimaryUser"))) {
+                this.skip();
+            }
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
             const connectionURI = await startST();

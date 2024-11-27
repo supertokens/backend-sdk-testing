@@ -15,7 +15,7 @@
 const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
 let assert = require("assert");
 let { PROCESS_STATE } = require("supertokens-node/lib/build/processState");
-const { recipesMock, randomString } = require("../../api-mock");
+const { recipesMock, randomString, hasFeatureFlag } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const {
     AccountLinking,
@@ -2132,6 +2132,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/helperFunctions
         });
 
         it("isEmailChangeAllowed returns false if it'd lead to primary user conflict on a tenant", async function () {
+            if (!(await hasFeatureFlag("isEmailChangeAllowedCrossTenantFixes"))) {
+                this.skip();
+            }
+
             const connectionURI = await startST();
             supertokens.init({
                 supertokens: {

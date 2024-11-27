@@ -23,7 +23,7 @@ const {
 } = require("../utils");
 let assert = require("assert");
 let { PROCESS_STATE } = require("supertokens-node/lib/build/processState");
-const { randomString, recipesMock, request, getOverrideLogs } = require("../../api-mock");
+const { randomString, recipesMock, request, getOverrideLogs, hasFeatureFlag } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const { getUpdatedUserFromDBForRespCompare } = require("../accountlinking-with-session/utils");
 const {
@@ -558,6 +558,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("should call shouldDoAutomaticAccountLinking with the right parameters when linking by account info to the oldest user", async function () {
+            if (!(await hasFeatureFlag("linkToOldestUser"))) {
+                this.skip();
+            }
+
             const connectionURI = await startST();
             supertokens.init({
                 supertokens: {

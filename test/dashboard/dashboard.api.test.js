@@ -14,7 +14,7 @@
  */
 const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
 let assert = require("assert");
-const { recipesMock, request } = require("../../api-mock");
+const { recipesMock, request, hasFeatureFlag } = require("../../api-mock");
 const { EmailPassword, Session, supertokens, ThirdParty, Multitenancy, Passwordless, MultiFactorAuth } = recipesMock;
 
 let connectionURI;
@@ -192,6 +192,9 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
 
             describe("with t1 tenant", function () {
                 it("test adding new thirdParty id adds all static providers with includeInNonPublicTenantsByDefault to core", async function () {
+                    if (!(await hasFeatureFlag("includeInNonPublicTenantsByDefaultTPProviderFlag"))) {
+                        this.skip();
+                    }
                     await stInitWithThirdParty(true);
                     await Multitenancy.createOrUpdateTenant("t1");
 
@@ -228,7 +231,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                     assert.equal(thirdPartyProvider.config.clientId, "clientid");
 
                     thirdPartyProvider = await ThirdParty.getProvider("t1", "facebook");
-                    assert(thirdPartyProvider.config === undefined);
+                    assert.strictEqual(thirdPartyProvider.config, undefined);
                 });
 
                 it("test updating thirdParty config from static adds all providers with includeInNonPublicTenantsByDefault to core", async function () {

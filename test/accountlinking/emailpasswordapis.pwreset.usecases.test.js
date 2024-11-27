@@ -159,6 +159,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("the reset password flow should link to the oldest user", async function () {
+            if (!(await hasFeatureFlag("linkToOldestUser"))) {
+                this.skip();
+            }
+
             const email = "test@example.com";
 
             const { user: tpUser1 } = await ThirdParty.manuallyCreateOrUpdateUser(
