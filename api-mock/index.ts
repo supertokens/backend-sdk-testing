@@ -22,6 +22,7 @@ import { ThirdPartyMock } from "./mocks/ThirdPartyMock";
 import { UserMetadataMock } from "./mocks/UserMetadataMock";
 import { OAuth2ProviderMock } from "./mocks/OAuth2ProviderMock";
 import { randomString, hasFeatureFlag } from "./utils";
+import { WebAuthnMock } from "./mocks/WebAuthnMock";
 
 const recipesMock = {
     EmailPassword: EmailPasswordMock,
@@ -41,6 +42,7 @@ const recipesMock = {
     OAuth2Provider: OAuth2ProviderMock,
     TestPrimitiveClaim,
     TestPrimitiveArrayClaim,
+    WebAuthn: WebAuthnMock,
 };
 
 export {
