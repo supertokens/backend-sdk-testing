@@ -13,36 +13,19 @@
  * under the License.
  */
 
-const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTenant } = require("../utils");
+const { printPath, createCoreApplication } = require("../utils");
 let assert = require("assert");
 const { plessCreateCode, plessResendCode, getTestExpressApp, getTestEmail, getTestPhoneNumber } = require("./utils");
-const { recipesMock, randomString, getOverrideParams } = require("../../api-mock");
+const { recipesMock, getOverrideParams } = require("../../api-mock");
 const { Session, supertokens: SuperTokens, MultiFactorAuth, Passwordless } = recipesMock;
 
 describe(`mfa with passwordless: ${printPath("[test/mfa/mfa.passwordlessapis.test.js]")}`, function () {
-    let globalConnectionURI;
-
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     describe("firstFactors config", () => {
         it("should make pwless apis send the appropriate email (otp-email)", async function () {
             const email = getTestEmail();
             const phoneNumber = getTestPhoneNumber();
 
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             SuperTokens.init({
                 supertokens: {
                     connectionURI,
@@ -116,7 +99,7 @@ describe(`mfa with passwordless: ${printPath("[test/mfa/mfa.passwordlessapis.tes
             const email = getTestEmail();
             const phoneNumber = getTestPhoneNumber();
 
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             SuperTokens.init({
                 supertokens: {
                     connectionURI,
@@ -190,7 +173,7 @@ describe(`mfa with passwordless: ${printPath("[test/mfa/mfa.passwordlessapis.tes
             const email = getTestEmail();
             const phoneNumber = getTestPhoneNumber();
 
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             SuperTokens.init({
                 supertokens: {
                     connectionURI,
@@ -264,7 +247,7 @@ describe(`mfa with passwordless: ${printPath("[test/mfa/mfa.passwordlessapis.tes
             const email = getTestEmail();
             const phoneNumber = getTestPhoneNumber();
 
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             SuperTokens.init({
                 supertokens: {
                     connectionURI,
@@ -338,7 +321,7 @@ describe(`mfa with passwordless: ${printPath("[test/mfa/mfa.passwordlessapis.tes
             const email = getTestEmail();
             const phoneNumber = getTestPhoneNumber();
 
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             SuperTokens.init({
                 supertokens: {
                     connectionURI,
@@ -412,7 +395,7 @@ describe(`mfa with passwordless: ${printPath("[test/mfa/mfa.passwordlessapis.tes
             const email = getTestEmail();
             const phoneNumber = getTestPhoneNumber();
 
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             SuperTokens.init({
                 supertokens: {
                     connectionURI,

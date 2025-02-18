@@ -12,9 +12,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
+const { printPath, createCoreApplication } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString, request } = require("../../api-mock");
+const { recipesMock, request } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const {
     Session,
@@ -26,24 +26,11 @@ const {
 describe(`thirdPartyTests: ${printPath(
     "[test/thirdparty/includeInNonPublicTenantsByDefault.test.js]"
 )}`, function () {
-    let globalConnectionURI;
-
-    beforeEach(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    afterEach(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     describe("with includeInNonPublicTenantsByDefault not set", function () {
         it("test public tenant that doesn't have providers in core", async function () {
             supertokens.init({
                 supertokens: {
-                    connectionURI: globalConnectionURI,
+                    connectionURI: await createCoreApplication(),
                 },
                 appInfo: {
                     apiDomain: "api.supertokens.io",
@@ -94,7 +81,7 @@ describe(`thirdPartyTests: ${printPath(
         it("test public tenant that have providers in core", async function () {
             supertokens.init({
                 supertokens: {
-                    connectionURI: globalConnectionURI,
+                    connectionURI: await createCoreApplication(),
                 },
                 appInfo: {
                     apiDomain: "api.supertokens.io",
@@ -156,7 +143,7 @@ describe(`thirdPartyTests: ${printPath(
         it("test non-public tenant that doesn't have providers in core", async function () {
             supertokens.init({
                 supertokens: {
-                    connectionURI: globalConnectionURI,
+                    connectionURI: await createCoreApplication(),
                 },
                 appInfo: {
                     apiDomain: "api.supertokens.io",
@@ -210,7 +197,7 @@ describe(`thirdPartyTests: ${printPath(
         it("test non-public tenant that has providers in core", async function () {
             supertokens.init({
                 supertokens: {
-                    connectionURI: globalConnectionURI,
+                    connectionURI: await createCoreApplication(),
                 },
                 appInfo: {
                     apiDomain: "api.supertokens.io",
@@ -278,7 +265,7 @@ describe(`thirdPartyTests: ${printPath(
         it("test public tenant that doesn't have providers in core", async function () {
             supertokens.init({
                 supertokens: {
-                    connectionURI: globalConnectionURI,
+                    connectionURI: await createCoreApplication(),
                 },
                 appInfo: {
                     apiDomain: "api.supertokens.io",
@@ -330,7 +317,7 @@ describe(`thirdPartyTests: ${printPath(
         it("test public tenant that have providers in core", async function () {
             supertokens.init({
                 supertokens: {
-                    connectionURI: globalConnectionURI,
+                    connectionURI: await createCoreApplication(),
                 },
                 appInfo: {
                     apiDomain: "api.supertokens.io",
@@ -393,7 +380,7 @@ describe(`thirdPartyTests: ${printPath(
         it("test non-public tenant that doesn't have providers in core", async function () {
             supertokens.init({
                 supertokens: {
-                    connectionURI: globalConnectionURI,
+                    connectionURI: await createCoreApplication(),
                 },
                 appInfo: {
                     apiDomain: "api.supertokens.io",
@@ -448,7 +435,7 @@ describe(`thirdPartyTests: ${printPath(
         it("test non-public tenant that has providers in core", async function () {
             supertokens.init({
                 supertokens: {
-                    connectionURI: globalConnectionURI,
+                    connectionURI: await createCoreApplication(),
                 },
                 appInfo: {
                     apiDomain: "api.supertokens.io",
@@ -517,7 +504,7 @@ describe(`thirdPartyTests: ${printPath(
         it("test public tenant that doesn't have providers in core", async function () {
             supertokens.init({
                 supertokens: {
-                    connectionURI: globalConnectionURI,
+                    connectionURI: await createCoreApplication(),
                 },
                 appInfo: {
                     apiDomain: "api.supertokens.io",
@@ -569,7 +556,7 @@ describe(`thirdPartyTests: ${printPath(
         it("test public tenant that have providers in core", async function () {
             supertokens.init({
                 supertokens: {
-                    connectionURI: globalConnectionURI,
+                    connectionURI: await createCoreApplication(),
                 },
                 appInfo: {
                     apiDomain: "api.supertokens.io",
@@ -632,7 +619,7 @@ describe(`thirdPartyTests: ${printPath(
         it("test non-public tenant that doesn't have providers in core", async function () {
             supertokens.init({
                 supertokens: {
-                    connectionURI: globalConnectionURI,
+                    connectionURI: await createCoreApplication(),
                 },
                 appInfo: {
                     apiDomain: "api.supertokens.io",
@@ -688,7 +675,7 @@ describe(`thirdPartyTests: ${printPath(
         it("test non-public tenant that has providers in core", async function () {
             supertokens.init({
                 supertokens: {
-                    connectionURI: globalConnectionURI,
+                    connectionURI: await createCoreApplication(),
                 },
                 appInfo: {
                     apiDomain: "api.supertokens.io",

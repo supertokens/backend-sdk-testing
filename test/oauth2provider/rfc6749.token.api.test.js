@@ -15,15 +15,11 @@
 
 const {
     printPath,
-    setupST,
-    startST: globalStartST,
-    killAllST,
-    cleanST,
-    createTenant,
+    createCoreApplication,
     extractInfoFromResponse,
 } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString, API_PORT, request } = require("../../api-mock");
+const { recipesMock, API_PORT, request } = require("../../api-mock");
 const { OAuth2Provider, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
 const {
     createAuthorizationUrl,
@@ -40,19 +36,10 @@ const redirectUri = "http://localhost:4000/redirect-url";
 const state = Buffer.from("some-random-string").toString("base64");
 
 describe(`OAuth2Provider-Token API: ${printPath("[test/oauth2provider/rfc6749.token.api.test.js]")}`, function () {
-    let globalConnectionURI;
     let user, session;
 
-    const startST = async (cfg) => {
-        return createTenant(globalConnectionURI, randomString(), cfg);
-    };
-
     before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
 
         SuperTokens.init({
             supertokens: {
@@ -70,11 +57,6 @@ describe(`OAuth2Provider-Token API: ${printPath("[test/oauth2provider/rfc6749.to
 
         user = signUpRes.user;
         session = await Session.createNewSessionWithoutRequestResponse(undefined, signUpRes.recipeUserId);
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
     });
 
     describe("client authentication", () => {
