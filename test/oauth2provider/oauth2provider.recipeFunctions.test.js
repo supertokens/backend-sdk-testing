@@ -13,34 +13,17 @@
  * under the License.
  */
 
-const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTenant } = require("../utils");
+const { printPath, createCoreApplication } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString, API_PORT } = require("../../api-mock");
+const { recipesMock, API_PORT } = require("../../api-mock");
 const { createAuthorizationUrl, testOAuthFlowAndGetAuthCode } = require("./utils");
 const { OAuth2Provider, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
 
 describe(`OAuth2Provider-recipeFunctions: ${printPath(
     "[test/oauth2provider/OAuth2Provider.recipeFunctions.test.js]"
 )}`, function () {
-    let globalConnectionURI;
-
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     it("should create an OAuth2Client instance with empty input", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -61,7 +44,7 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
     });
 
     it("should create an OAuth2Client instance with custom input", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -86,7 +69,7 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
 
     it("should not allow creating a client with a redirect URI containing a URL fragment", async function () {
         // NOTE: Url fragments are not allowed in redirect URIs as per https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.2
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -112,7 +95,7 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
     });
 
     it("should update the OAuth2Client", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -157,7 +140,7 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
     });
 
     it("should delete the OAuth2Client", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -185,7 +168,7 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
     });
 
     it("should get OAuth2Clients with pagination", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -225,7 +208,7 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
     });
 
     it("should get OAuth2Clients with filter", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -259,7 +242,7 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
 
     describe("validateAccessToken", function () {
         it("should validate tokens from a successful OAuth2 login flow (openid, offline_access)", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";
@@ -343,7 +326,7 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
         });
 
         it("should validate tokens from a successful OAuth2 login flow (client credentials)", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";
@@ -407,7 +390,7 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
         });
 
         it("should validate tokens from a successful OAuth2 login flow (client credentials)", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";
@@ -471,7 +454,7 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
         });
 
         it("should validate tokens from a successful createTokenForClientCredentials call", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";
@@ -527,7 +510,7 @@ describe(`OAuth2Provider-recipeFunctions: ${printPath(
         });
 
         it("should validate tokens with checkDatabase true from a successful createTokenForClientCredentials call", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";

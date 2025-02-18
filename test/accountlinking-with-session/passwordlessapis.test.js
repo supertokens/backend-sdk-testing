@@ -12,7 +12,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { printPath, setupST, killAllST, cleanST, startST: globalStartST } = require("../utils");
+const { printPath } = require("../utils");
 const {
     getTestEmail,
     setup,
@@ -30,29 +30,16 @@ const { recipesMock, getOverrideParams, resetOverrideParams } = require("../../a
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const { supertokens, Passwordless } = recipesMock;
 
-let globalConnectionURI;
-
 describe(`passwordless accountlinkingTests w/ session: ${printPath(
     "[test/accountlinking-with-session/passwordlessapis.test.js]"
 )}`, function () {
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     describe("consumeCodePOST", function () {
         describe("during sign up", () => {
             describe("linking", () => {
                 it("should link to session user if the session user is already primary", async () => {
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
-                    await setup({ globalConnectionURI });
+                    await setup();
                     let sessionUser = await createEmailPasswordUser(email1, true);
                     sessionUser = await makeUserPrimary(sessionUser);
                     const session = await getSessionForUser(sessionUser);
@@ -75,7 +62,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                 it("should link to session user if the session user can be made primary", async () => {
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
-                    await setup({ globalConnectionURI });
+                    await setup();
                     let sessionUser = await createEmailPasswordUser(email1, true);
 
                     const session = await getSessionForUser(sessionUser);
@@ -98,7 +85,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                 it("should error if the session user cannot be made primary - conflicting primary user", async () => {
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
-                    await setup({ globalConnectionURI });
+                    await setup();
 
                     const conflictingUser = await createThirdPartyUser(email1, false);
                     await makeUserPrimary(conflictingUser);
@@ -126,7 +113,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                 it("should error if the session user cannot be made primary - email verification", async () => {
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
-                    await setup({ globalConnectionURI });
+                    await setup();
 
                     let sessionUser = await createEmailPasswordUser(email1, false);
 
@@ -159,7 +146,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                 it("should error if sign up is not allowed", async () => {
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
-                    await setup({ globalConnectionURI });
+                    await setup();
 
                     const conflictingUser = await createThirdPartyUser(email2, false);
                     await makeUserPrimary(conflictingUser);
@@ -187,7 +174,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                 it("should error if linking is not allowed because of conflicting primary user", async () => {
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
-                    await setup({ globalConnectionURI });
+                    await setup();
 
                     const conflictingUser = await createThirdPartyUser(email2, true);
                     await makeUserPrimary(conflictingUser);
@@ -216,7 +203,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     const email2 = getTestEmail("2");
 
                     await setup({
-                        globalConnectionURI,
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
@@ -243,7 +229,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     const email1 = "test2@example.com";
                     const email2 = getTestEmail("2");
                     await setup({
-                        globalConnectionURI,
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
@@ -268,7 +253,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
                     await setup({
-                        globalConnectionURI,
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
@@ -296,7 +280,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
                     await setup({
-                        globalConnectionURI,
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
@@ -322,7 +305,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
                     await setup({
-                        globalConnectionURI,
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
@@ -349,7 +331,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
                     await setup({
-                        globalConnectionURI,
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
@@ -376,7 +357,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                 it("should link to session user if the session user is already primary", async () => {
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
-                    await setup({ globalConnectionURI });
+                    await setup();
                     let sessionUser = await createEmailPasswordUser(email1, true);
                     sessionUser = await makeUserPrimary(sessionUser);
                     await createPasswordlessUser({ email: email2 });
@@ -401,7 +382,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                 it("should link to session user if the session user can be made primary", async () => {
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
-                    await setup({ globalConnectionURI });
+                    await setup();
                     let sessionUser = await createEmailPasswordUser(email1, true);
                     await createPasswordlessUser({ email: email2 });
 
@@ -425,7 +406,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                 it("should error if the session user cannot be made primary - conflicting primary user", async () => {
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
-                    await setup({ globalConnectionURI });
+                    await setup();
 
                     const conflictingUser = await createThirdPartyUser(email1, false);
                     await makeUserPrimary(conflictingUser);
@@ -454,7 +435,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                 it("should error if the session user cannot be made primary - email verification", async () => {
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
-                    await setup({ globalConnectionURI });
+                    await setup();
 
                     let sessionUser = await createEmailPasswordUser(email1, false);
                     await createPasswordlessUser({ email: email2 });
@@ -488,7 +469,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                 it("should error if the authenticating user is already primary", async () => {
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
-                    await setup({ globalConnectionURI });
+                    await setup();
 
                     let user = await createPasswordlessUser({ email: email2 });
                     user = await makeUserPrimary(user);
@@ -516,7 +497,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     const email1 = "test2@example.com";
                     const email2 = getTestEmail("2");
                     await setup({
-                        globalConnectionURI,
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
@@ -544,7 +524,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     const email1 = "test2@example.com";
                     const email2 = getTestEmail("2");
                     await setup({
-                        globalConnectionURI,
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
                     });
@@ -570,7 +549,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
                     await setup({
-                        globalConnectionURI,
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
@@ -599,7 +577,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
                     await setup({
-                        globalConnectionURI,
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
@@ -627,7 +604,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
                     await setup({
-                        globalConnectionURI,
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
@@ -655,7 +631,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     const email1 = getTestEmail("1");
                     const email2 = getTestEmail("2");
                     await setup({
-                        globalConnectionURI,
                         shouldDoAutomaticAccountLinking:
                             shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
                     });
@@ -683,7 +658,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
             it("should associate an exiting user with the current tenant if the session user has one with the same account info", async () => {
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
-                await setup({ globalConnectionURI });
+                await setup();
                 let sessionUser = await createEmailPasswordUser(email1, true);
                 sessionUser = await makeUserPrimary(sessionUser);
                 const otherTenantUser = await createPasswordlessUser({ email: email2 }, true, "tenant1");
@@ -718,7 +693,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
             it("should not associate an exiting user with the current tenant if the session user is not linked to it", async () => {
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
-                await setup({ globalConnectionURI });
+                await setup();
                 let sessionUser = await createEmailPasswordUser(email1, true);
                 sessionUser = await makeUserPrimary(sessionUser);
                 await createPasswordlessUser({ email: email2 }, true, "tenant1");
@@ -748,7 +723,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
             it("should error out if the credentials are wrong", async () => {
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
-                await setup({ globalConnectionURI });
+                await setup();
                 let sessionUser = await createEmailPasswordUser(email1, true);
                 sessionUser = await makeUserPrimary(sessionUser);
                 const otherTenantUser = await createPasswordlessUser({ email: email2 }, true, "tenant1");
@@ -781,7 +756,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
         it("should create a code if the session user is already primary and have the appropriate flowType", async () => {
             const email1 = getTestEmail("1");
             const email2 = getTestEmail("2");
-            await setup({ globalConnectionURI });
+            await setup();
             let sessionUser = await createEmailPasswordUser(email1, true);
             sessionUser = await makeUserPrimary(sessionUser);
             await createPasswordlessUser({ email: email2 });
@@ -798,7 +773,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
 
         it("should create a code if the session user is not primary user using the same email without verification", async () => {
             const email1 = getTestEmail("1");
-            await setup({ globalConnectionURI });
+            await setup();
             let sessionUser = await createEmailPasswordUser(email1, false);
 
             const session = await getSessionForUser(sessionUser);
@@ -813,7 +788,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
         it("should error if there is another user using the same email without verification and it's not the session user", async () => {
             const email1 = getTestEmail("1");
             const email2 = getTestEmail("2");
-            await setup({ globalConnectionURI });
+            await setup();
             await createEmailPasswordUser(email1, false);
             let sessionUser = await createPasswordlessUser({ email: email2 });
 
@@ -833,7 +808,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
         it("should create a code if the session user can be made primary", async () => {
             const email1 = getTestEmail("1");
             const email2 = getTestEmail("2");
-            await setup({ globalConnectionURI });
+            await setup();
             let sessionUser = await createEmailPasswordUser(email1, true);
 
             const session = await getSessionForUser(sessionUser);
@@ -848,7 +823,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
         it("should create a code even if the session user cannot be made primary - conflicting primary user", async () => {
             const email1 = getTestEmail("1");
             const email2 = getTestEmail("2");
-            await setup({ globalConnectionURI });
+            await setup();
 
             const conflictingUser = await createThirdPartyUser(email1, false);
             await makeUserPrimary(conflictingUser);
@@ -867,7 +842,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
         it("should create a code even if the session user cannot be made primary - email verification", async () => {
             const email1 = getTestEmail("1");
             const email2 = getTestEmail("2");
-            await setup({ globalConnectionURI });
+            await setup();
 
             let sessionUser = await createEmailPasswordUser(email1, false);
 
@@ -883,7 +858,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
         it("should error if sign up is not allowed", async () => {
             const email1 = getTestEmail("1");
             const email2 = getTestEmail("2");
-            await setup({ globalConnectionURI });
+            await setup();
 
             const conflictingUser = await createThirdPartyUser(email2, false);
             await makeUserPrimary(conflictingUser);
@@ -907,7 +882,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
             const email1 = "test2@example.com";
             const email2 = getTestEmail("2");
             await setup({
-                globalConnectionURI,
                 shouldDoAutomaticAccountLinking:
                     shouldDoAutomaticAccountLinkingOverride.linkingNoVerifyExceptWhenEmailMatchTest,
             });
@@ -927,7 +901,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
             const email1 = getTestEmail("1");
             const email2 = getTestEmail("2");
             await setup({
-                globalConnectionURI,
                 shouldDoAutomaticAccountLinking:
                     shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
             });
@@ -948,7 +921,6 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
             const email1 = getTestEmail("1");
             const email2 = getTestEmail("2");
             await setup({
-                globalConnectionURI,
                 shouldDoAutomaticAccountLinking:
                     shouldDoAutomaticAccountLinkingOverride.noLinkingWhenUserEqualsSessionUserDefaultRequireVerification,
             });
@@ -969,7 +941,7 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
         it("should create a code with the appropriate flowType", async () => {
             const email1 = getTestEmail("1");
             const email2 = getTestEmail("2");
-            await setup({ emailInputs: true, globalConnectionURI });
+            await setup({ emailInputs: true });
             await resetOverrideParams();
             let sessionUser = await createEmailPasswordUser(email1, true);
             sessionUser = await makeUserPrimary(sessionUser);

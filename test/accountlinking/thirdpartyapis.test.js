@@ -14,11 +14,7 @@
  */
 const {
     printPath,
-    setupST,
-    killAllST,
-    cleanST,
-    startST: globalStartST,
-    createTenant,
+    createCoreApplication,
     extractInfoFromResponse,
 } = require("../utils");
 let assert = require("assert");
@@ -36,12 +32,6 @@ const {
 } = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.test.js]")}`, function () {
-    let globalConnectionURI;
-
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
-    };
-
     before(async function () {
         this.customProviderWithEmailVerified = {
             config: {
@@ -97,19 +87,11 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
                 },
             }),
         };
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
     });
 
     describe("signInUpPOST tests", function () {
         it("signInUpPOST calls isSignUpAllowed if it's sign up even if user with email already exists with third party", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -192,7 +174,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
         });
 
         it("signInUpPOST does not call isSignUpAllowed if it's a sign in even if user's email has changed", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -270,7 +252,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
         });
 
         it("signInUpPOST returns SIGN_IN_UP_NOT_ALLOWED if isSignUpAllowed returns false", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -352,7 +334,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
         });
 
         it("signInUpPOST returns SIGN_IN_UP_NOT_ALLOWED if an unverified EP user exists", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -433,7 +415,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
         });
 
         it("signInUpPOST successfully links account and returns the session of the right recipe user if it's a sign up", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -524,7 +506,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
         });
 
         it("signInUpPOST successfully does linking of accounts and returns the session of the right recipe user if it's a sign in", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -632,7 +614,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
         });
 
         it("signInUpPOST gives the right user in the override on successful account linking", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             let userInCallback = undefined;
             supertokens.init({
                 supertokens: {
@@ -734,7 +716,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
         });
 
         it("signInUpPOST returns SIGN_IN_NOT_ALLOWED if the sign in user's email has changed to another primary user's email", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -821,7 +803,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
         });
 
         it("signInUpPOST returns SIGN_IN_UP_NOT_ALLOWED if it's a sign in and isEmailChangeAllowed returns false", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -914,7 +896,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
         });
 
         it("signInUpPOST checks verification from email verification recipe before calling  isEmailChangeAllowed", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1015,7 +997,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
         });
 
         it("signInUpPOST returns SIGN_IN_UP_NOT_ALLOWED if it's a sign in and isSignInAllowed returns false cause there is no email change", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1102,7 +1084,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
         });
 
         it("signInUpPOST does account linking during sign in if required", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1200,7 +1182,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
         });
 
         it("signInUpPOST returns SIGN_IN_UP_NOT_ALLOWED even though isEmailChangeAllowed returns true if other recipe exist with unverified, same email", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1287,7 +1269,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
         });
 
         it("signInUpPOST returns OK if isEmailChangeAllowed returns true and primary user exists with same email, new email is verified for recipe user, but not for primary user", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1390,7 +1372,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             let date = Date.now();
             let email = `john.doe+${date}+a@supertokens.com`;
             let email2 = `email@test.com`;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1463,7 +1445,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             let date = Date.now();
             let email = `john.doe+${date}+a@supertokens.com`;
             let email2 = `email@test.com`;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1535,7 +1517,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             let date = Date.now();
             let email = `john.doe+${date}+a@supertokens.com`;
             let email2 = `email@test.com`;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1607,7 +1589,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             it("signInUpPOST successfully links account and returns the session of the right recipe user if it's a sign up", async function () {
                 let date = Date.now();
                 let email = `john.doe+${date}@supertokens.com`;
-                const connectionURI = await startST();
+                const connectionURI = await createCoreApplication();
                 supertokens.init({
                     supertokens: {
                         connectionURI,

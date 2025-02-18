@@ -13,31 +13,14 @@
  * under the License.
  */
 
-const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTenant } = require("../utils");
+const { printPath, createCoreApplication } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString, API_PORT } = require("../../api-mock");
+const { recipesMock, API_PORT } = require("../../api-mock");
 const { OAuth2Provider, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
 const { default: generatePKCEChallenge } = require("pkce-challenge");
 const { createAuthorizationUrl, testOAuthFlowAndGetAuthCode } = require("./utils");
 
 describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.test.js]")}`, function () {
-    let globalConnectionURI;
-
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     const redirectUri = "http://localhost:4000/redirect-url";
     const defaultClientConf = {
         redirectUris: [redirectUri],
@@ -53,7 +36,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
     describe("redirect uri validation when starting the auth flow", () => {
         it("should reject changed path", async () => {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";
@@ -95,7 +78,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
         });
 
         it("should reject changed domain", async () => {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";
@@ -138,7 +121,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
         });
 
         it("should reject shortened domain", async () => {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";
@@ -181,7 +164,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
         });
 
         it("should reject different domain format", async () => {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";
@@ -224,7 +207,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
     describe("Authorization Code validation", () => {
         it("should reject codes belonging to a different clientId", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             SuperTokens.init({
                 supertokens: {
@@ -285,7 +268,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
         });
 
         it("should reject reused codes", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             SuperTokens.init({
                 supertokens: {
@@ -358,7 +341,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
         });
 
         it("should reject codes belonging to a different redirectURI", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             SuperTokens.init({
                 supertokens: {
@@ -425,7 +408,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
 
     describe("blocking PKCE downgrades", () => {
         it("should reject omitting the code challenge", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             SuperTokens.init({
                 supertokens: {
@@ -487,7 +470,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
         });
 
         it("should reject omitting the code verifier", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             SuperTokens.init({
                 supertokens: {
@@ -552,7 +535,7 @@ describe(`OAuth2Provider OWASP checks: ${printPath("[test/oauth2provider/owasp.t
         });
 
         it("should reject sending the code verifier of another request", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             SuperTokens.init({
                 supertokens: {
