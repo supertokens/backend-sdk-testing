@@ -15,15 +15,11 @@
 
 const {
     printPath,
-    setupST,
-    startST: globalStartST,
-    killAllST,
-    cleanST,
-    createTenant,
+    createCoreApplication,
     extractInfoFromResponse,
 } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString } = require("../../api-mock");
+const { recipesMock } = require("../../api-mock");
 const {
     AccountLinking,
     EmailPassword,
@@ -49,25 +45,8 @@ const { parseJWTWithoutSignatureVerification } = require("supertokens-node/lib/b
 const { TOTP: TOTPGenerator } = require("otpauth");
 
 describe(`mfa-api w/ TOTP: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
-    let globalConnectionURI;
-
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     it("should require mfa signing in", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,

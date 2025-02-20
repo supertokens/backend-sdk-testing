@@ -12,7 +12,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
+const { printPath, createCoreApplication } = require("../utils");
 const {
     getTestEmail,
     postToAuthAPI,
@@ -23,7 +23,7 @@ const {
     testPassword,
 } = require("./utils");
 let assert = require("assert");
-const { recipesMock, randomString, resetOverrideParams, getOverrideParams, hasFeatureFlag } = require("../../api-mock");
+const { recipesMock, resetOverrideParams, getOverrideParams, hasFeatureFlag } = require("../../api-mock");
 const {
     AccountLinking,
     EmailPassword,
@@ -39,17 +39,11 @@ const {
 let { TOTP: TOTPGenerator } = require("otpauth");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 
-let globalConnectionURI;
-
-const startST = async () => {
-    return createTenant(globalConnectionURI, randomString());
-};
-
 const setup = async function setup(config = {}) {
     const info = {
         coreCallCount: 0,
     };
-    const connectionURI = await startST();
+    const connectionURI = await createCoreApplication();
     supertokens.init({
         // debug: true,
         supertokens: {
@@ -132,17 +126,6 @@ const setup = async function setup(config = {}) {
 describe(`Multi-recipe account linking flows core call counts: ${printPath(
     "[test/accountlinking-with-session/callcount.test.js]"
 )}`, function () {
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     describe("sign up", function () {
         it("should call the core <=7 times without MFA or AL", async () => {
             await setup({
