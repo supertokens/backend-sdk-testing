@@ -11,6 +11,7 @@ releasePassword
 .idea
 /test_report
 /.nyc_output
+/test-results.*
 
 
 pyenv
