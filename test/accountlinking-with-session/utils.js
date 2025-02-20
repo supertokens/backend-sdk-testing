@@ -11,11 +11,11 @@ const {
     EmailVerification,
     MultiFactorAuth,
 } = recipesMock;
-const { createTenant } = require("../utils");
+const { createCoreApplication } = require("../utils");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 
 exports.setup = async function setup(config = {}) {
-    const connectionURI = await createTenant(config.globalConnectionURI, randomString());
+    const connectionURI = await createCoreApplication({ coreConfig: config.coreConfig });
     supertokens.init({
         // debug: true,
         supertokens: {
@@ -33,21 +33,21 @@ exports.setup = async function setup(config = {}) {
                 flowType: "USER_INPUT_CODE_AND_MAGIC_LINK",
                 ...(config.emailInputs
                     ? {
-                          emailDelivery: {
-                              service: {
-                                  sendEmail: ({ userContext, ...rest }) => {
-                                      if (!store || !store.emailInputs) {
-                                          store = {
-                                              ...store,
-                                              emailInputs: [],
-                                          };
-                                      }
-                                      store.emailInputs.push(rest);
-                                      return;
-                                  },
-                              },
-                          },
-                      }
+                        emailDelivery: {
+                            service: {
+                                sendEmail: ({ userContext, ...rest }) => {
+                                    if (!store || !store.emailInputs) {
+                                        store = {
+                                            ...store,
+                                            emailInputs: [],
+                                        };
+                                    }
+                                    store.emailInputs.push(rest);
+                                    return;
+                                },
+                            },
+                        },
+                    }
                     : {}),
             }),
             ThirdParty.init({
