@@ -1,4 +1,5 @@
 const { readFile } = require("fs/promises");
+
 require("./wasm_exec");
 
 const getWebauthnLib = async () => {
@@ -69,4 +70,4 @@ const getWebauthnLib = async () => {
     return { createCredential, createAndAssertCredential };
 };
 
-module.exports = { getWebauthnLib };
+module.exports = getWebauthnLib;

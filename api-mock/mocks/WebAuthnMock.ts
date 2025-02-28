@@ -62,6 +62,14 @@ export const WebAuthnMock: Partial<typeof WebAuthn> = {
                                         apis: minify("webauthn.init.override.apis", config?.override?.apis.toString()),
                                     }
                                   : {}),
+                              ...(config.override.functions
+                                  ? {
+                                        functions: minify(
+                                            "webauthn.init.override.functions",
+                                            config?.override?.functions.toString()
+                                        ),
+                                    }
+                                  : {}),
                           },
                       }
                     : {}),
@@ -69,11 +77,148 @@ export const WebAuthnMock: Partial<typeof WebAuthn> = {
             recipeId: "webauthn",
         } as any;
     },
-    getGeneratedOptions: async ({ webauthnGeneratedOptionsId, tenantId, userContext }) => {
+
+    registerOptions: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/webauthn/registeroptions",
+            input,
+        });
+    },
+
+    signInOptions: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/webauthn/signinoptions",
+            input,
+        });
+    },
+
+    getGeneratedOptions: async (input) => {
         return await queryAPI({
             method: "post",
             path: "/test/webauthn/getgeneratedoptions",
-            input: { webauthnGeneratedOptionsId, tenantId, userContext },
+            input,
+        });
+    },
+
+    signUp: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/webauthn/signup",
+            input,
+        });
+    },
+
+    signIn: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/webauthn/signin",
+            input,
+        });
+    },
+
+    verifyCredentials: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/webauthn/verifycredentials",
+            input,
+        });
+    },
+
+    generateRecoverAccountToken: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/webauthn/generaterecoveraccounttoken",
+            input,
+        });
+    },
+
+    recoverAccount: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/webauthn/recoveraccount",
+            input,
+        });
+    },
+
+    consumeRecoverAccountToken: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/webauthn/consumerecoveraccounttoken",
+            input,
+        });
+    },
+
+    registerCredential: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/webauthn/registercredential",
+            input,
+        });
+    },
+
+    createRecoverAccountLink: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/webauthn/createrecoveraccountlink",
+            input,
+        });
+    },
+
+    sendRecoverAccountEmail: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/webauthn/sendrecoveraccountemail",
+            input,
+        });
+    },
+
+    sendEmail: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/webauthn/sendemail",
+            input,
+        });
+    },
+
+    getUserFromRecoverAccountToken: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/webauthn/getuserfromrecoveraccounttoken",
+            input,
+        });
+    },
+
+    removeGeneratedOptions: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/webauthn/removegeneratedoptions",
+            input,
+        });
+    },
+
+    removeCredential: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/webauthn/removecredential",
+            input,
+        });
+    },
+
+    getCredential: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/webauthn/getcredential",
+            input,
+        });
+    },
+
+    listCredentials: async (input) => {
+        return await queryAPI({
+            method: "post",
+            path: "/test/webauthn/listcredentials",
+            input,
         });
     },
 };
