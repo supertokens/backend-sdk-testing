@@ -183,10 +183,14 @@ export async function queryAPI({
 
     if (!response.ok) {
         // Response was not OK
-        // Parse the output as JSON and throw it as an error
-        // The parsing could error out itself, but we let that error bubble up
-        const errorBody = await response.json();
-        throw errorBody;
+        try {
+            // Parse the output as JSON and throw it as an error
+            const errorBody = await response.json();
+            throw errorBody;
+        } catch {
+            // If JSON parsing fails, throw response body
+            throw text;
+        }
     }
 
     // Return body as JSON if possible, else text
