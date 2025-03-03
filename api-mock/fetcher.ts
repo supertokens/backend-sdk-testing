@@ -173,8 +173,9 @@ export async function queryAPI({
         return response;
     }
 
-    // Clone response so we can re-use it below
-    const text = await response.clone().text();
+    // Get the text response, and use it to parse as JSON below
+    // NOTE: Cannot clone and re-use: https://github.com/node-fetch/node-fetch/issues/1131
+    const text = await response.text();
 
     // TODO: we need this for legacy tests (which should probably be updated)
     if (text === "") {
@@ -185,7 +186,7 @@ export async function queryAPI({
         // Response was not OK
         try {
             // Parse the output as JSON and throw it as an error
-            const errorBody = await response.json();
+            const errorBody = JSON.parse(text);
             throw errorBody;
         } catch {
             // If JSON parsing fails, throw response body
@@ -195,7 +196,7 @@ export async function queryAPI({
 
     // Return body as JSON if possible, else text
     try {
-        return await response.json();
+        return JSON.parse(text);
     } catch {
         return text;
     }
