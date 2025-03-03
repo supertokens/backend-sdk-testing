@@ -184,14 +184,15 @@ export async function queryAPI({
 
     if (!response.ok) {
         // Response was not OK
+        let errorBody;
         try {
             // Parse the output as JSON and throw it as an error
-            const errorBody = JSON.parse(text);
-            throw errorBody;
+            errorBody = JSON.parse(text);
         } catch {
             // If JSON parsing fails, throw response body
             throw text;
         }
+        throw errorBody;
     }
 
     // Return body as JSON if possible, else text
