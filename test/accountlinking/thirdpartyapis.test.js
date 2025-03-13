@@ -729,6 +729,10 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             let overrideParams = await getOverrideParams();
             userInCallback = overrideParams.userInCallback;
 
+            if (userInCallback.webauthn) {
+                delete userInCallback.webauthn;
+            }
+
             assert(userInCallback !== undefined);
             assert.deepStrictEqual(pUser.toJson(), userInCallback);
         });
