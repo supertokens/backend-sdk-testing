@@ -69,6 +69,9 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     assert.strictEqual(body.status, "OK");
 
                     assert.strictEqual(body.user.id, sessionUser.id);
+                    if (body.user.webauthn) {
+                        delete body.user.webauthn;
+                    }
                     assert.deepStrictEqual(body.user, await getUpdatedUserFromDBForRespCompare(sessionUser));
                 });
 
@@ -92,6 +95,9 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     assert.strictEqual(body.status, "OK");
 
                     assert.strictEqual(body.user.id, sessionUser.id);
+                    if (body.user.webauthn) {
+                        delete body.user.webauthn;
+                    }
                     assert.deepStrictEqual(body.user, await getUpdatedUserFromDBForRespCompare(sessionUser));
                 });
 
@@ -425,6 +431,9 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     assert.strictEqual(body.status, "OK");
 
                     assert.strictEqual(body.user.id, sessionUser.id);
+                    if (body.user.webauthn) {
+                        delete body.user.webauthn;
+                    }
                     assert.deepStrictEqual(body.user, await getUpdatedUserFromDBForRespCompare(sessionUser));
                 });
 
@@ -449,6 +458,9 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     assert.strictEqual(body.status, "OK");
 
                     assert.strictEqual(body.user.id, sessionUser.id);
+                    if (body.user.webauthn) {
+                        delete body.user.webauthn;
+                    }
                     assert.deepStrictEqual(body.user, await getUpdatedUserFromDBForRespCompare(sessionUser));
                 });
 

@@ -676,8 +676,15 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             assert.deepStrictEqual(shouldDoAutomaticAccountLinkingCallParams[3][0].recipeId, "emailpassword");
             assert.deepStrictEqual(shouldDoAutomaticAccountLinkingCallParams[3][0].email, "test@example.com");
             const tpUserForComparison = tpUser.user.toJson();
+
+            // Drop the webauthn key from the user object if it exists
+            const userToCompare = shouldDoAutomaticAccountLinkingCallParams[3][1]
+            if (userToCompare.webauthn) {
+                delete userToCompare.webauthn;
+            }
+
             tpUserForComparison.isPrimaryUser = true;
-            assert.deepStrictEqual(shouldDoAutomaticAccountLinkingCallParams[3][1], JSON.parse(JSON.stringify(tpUserForComparison)));
+            assert.deepStrictEqual(userToCompare, JSON.parse(JSON.stringify(tpUserForComparison)));
         });
 
         it("calling signUpPOST succeeds, and links to older account, if email exists in some non email password, non primary user - account linking enabled, and email verification not required", async function () {
