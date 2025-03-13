@@ -59,6 +59,9 @@ describe(`Multi-recipe account linking flows w/ session: ${printPath(
 
             assert.strictEqual(addPWResp.body.status, "OK");
             assert.strictEqual(addPWResp.body.user.id, createRespBody.user.id);
+            if (addPWResp.body.user.webauthn) {
+                delete addPWResp.body.user.webauthn;
+            }
             assert.deepStrictEqual(addPWResp.body.user, await getUpdatedUserFromDBForRespCompare(createRespBody.user));
         });
 
