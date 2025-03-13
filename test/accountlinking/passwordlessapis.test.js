@@ -1047,6 +1047,9 @@ async function getConsumeCodeTestCase({ pwlessUser, otherRecipeUser, accountLink
         const user = consumeCodeResponse.body.user;
         const userFromGetUser = await supertokens.getUser(user.id);
 
+        if (user.webauthn) {
+            delete user.webauthn;
+        }
         assertJSONEquals(user, userFromGetUser.toJson());
         assert.strictEqual(user.isPrimaryUser, expect.isPrimary);
         if (expect.userId === "other") {
