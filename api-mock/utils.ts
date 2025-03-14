@@ -70,6 +70,7 @@ export function deserializeOverrideParams(vars) {
                     email: undefined, // this is there cause the user object json adds them as undefined as opposed to omitting it entirely
                     thirdParty: undefined,
                     phoneNumber: undefined,
+                    webauthn: undefined,
                     ...lm,
                     recipeUserId: typeof lm.recipeUserId === "string" ? lm.recipeUserId : lm.recipeUserId.recipeUserId,
                 })),
