@@ -376,9 +376,102 @@ describe(`apisFunctions: ${printPath("[test/webauthn/apis.test.js]")}`, function
             assert.equal(signInResponse.status, "INVALID_CREDENTIALS_ERROR");
         });
 
-        it("should fail signIn if there is no credential registered for the user", async function () {});
+        it("should fail signIn if there is no credential registered for the user", async function () {
+            await initST();
 
-        it("should allow signIn multiple times with the same credential", async function () {});
+            const { signUpResponse, credential } = await createUser(rpId, rpName, origin);
+
+            await getWebAuthnRecipe().removeCredential({
+                userId: signUpResponse.user.id,
+                credentialId: credential.attestation.id,
+                tenantId: "public",
+                userContext: {},
+            });
+
+            const signInOptionsResponse = await createSignInOptions();
+
+            const signInResponse = await new Promise((resolve, reject) =>
+                request()
+                    .post("/auth/webauthn/signin")
+                    .send({
+                        credential: credential.assertion,
+                        webauthnGeneratedOptionsId: signInOptionsResponse.webauthnGeneratedOptionsId,
+                        shouldTryLinkingWithSessionUser: false,
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(JSON.parse(res.text));
+                        }
+                    })
+            );
+
+            assert.equal(signInResponse.status, "INVALID_CREDENTIALS_ERROR");
+        });
+
+        it("should allow signIn multiple times with the same credential", async function () {
+            await initST();
+
+            const { email, credential, signInOptionsResponse } = await createUser(rpId, rpName, origin);
+
+            const signInResponse1 = await new Promise((resolve, reject) =>
+                request()
+                    .post("/auth/webauthn/signin")
+                    .send({
+                        credential: credential.assertion,
+                        webauthnGeneratedOptionsId: signInOptionsResponse.webauthnGeneratedOptionsId,
+                        shouldTryLinkingWithSessionUser: false,
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(JSON.parse(res.text));
+                        }
+                    })
+            );
+
+            assert.equal(signInResponse1.status, "OK");
+
+            assert.equal(typeof signInResponse1?.user?.id, "string");
+            assert.deepEqual(signInResponse1?.user?.emails, [email]);
+            assert.deepEqual(signInResponse1?.user?.webauthn?.credentialIds, [credential.attestation.id]);
+            assert.equal(signInResponse1?.user?.loginMethods?.[0]?.email, email);
+            assert.deepEqual(signInResponse1?.user?.loginMethods?.[0]?.webauthn?.credentialIds, [
+                credential.attestation.id,
+            ]);
+
+            const signInResponse2 = await new Promise((resolve, reject) =>
+                request()
+                    .post("/auth/webauthn/signin")
+                    .send({
+                        credential: credential.assertion,
+                        webauthnGeneratedOptionsId: signInOptionsResponse.webauthnGeneratedOptionsId,
+                        shouldTryLinkingWithSessionUser: false,
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(JSON.parse(res.text));
+                        }
+                    })
+            );
+
+            assert.equal(signInResponse2.status, "OK");
+
+            assert.equal(typeof signInResponse2?.user?.id, "string");
+            assert.deepEqual(signInResponse2?.user?.emails, [email]);
+            assert.deepEqual(signInResponse2?.user?.webauthn?.credentialIds, [credential.attestation.id]);
+            assert.equal(signInResponse2?.user?.loginMethods?.[0]?.email, email);
+            assert.deepEqual(signInResponse2?.user?.loginMethods?.[0]?.webauthn?.credentialIds, [
+                credential.attestation.id,
+            ]);
+        });
     });
 
     describe("[generateRecoverAccountTokenPOST]", function () {
