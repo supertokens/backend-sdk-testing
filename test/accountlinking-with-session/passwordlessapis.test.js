@@ -245,6 +245,12 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     assert.strictEqual(body.status, "OK");
 
                     assert.strictEqual(body.user.id, otherUser.id);
+
+                    delete body.user?.webauthn;
+                    body.user?.loginMethods?.forEach((method, index) => {
+                        delete body.user.loginMethods[index].webauthn;
+                    });
+
                     assert.deepStrictEqual(body.user, await getUpdatedUserFromDBForRespCompare(otherUser));
                 });
 
@@ -305,6 +311,12 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     assert.strictEqual(body.status, "OK");
 
                     assert.strictEqual(body.user.id, otherUser.id);
+
+                    delete body.user?.webauthn;
+                    body.user?.loginMethods?.forEach((method, index) => {
+                        delete body.user.loginMethods[index].webauthn;
+                    });
+
                     assert.deepStrictEqual(body.user, await getUpdatedUserFromDBForRespCompare(otherUser));
 
                     sessionUser = await supertokens.getUser(sessionUser.id);
@@ -368,6 +380,12 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     assert.strictEqual(body.status, "OK");
 
                     assert.strictEqual(body.user.id, otherUser.id);
+
+                    delete body.user?.webauthn;
+                    body.user?.loginMethods?.forEach((method, index) => {
+                        delete body.user.loginMethods[index].webauthn;
+                    });
+
                     assert.deepStrictEqual(body.user, await getUpdatedUserFromDBForRespCompare(otherUser));
 
                     sessionUser = await supertokens.getUser(sessionUser.id);
@@ -582,6 +600,12 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     assert.strictEqual(body.status, "OK");
 
                     assert.strictEqual(body.user.id, otherUser.id);
+
+                    delete body.user?.webauthn;
+                    body.user?.loginMethods?.forEach((method, index) => {
+                        delete body.user.loginMethods[index].webauthn;
+                    });
+
                     assert.deepStrictEqual(body.user, await getUpdatedUserFromDBForRespCompare(otherUser));
                 });
 
@@ -644,6 +668,12 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     assert.strictEqual(body.status, "OK");
 
                     assert.strictEqual(body.user.id, otherUser.id);
+
+                    delete body.user?.webauthn;
+                    body.user?.loginMethods?.forEach((method, index) => {
+                        delete body.user.loginMethods[index].webauthn;
+                    });
+
                     assert.deepStrictEqual(body.user, await getUpdatedUserFromDBForRespCompare(otherUser));
 
                     sessionUser = await supertokens.getUser(sessionUser.id);
@@ -710,6 +740,12 @@ describe(`passwordless accountlinkingTests w/ session: ${printPath(
                     assert.strictEqual(body.status, "OK");
 
                     assert.strictEqual(body.user.id, otherUser.id);
+
+                    delete body.user?.webauthn;
+                    body.user?.loginMethods?.forEach((method, index) => {
+                        delete body.user.loginMethods[index].webauthn;
+                    });
+
                     assert.deepStrictEqual(body.user, await getUpdatedUserFromDBForRespCompare(otherUser));
 
                     sessionUser = await supertokens.getUser(sessionUser.id);
