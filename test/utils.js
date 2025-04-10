@@ -12,9 +12,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { exec, spawn } = require("child_process");
-const nock = require("nock");
-let fs = require("fs");
+const { exec } = require("child_process");
 const { default: fetch } = require("cross-fetch");
 let SuperTokens = require("supertokens-node/lib/build/supertokens").default;
 let SessionRecipe = require("supertokens-node/lib/build/recipe/session/recipe").default;
@@ -34,8 +32,8 @@ let { ProcessState } = require("supertokens-node/lib/build/processState");
 let debug = require("debug");
 let assert = require("assert");
 const { CollectingResponse } = require("supertokens-node/framework/custom");
-const { randomUUID } = require('node:crypto');
-const setCookieParser = require('set-cookie-parser');
+const { randomUUID } = require("node:crypto");
+const setCookieParser = require("set-cookie-parser");
 
 module.exports.printPath = function (path) {
     return `${createFormat([consoleOptions.yellow, consoleOptions.italic, consoleOptions.dim])}${path}${createFormat([
@@ -56,6 +54,10 @@ module.exports.executeCommand = async function (cmd) {
 };
 
 module.exports.extractInfoFromResponse = function (res) {
+    if (!res) {
+        throw new Error("Expected `res` to be defined to parse response.");
+    }
+
     let headers;
     let accessToken = undefined;
     let refreshToken = undefined;
@@ -158,19 +160,35 @@ module.exports.resetAll = function (disableLogging = true) {
     }
 };
 
-getCoreUrl = () => {
-    const host = process.env?.SUPERTOKENS_CORE_HOST ?? 'localhost';
-    const port = process.env?.SUPERTOKENS_CORE_PORT ?? '3567';
+module.exports.getCoreUrl = () => {
+    const host = process.env?.SUPERTOKENS_CORE_HOST ?? "localhost";
+    const port = process.env?.SUPERTOKENS_CORE_PORT ?? "3567";
 
     const coreUrl = `http://${host}:${port}`;
 
     return coreUrl;
-}
+};
 
-module.exports.getCoreUrl = getCoreUrl;
+module.exports.getCoreUrlFromConnectionURI = (connectionURI) => {
+    let coreUrl = connectionURI;
+
+    if (coreUrl.includes("appid-")) {
+        coreUrl = connectionURI.split("appid-")[0];
+    }
+
+    if (coreUrl.endsWith("/")) {
+        coreUrl = coreUrl.slice(0, -1);
+    }
+
+    return coreUrl;
+};
+
+module.exports.getAppIdFromConnectionURI = function (connectionURI) {
+    return connectionURI.split("/").pop().split("-").pop();
+};
 
 module.exports.createCoreApplication = async function ({ appId, coreConfig } = {}) {
-    const coreUrl = getCoreUrl();
+    const coreUrl = module.exports.getCoreUrl();
 
     if (!appId) {
         appId = randomUUID();
@@ -196,6 +214,26 @@ module.exports.createCoreApplication = async function ({ appId, coreConfig } = {
     assert.strictEqual(respBody.createdNew, true);
 
     return `${coreUrl}/appid-${appId}`;
+};
+
+module.exports.removeCoreApplication = async function ({ connectionURI } = {}) {
+    const coreUrl = module.exports.getCoreUrlFromConnectionURI(connectionURI);
+    const appId = module.exports.getAppIdFromConnectionURI(connectionURI);
+
+    const removeAppResp = await fetch(`${coreUrl}/recipe/multitenancy/app/remove`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            appId,
+        }),
+    });
+
+    const respBody = await removeAppResp.json();
+    assert.strictEqual(respBody.status, "OK");
+
+    return true;
 };
 
 function createFormat(options) {
