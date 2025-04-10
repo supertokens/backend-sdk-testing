@@ -12,7 +12,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { printPath, setupST, killAllST, cleanST, startST } = require("../utils");
+const { printPath, createCoreApplication } = require("../utils");
 let assert = require("assert");
 const { recipesMock, request } = require("../../api-mock");
 const { supertokens, WebAuthn } = recipesMock;
@@ -25,16 +25,6 @@ const createRegisterOptions = require("./lib/createRegisterOptions");
 const createSignInOptions = require("./lib/createSignInOptions");
 
 describe(`apisFunctions: ${printPath("[test/webauthn/apis.test.js]")}`, function () {
-    beforeEach(async function () {
-        await killAllST();
-        await setupST();
-    });
-
-    afterEach(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     describe("[registerOptionsPOST]", function () {
         it("test registerOptions with default values", async function () {
             await initST({ origin: false, rpId: false, rpName: false });
@@ -78,7 +68,7 @@ describe(`apisFunctions: ${printPath("[test/webauthn/apis.test.js]")}`, function
         });
 
         it("test registerOptions with custom values", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             supertokens.init({
                 supertokens: {
@@ -199,7 +189,7 @@ describe(`apisFunctions: ${printPath("[test/webauthn/apis.test.js]")}`, function
         });
 
         it("test signInOptions with custom values", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             supertokens.init({
                 supertokens: {
