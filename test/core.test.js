@@ -12,31 +12,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("./utils");
+const { printPath, createCoreApplication } = require("./utils");
 let assert = require("assert");
-const { recipesMock, randomString, getOverrideLogs, request } = require("../api-mock");
+const { recipesMock, getOverrideLogs, request } = require("../api-mock");
 const { EmailPassword, Session, supertokens } = recipesMock;
 
 describe(`coreTests: ${printPath("[test/core.test.js]")}`, function () {
-    let globalConnectionURI;
-
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     it("apiversion payload test when calling API", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
 
         await supertokens.init({
             supertokens: {
@@ -92,7 +75,7 @@ describe(`coreTests: ${printPath("[test/core.test.js]")}`, function () {
     });
 
     it("apiversion payload test when calling recipe function", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
 
         await supertokens.init({
             supertokens: {
