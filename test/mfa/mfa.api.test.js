@@ -15,15 +15,11 @@
 
 const {
     printPath,
-    setupST,
-    startST: globalStartST,
-    killAllST,
-    cleanST,
-    createTenant,
+    createCoreApplication,
     extractInfoFromResponse,
 } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString } = require("../../api-mock");
+const { recipesMock } = require("../../api-mock");
 const {
     AccountLinking,
     EmailPassword,
@@ -48,25 +44,8 @@ const {
 const { parseJWTWithoutSignatureVerification } = require("supertokens-node/lib/build/recipe/session/jwt");
 
 describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
-    let globalConnectionURI;
-
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     it("test with firstFactors not set allows all factors", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -163,7 +142,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     });
 
     it("test mfa info after first factor", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -224,7 +203,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     });
 
     it("mfa info errors if the user is stuck", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         let requireFactor = false;
 
         supertokens.init({
@@ -293,7 +272,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     });
 
     it("test that only a valid first factor is allowed to login", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -328,7 +307,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     });
 
     it("test that only a valid first factor is allowed to login and tenant config is prioritised", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -367,7 +346,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     });
 
     it("test that once user has more than one factor setup, they need 2FA to setup a new factor", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -427,7 +406,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     });
 
     it("test that existing user sign in links the user to the current one if allowed", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -482,7 +461,7 @@ describe(`mfa-api: ${printPath("[test/mfa/mfa.api.test.js]")}`, function () {
     });
 
     it("test that the factor doesn't get completed if signing in with another primary user", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,

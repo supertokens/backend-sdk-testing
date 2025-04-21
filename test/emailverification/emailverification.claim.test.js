@@ -12,34 +12,17 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
+const { printPath, createCoreApplication } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString, getOverrideLogs, resetOverrideParams } = require("../../api-mock");
+const { recipesMock, getOverrideLogs, resetOverrideParams } = require("../../api-mock");
 const { EmailPassword, EmailVerification, Session, supertokens } = recipesMock;
 
 describe(`EmailverificationTests: ${printPath(
     "[test/emailverification/emailverification.claim.test.js]"
 )}`, function () {
-    let globalConnectionURI;
-
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     describe("EmailVerification Claim", function () {
         it("value should be fetched if it is undefined", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -74,7 +57,7 @@ describe(`EmailverificationTests: ${printPath(
         });
 
         it("value should be fetched as per maxAgeInSeconds if it is provided", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -132,7 +115,7 @@ describe(`EmailverificationTests: ${printPath(
         });
 
         it("value should be fetched as per refetchTimeOnFalseInSeconds if it is provided", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -190,7 +173,7 @@ describe(`EmailverificationTests: ${printPath(
         });
 
         it("value should be fetched as per default the refetchTimeOnFalseInSeconds if it is not provided", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,

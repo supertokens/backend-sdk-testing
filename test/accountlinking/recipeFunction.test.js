@@ -14,38 +14,17 @@
  */
 const {
     printPath,
-    setupST,
-    killAllST,
-    cleanST,
-    assertJSONEquals,
-    startST: globalStartST,
-    createTenant,
+    createCoreApplication,
+    assertJSONEquals
 } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString, getOverrideParams, resetOverrideParams } = require("../../api-mock");
+const { recipesMock, getOverrideParams, resetOverrideParams } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const { AccountLinking, EmailPassword, EmailVerification, Session, supertokens, ThirdParty } = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.test.js]")}`, function () {
-    let globalConnectionURI;
-
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     it("make primary user success", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -79,7 +58,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("make primary user succcess - already is a primary user", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -106,7 +85,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("make primary user failure - recipe user already linked to another user", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -139,7 +118,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("make primary user failure - account info user already associated with a primary user", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -185,7 +164,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("link accounts success", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         let primaryUserInCallback;
         let newAccountInfoInCallback;
         supertokens.init({
@@ -244,7 +223,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("link accounts success, even if using recipe user id that is linked to the primary user id", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         let primaryUserInCallback;
         let newAccountInfoInCallback;
         supertokens.init({
@@ -292,7 +271,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("link accounts success - already linked", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         let primaryUserInCallback;
         let newAccountInfoInCallback;
         supertokens.init({
@@ -354,7 +333,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("link accounts failure - recipe user id already linked with another primary user id", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         let primaryUserInCallback;
         supertokens.init({
             supertokens: {
@@ -402,7 +381,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("link accounts failure - input user is not a primary user", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         let primaryUserInCallback;
         supertokens.init({
             supertokens: {
@@ -434,7 +413,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("account linking failure - account info user already associated with a primary user", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -487,7 +466,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("unlinking accounts success and removes session", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -534,7 +513,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("unlinking account of primary user causes it to become a recipe user", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -572,7 +551,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("unlinking accounts where user id is primary user causes that user id to be deleted", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -620,7 +599,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("delete user successful", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -664,7 +643,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("delete user successful - primary user being deleted", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -708,7 +687,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("delete user successful - remove all linked accounts", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -754,7 +733,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("link accounts success causes new account's email to be verified if same email", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -814,7 +793,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("link accounts success does not cause primary user's account's email to be verified if same email", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -884,7 +863,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("link accounts success does not cause new account's email to be verified if different email", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -943,7 +922,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/recipeFunction.
     });
 
     it("link accounts does not cause primary user's account's email to be verified if different email", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,

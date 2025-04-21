@@ -13,32 +13,15 @@
  * under the License.
  */
 
-const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTenant } = require("../utils");
+const { printPath, createCoreApplication } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString, API_PORT } = require("../../api-mock");
+const { recipesMock, API_PORT } = require("../../api-mock");
 const { OAuth2Provider, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
 const { createAuthorizationUrl, testOAuthFlowAndGetAuthCode } = require("./utils");
 
 describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.api.test.js]")}`, function () {
-    let globalConnectionURI;
-
-    const startST = async (cfg) => {
-        return createTenant(globalConnectionURI, randomString(), cfg);
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     it("should revoke previously issued access tokens when revoking a refresh token with enableRefreshTokenRotation", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
 
         const apiDomain = `http://localhost:${API_PORT}`;
         const websiteDomain = "http://supertokens.io";
@@ -164,7 +147,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
     });
 
     it("should revoke previously issued access tokens when revoking a refresh token without enableRefreshTokenRotation", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
 
         const apiDomain = `http://localhost:${API_PORT}`;
         const websiteDomain = "http://supertokens.io";

@@ -12,34 +12,17 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
+const { printPath, createCoreApplication } = require("../utils");
 let assert = require("assert");
-const { getOverrideParams, randomString, recipesMock, request, getOverrideLogs } = require("../../api-mock");
+const { getOverrideParams, recipesMock, request, getOverrideLogs } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const { AccountLinking, EmailPassword, EmailVerification, Session, supertokens, ThirdParty } = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordapis2.test.js]")}`, function () {
-    let globalConnectionURI;
-
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     describe("generatePasswordResetTokenPOST tests", function () {
         it("calling generatePasswordResetTokenPOST with no primary user and no email password user should be OK, and not send any email", async function () {
             let sendEmailCallbackCalled = false;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -126,7 +109,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         });
 
         it("calling generatePasswordResetTokenPOST with single recipe users and no email password user should be OK, and send email", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -209,7 +192,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
 
         it("calling generatePasswordResetTokenPOST with single unverified recipe users and no email password user should be OK, and not send any email if linking requires verification", async function () {
             let sendEmailCallbackCalled = false;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -287,7 +270,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
 
         it("calling generatePasswordResetTokenPOST with no primary user and existing email password user should be OK, and should send an email", async function () {
             let sendEmailToUserId = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -368,7 +351,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
 
         it("calling generatePasswordResetTokenPOST with primary user existing, and no email password user, and email is in unverified state of primary user, and email verification is required, should return OK, but should not send an email", async function () {
             let sendEmailCallbackCalled = false;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -456,7 +439,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
 
         it("calling generatePasswordResetTokenPOST with primary user existing, and no email password user, and email is in unverified state of primary user, and email verification is NOT required, should return OK, and should send an email", async function () {
             let sendEmailToUserId = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -544,7 +527,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
 
         it("calling generatePasswordResetTokenPOST with primary user existing, and no email password user, account linking enabled, and email verification required, should return OK, and should send an email", async function () {
             let sendEmailToUserId = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -635,7 +618,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
 
         it("calling generatePasswordResetTokenPOST with primary user existing, and no email password user, account linking disabled, should return OK, but should not send an email", async function () {
             let sendEmailCallbackCalled = false;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -720,7 +703,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         it("calling generatePasswordResetTokenPOST with primary user existing, and email password user existing, where both accounts are linked, should fail if email is unverified and account linking is enabled", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -808,7 +791,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         it("calling generatePasswordResetTokenPOST with primary user existing, and email password user existing, where both accounts are linked, should fail if email is unverified even if account linking is disabled", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -897,7 +880,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         it("calling generatePasswordResetTokenPOST with primary user existing, and email password user existing, where both accounts are linked, should send email if email is verified", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1000,7 +983,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         it("calling generatePasswordResetTokenPOST with primary user existing, and no email password user existing, primary user is not verified, and email verification is required, should not send email", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1125,7 +1108,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         it("calling generatePasswordResetTokenPOST with recipe user existing, and no email password user existing, primary user is not verified, and email verification is required, should not send email", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1249,7 +1232,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         it("calling generatePasswordResetTokenPOST with primary user existing, and no email password user existing, primary user is not verified, and email verification is not required, should send email", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1341,7 +1324,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         it("calling generatePasswordResetTokenPOST with recipe user existing, and no email password user existing, primary user is not verified, and email verification is not required, should send email", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1438,7 +1421,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let sendEmailToUserId = undefined;
             let sendEmailToRecipeUserId = undefined;
             let sendEmailToUserEmail = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1538,7 +1521,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         it("calling generatePasswordResetTokenPOST with primary user existing, and email password user existing, account linking enabled, but email verification not required should send email, for primary user", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1635,7 +1618,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         it("calling generatePasswordResetTokenPOST with primary user existing, and email password user existing, account linking enabled, email verification required should send email, for primary user", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1733,7 +1716,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         it("calling generatePasswordResetTokenPOST with primary user existing, with multiple login methods, and email is verified in one of those methods, and email password user existing, account linking enabled, email verification required should send email, for primary user", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1839,7 +1822,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         it("calling generatePasswordResetTokenPOST with primary user existing, with multiple login methods, and email right is not verified in the login methods, and email password user existing, account linking enabled, email verification required should say not allowed", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -1953,7 +1936,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             const emailA = "test@example.com";
             const emailV = "test2@example.com";
 
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -2051,7 +2034,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         it("calling generatePasswordResetTokenPOST with primary user existing, with multiple login methods, and all of them having the same email, but none are verified, and email password user existing, account linking enabled, email verification required should send email with primary user", async function () {
             let sendEmailToUserId = undefined;
             let sendEmailToUserEmail = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -2166,7 +2149,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let token = undefined;
             let userPostPasswordReset = undefined;
             let emailPostPasswordReset = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -2302,7 +2285,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let token = undefined;
             let userPostPasswordReset = undefined;
             let emailPostPasswordReset = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -2453,7 +2436,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let token = undefined;
             let userPostPasswordReset = undefined;
             let emailPostPasswordReset = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -2587,7 +2570,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let token = undefined;
             let userPostPasswordReset = undefined;
             let emailPostPasswordReset = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -2743,7 +2726,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let token = undefined;
             let userPostPasswordReset = undefined;
             let emailPostPasswordReset = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -2901,7 +2884,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let token = undefined;
             let userPostPasswordReset = undefined;
             let emailPostPasswordReset = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -3047,7 +3030,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let token = undefined;
             let userPostPasswordReset = undefined;
             let emailPostPasswordReset = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -3189,7 +3172,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let token = undefined;
             let userPostPasswordReset = undefined;
             let emailPostPasswordReset = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -3344,7 +3327,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let token = undefined;
             let userPostPasswordReset = undefined;
             let emailPostPasswordReset = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -3520,7 +3503,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let token = undefined;
             let userPostPasswordReset = undefined;
             let emailPostPasswordReset = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -3696,7 +3679,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let token = undefined;
             let userPostPasswordReset = undefined;
             let emailPostPasswordReset = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -3889,7 +3872,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let token = undefined;
             let userPostPasswordReset = undefined;
             let emailPostPasswordReset = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -4058,7 +4041,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let token = undefined;
             let userPostPasswordReset = undefined;
             let emailPostPasswordReset = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -4217,7 +4200,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let token = undefined;
             let userPostPasswordReset = undefined;
             let emailPostPasswordReset = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -4382,7 +4365,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let token = undefined;
             let userPostPasswordReset = undefined;
             let emailPostPasswordReset = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -4541,7 +4524,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
             let token = undefined;
             let userPostPasswordReset = undefined;
             let emailPostPasswordReset = undefined;
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,

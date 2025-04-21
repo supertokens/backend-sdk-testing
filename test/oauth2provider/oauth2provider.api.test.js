@@ -15,15 +15,11 @@
 
 const {
     printPath,
-    setupST,
-    startST: globalStartST,
-    killAllST,
-    cleanST,
-    createTenant,
+    createCoreApplication,
     extractInfoFromResponse,
 } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString, API_PORT, request, getOverrideLogs } = require("../../api-mock");
+const { recipesMock, API_PORT, request, getOverrideLogs } = require("../../api-mock");
 const { OAuth2Provider, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
 const {
     createAuthorizationUrl,
@@ -34,26 +30,9 @@ const {
 const { default: generatePKCEChallenge } = require("pkce-challenge");
 
 describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.api.test.js]")}`, function () {
-    let globalConnectionURI;
-
-    const startST = async (cfg) => {
-        return createTenant(globalConnectionURI, randomString(), cfg);
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     describe("Login", () => {
         it("should simulate a successful OAuth2 login flow", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";
@@ -128,7 +107,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         });
 
         it("should simulate a successful OAuth2 login flow (openid, offline_access) with enableRefreshTokenRotation", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";
@@ -226,7 +205,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         });
 
         it("should simulate a successful OAuth2 login flow (openid, offline_access) without enableRefreshTokenRotation", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";
@@ -323,7 +302,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         });
 
         it("should simulate a successful OAuth2 login flow with PKCE", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";
@@ -404,7 +383,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         });
 
         it("should simulate a successful OAuth2 login flow (client_credentials)", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";
@@ -457,7 +436,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         });
 
         it("should return an error for Resource Owner Password Credentials Flow", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";
@@ -514,7 +493,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         });
 
         it("should preserve query params in the redirect URI after a successful OAuth flow", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";
@@ -589,7 +568,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         });
 
         it("should throw an error if state is not passed in the OAuth flow", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";
@@ -647,7 +626,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         });
 
         it("should simulate a successful OAuth2 login flow (id_token only implicit flow)", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
 
             const apiDomain = `http://localhost:${API_PORT}`;
             const websiteDomain = "http://supertokens.io";
@@ -715,7 +694,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
         let connectionURI, apiDomain, websiteDomain, scope, redirectUri, client, state, tokenResp, session;
 
         beforeEach(async function () {
-            connectionURI = await startST();
+            connectionURI = await createCoreApplication();
 
             apiDomain = `http://localhost:${API_PORT}`;
             websiteDomain = "http://supertokens.io";
@@ -973,7 +952,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
     });
 
     it("should simulate a successful OAuth2 login flow (id_token implicit flow)", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
 
         const apiDomain = `http://localhost:${API_PORT}`;
         const websiteDomain = "http://supertokens.io";
@@ -1041,7 +1020,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             let connectionURI, apiDomain, websiteDomain, scope, redirectUri, client, state, state2, nonce;
 
             beforeEach(async function () {
-                connectionURI = await startST({ access_token_validity: 2 });
+                connectionURI = await createCoreApplication({ coreConfig: { access_token_validity: 2 } });
 
                 apiDomain = `http://localhost:${API_PORT}`;
                 websiteDomain = "http://supertokens.io";
@@ -2399,7 +2378,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             let connectionURI, apiDomain, websiteDomain, scope, redirectUri, client, state, state2, nonce;
 
             beforeEach(async function () {
-                connectionURI = await startST({ access_token_validity: 10 });
+                connectionURI = await createCoreApplication({ coreConfig: { access_token_validity: 10 } });
 
                 apiDomain = `http://localhost:${API_PORT}`;
                 websiteDomain = "http://supertokens.io";
@@ -2914,7 +2893,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             let connectionURI, apiDomain, websiteDomain, scope, redirectUri, client, state, state2, nonce;
 
             beforeEach(async function () {
-                connectionURI = await startST({ access_token_validity: 10 });
+                connectionURI = await createCoreApplication({ coreConfig: { access_token_validity: 10 } });
 
                 apiDomain = `http://localhost:${API_PORT}`;
                 websiteDomain = "http://supertokens.io";
@@ -3007,7 +2986,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             let connectionURI, apiDomain, websiteDomain, scope, redirectUri, client, state, state2, nonce;
 
             beforeEach(async function () {
-                connectionURI = await startST({ access_token_validity: 10 });
+                connectionURI = await createCoreApplication({ coreConfig: { access_token_validity: 10 } });
 
                 apiDomain = `http://localhost:${API_PORT}`;
                 websiteDomain = "http://supertokens.io";
@@ -3100,7 +3079,7 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
             let connectionURI, apiDomain, websiteDomain, scope, redirectUri, client, state, state2, nonce;
 
             beforeEach(async function () {
-                connectionURI = await startST({ access_token_validity: 10 });
+                connectionURI = await createCoreApplication({ coreConfig: { access_token_validity: 10 } });
 
                 apiDomain = `http://localhost:${API_PORT}`;
                 websiteDomain = "http://supertokens.io";

@@ -12,7 +12,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { printPath, setupST, killAllST, cleanST, startST: globalStartST } = require("../utils");
+const { printPath } = require("../utils");
 const {
     postToAuthAPI,
     putAPI,
@@ -31,29 +31,15 @@ const { recipesMock } = require("../../api-mock");
 const { Passwordless } = recipesMock;
 let assert = require("assert");
 
-let globalConnectionURI;
-
 describe(`shouldTryLinkingWithSessionUser: ${printPath(
     "[test/accountlinking-with-session/shouldTryLinkingWithSessionUser.flows.test.js]"
 )}`, function () {
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     describe("EmailPassword", function () {
         describe("signUpPost", () => {
             it("should ignore expired session with shouldTryLinkingWithSessionUser=false", async () => {
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -77,7 +63,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -101,7 +86,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -123,7 +107,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -144,7 +127,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -169,7 +151,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -194,7 +175,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -217,7 +197,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -241,7 +220,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -265,7 +243,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -289,7 +266,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -314,7 +290,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -336,7 +311,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -358,7 +332,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -381,7 +354,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -417,7 +389,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -453,7 +424,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -490,7 +460,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -520,7 +489,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
@@ -550,7 +518,6 @@ describe(`shouldTryLinkingWithSessionUser: ${printPath(
                 const email1 = getTestEmail("1");
                 const email2 = getTestEmail("2");
                 await setup({
-                    globalConnectionURI,
                     shouldDoAutomaticAccountLinking: shouldDoAutomaticAccountLinkingOverride.automaticallyLinkNoVerify,
                     coreConfig: {
                         access_token_validity: 2,
