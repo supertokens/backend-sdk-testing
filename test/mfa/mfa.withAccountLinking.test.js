@@ -15,16 +15,12 @@
 
 const {
     printPath,
-    setupST,
-    startST: globalStartST,
-    killAllST,
-    cleanST,
     extractInfoFromResponse,
-    createTenant,
+    createCoreApplication,
 } = require("../utils");
 let assert = require("assert");
 const { epSignIn, epSignUp, plessEmailSignInUp, tpSignInUp, validateUserEmail } = require("./utils");
-const { recipesMock, getOverrideParams, randomString, hasFeatureFlag } = require("../../api-mock");
+const { recipesMock, getOverrideParams, hasFeatureFlag } = require("../../api-mock");
 const {
     AccountLinking,
     Session,
@@ -39,25 +35,8 @@ const {
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 
 describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinking.test.js]")}`, function () {
-    let globalConnectionURI;
-
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     it("test that thirdparty user sign up is rejected when another user with same email unverified exists", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -125,7 +104,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
     });
 
     it("should not link when signing-up when automatic account linking is turned off", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             // debug: true,
             supertokens: {
@@ -206,7 +185,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
     });
 
     it("test factor setup with same email as another existing user when automatic account linking is turned on but verification not required", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -295,7 +274,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
     });
 
     it("test factor setup with same email as another existing user when automatic account linking is turned on and verification is required", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -384,7 +363,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
     });
 
     it("test factor setup with thirdparty same email as another existing user when automatic account linking is turned on and verification is required", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -494,7 +473,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
     });
 
     it("test that unverified sign up is not allowed as a factor setup", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -576,7 +555,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
         // Second factor is email password e2 -> should be rejected
         // Google signing in with e2 -> should be allowed and become a primary user.
 
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -700,7 +679,7 @@ describe(`mfa with account linking: ${printPath("[test/mfa/mfa.withAccountLinkin
         // Second factor is email otp e2 -> should be linked
         // Google signing in with e2 -> should link with google account with email e1
 
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,

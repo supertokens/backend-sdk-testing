@@ -12,30 +12,13 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
+const { printPath, createCoreApplication } = require("../utils");
 let assert = require("assert");
-const { resetOverrideLogs, randomString, recipesMock, request, getOverrideLogs, hasFeatureFlag } = require("../../api-mock");
+const { resetOverrideLogs, recipesMock, request, getOverrideLogs, hasFeatureFlag } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const { AccountLinking, EmailPassword, EmailVerification, Session, supertokens, ThirdParty } = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordapis2.test.js]")}`, function () {
-    let globalConnectionURI;
-
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     const customProviderWithEmailVerified = {
         config: {
             thirdPartyId: "custom-ev",
@@ -94,7 +77,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
 
     describe("with automaticallyLinkIfVerified", () => {
         beforeEach(async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -217,7 +200,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/emailpasswordap
         const emailB = "test2@example.com";
 
         beforeEach(async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,

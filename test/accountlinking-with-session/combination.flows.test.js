@@ -12,7 +12,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { printPath, setupST, killAllST, cleanST, startST: globalStartST } = require("../utils");
+const { printPath } = require("../utils");
 const {
     postAPI,
     putAPI,
@@ -23,25 +23,12 @@ const {
 } = require("./utils");
 let assert = require("assert");
 
-let globalConnectionURI;
-
 describe(`Multi-recipe account linking flows w/ session: ${printPath(
     "[test/accountlinking-with-session/combination.flows.test.js]"
 )}`, function () {
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     describe("Discord-like (fake email)", function () {
         it("should be able to add a password to a fake-email tp user", async () => {
-            await setup({ globalConnectionURI });
+            await setup();
 
             const createResp = await signInUpPOST(undefined, true, undefined);
             assert.strictEqual(createResp.status, 200);
@@ -66,7 +53,7 @@ describe(`Multi-recipe account linking flows w/ session: ${printPath(
         });
 
         it("should not be able to sign up with fake-email without a session", async () => {
-            await setup({ globalConnectionURI });
+            await setup();
 
             const createResp = await signInUpPOST(undefined, true, undefined);
             assert.strictEqual(createResp.status, 200);

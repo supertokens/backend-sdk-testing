@@ -13,31 +13,14 @@
  * under the License.
  */
 
-const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTenant } = require("../utils");
+const { printPath, createCoreApplication } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString } = require("../../api-mock");
+const { recipesMock } = require("../../api-mock");
 const { EmailPassword, Session, supertokens: SuperTokens, MultiFactorAuth, TOTP: Totp, UserMetadata } = recipesMock;
 
 describe(`mfa-autoinit: ${printPath("[test/mfa/mfa.autoInit.test.js]")}`, function () {
-    let globalConnectionURI;
-
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     it("test usermetadata is auto-initialised if mfa is initialised", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -54,7 +37,7 @@ describe(`mfa-autoinit: ${printPath("[test/mfa/mfa.autoInit.test.js]")}`, functi
     });
 
     it("test init throws if totp is initialised without MFA", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         let caught;
         try {
             SuperTokens.init({
