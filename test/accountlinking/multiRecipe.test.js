@@ -12,9 +12,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
+const { printPath, createCoreApplication } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString, request } = require("../../api-mock");
+const { recipesMock, request } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const {
     AccountLinking,
@@ -27,26 +27,9 @@ const {
 } = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/multiRecipe.test.js]")}`, function () {
-    let globalConnectionURI;
-
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     describe("migration tests", function () {
         it("allows sign in with verified recipe user even if there is an unverified one w/ the same email", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             initST(connectionURI);
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");
@@ -85,7 +68,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multiRecipe.tes
         });
 
         it("should not allow sign in with unverified recipe user when there is a verified one w/ the same email", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             initST(connectionURI);
 
             let epUser = await EmailPassword.signUp("public", "test@example.com", "password1234");

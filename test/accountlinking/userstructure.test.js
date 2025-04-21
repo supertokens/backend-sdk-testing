@@ -14,38 +14,17 @@
  */
 const {
     printPath,
-    setupST,
-    killAllST,
-    cleanST,
     assertJSONEquals,
-    startST: globalStartST,
-    createTenant,
+    createCoreApplication,
     extractInfoFromResponse,
 } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString, request, hasFeatureFlag } = require("../../api-mock");
+const { recipesMock, request, hasFeatureFlag } = require("../../api-mock");
 const { AccountLinking, EmailPassword, Session, supertokens, ThirdParty, Passwordless } = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.test.js]")}`, function () {
-    let globalConnectionURI;
-
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     it("hasSameEmailAs function in user object work", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -67,7 +46,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("toJson works as expected", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -89,7 +68,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("hasSameThirdPartyInfoAs function in user object work", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -178,7 +157,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("hasSamePhoneNumberAs function in user object work", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -219,7 +198,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
         });
 
         it("user structure FDI 1.17 is correctly returned even if session does not match logged in user", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -318,7 +297,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
         });
 
         it("user structure FDI 1.18 is correctly returned even if session does not match logged in user", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -414,7 +393,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
         });
 
         it("user structure FDI 2.0 is correctly returned even if session does not match logged in user", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -513,7 +492,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
         });
 
         it("user structure FDI 1.18,2.0 is correctly returned even if session does not match logged in user", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -612,7 +591,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
         });
 
         it("user structure FDI 3.0 is correctly returned even if session does not match logged in user", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -708,7 +687,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
         });
 
         it("user structure FDI 2.0,3.0 is correctly returned even if session does not match logged in user", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -804,7 +783,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
         });
 
         it("user structure no FDI is correctly returned even if session does not match logged in user", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -899,7 +878,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
     });
 
     it("user structure FDI 1.17 is correctly returned based on session user ID", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -959,7 +938,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
             this.skip();
         }
 
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,
@@ -1101,7 +1080,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/userstructure.t
             this.skip();
         }
 
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
                 connectionURI,

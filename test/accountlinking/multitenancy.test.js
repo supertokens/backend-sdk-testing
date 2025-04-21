@@ -12,9 +12,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
+const { printPath, createCoreApplication } = require("../utils");
 let assert = require("assert");
-const { recipesMock, randomString } = require("../../api-mock");
+const { recipesMock } = require("../../api-mock");
 const { shouldDoAutomaticAccountLinkingOverride } = require("../overridesMapping");
 const {
     AccountLinking,
@@ -28,26 +28,9 @@ const {
 } = recipesMock;
 
 describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.test.js]")}`, function () {
-    let globalConnectionURI;
-
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     describe("user sharing", function () {
         it("should work fine for primary users", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -85,7 +68,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
         });
 
         it("should not share linked users when sharing primary user", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -143,7 +126,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
         });
 
         it("should not share linked users when sharing recipe user", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -194,7 +177,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
         });
 
         it("should not share linked users if linked after sharing was done", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -252,7 +235,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
         });
 
         it("should not allow sharing if there is a conflicting primary user", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -303,7 +286,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
 
     describe("getUsersThatCanBeLinkedToRecipeUser", () => {
         it("should not suggest linking users on separate tenants", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -351,7 +334,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
         });
 
         it("should not check if recipeUser is associated with tenant", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -401,7 +384,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
 
     describe("canCreatePrimaryUser", () => {
         it("should return ACCOUNT_INFO_ALREADY_ASSOCIATED_WITH_ANOTHER_PRIMARY_USER_ID_ERROR if a conflicting user was shared on the tenant", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -449,7 +432,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
         });
 
         it("should return OK if a conflicting user is only on a different tenant", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -496,7 +479,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
 
     describe("createPrimaryUser", () => {
         it("should return ACCOUNT_INFO_ALREADY_ASSOCIATED_WITH_ANOTHER_PRIMARY_USER_ID_ERROR if a conflicting user was shared on the tenant", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -544,7 +527,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
         });
 
         it("should return OK if a conflicting user is only on a different tenant", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -591,7 +574,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
 
     describe("linkAccounts", () => {
         it("should be able to link to a shared user", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -639,7 +622,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
         });
 
         it("should return OK even if the primary user is only on a different tenant", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -686,7 +669,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
 
     describe("isEmailChangeAllowed", () => {
         it("should return false for primary user if a conflicting user was shared on the tenant", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -736,7 +719,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
         });
 
         it("should return false for recipe user if a conflicting user was shared on the tenant and verification is required", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -786,7 +769,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
         });
 
         it("should return true if a conflicting user is only present on another tenant", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -835,7 +818,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
 
     describe("isSignUpAllowed", () => {
         it("should return false if a conflicting user was shared on the tenant", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -889,7 +872,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
         });
 
         it("should return true if a conflicting user is only on a different tenant", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -938,7 +921,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
 
     describe("isSignInAllowed", () => {
         it("should return false if a conflicting user was shared on the tenant", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,
@@ -988,7 +971,7 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/multitenancy.te
         });
 
         it("should return true if a conflicting user is only on a different tenant", async function () {
-            const connectionURI = await startST();
+            const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
                     connectionURI,

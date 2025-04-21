@@ -153,56 +153,53 @@ export async function queryAPI({
     headers?: Record<string, string>;
     returnResponse?: boolean;
     skipInit?: boolean;
-}) {
+}): Promise<any> {
     if (!skipInit && apiStatus === "NOT_READY") {
         await initApp();
     }
-    try {
-        let response = await fetch(`http://localhost:${API_PORT}${path}`, {
-            method,
-            headers: {
-                "Content-Type": "application/json",
-                "fdi-version": fdiVersion,
-                ...headers,
-            },
-            body: JSON.stringify(input),
-        });
 
-        if (returnResponse) {
-            return response;
-        }
+    const response = await fetch(`http://localhost:${API_PORT}${path}`, {
+        method,
+        headers: {
+            "Content-Type": "application/json",
+            "fdi-version": fdiVersion,
+            ...headers,
+        },
+        body: JSON.stringify(input),
+    });
 
-        if (!response.ok) {
-            throw response;
-        }
+    // Return response as-is if requested
+    if (returnResponse) {
+        return response;
+    }
 
+    // Get the text response, and use it to parse as JSON below
+    // NOTE: Cannot clone and re-use: https://github.com/node-fetch/node-fetch/issues/1131
+    const text = await response.text();
+
+    // TODO: we need this for legacy tests (which should probably be updated)
+    if (text === "") {
+        return undefined;
+    }
+
+    if (!response.ok) {
+        // Response was not OK
+        let errorBody;
         try {
-            const text =  await response.text();
-            // TODO: we need this for legacy tests (which should probably be updated)
-            if (text === "") {
-                return undefined;
-            }
-            
-            try {   
-                return JSON.parse(text);
-            } catch {
-                return text;
-            }
+            // Parse the output as JSON and throw it as an error
+            errorBody = JSON.parse(text);
         } catch {
-            return undefined;
+            // If JSON parsing fails, throw response body
+            throw text;
         }
-    } catch (error) {
-        if (error instanceof Response) {
-            const text = await error.text();
-            let errorBody;
-            try {
-                errorBody = JSON.parse(text);
-            } catch (e) {
-                throw new Error(text);
-            }
-            throw errorBody;
-        }
-        throw error;
+        throw errorBody;
+    }
+
+    // Return body as JSON if possible, else text
+    try {
+        return JSON.parse(text);
+    } catch {
+        return text;
     }
 }
 
@@ -225,11 +222,10 @@ export async function initApp() {
 }
 
 export async function resetOverrideLogs() {
-    const logs = await queryAPI({
+    return await queryAPI({
         method: "get",
-        path: "/test/getoverridelogs",
+        path: "/test/resetoverridelogs",
     });
-    return logs;
 }
 
 export async function getOverrideLogs() {
