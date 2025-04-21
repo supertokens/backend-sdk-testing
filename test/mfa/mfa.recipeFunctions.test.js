@@ -13,9 +13,9 @@
  * under the License.
  */
 
-const { printPath, setupST, startST: globalStartST, killAllST, cleanST, createTenant } = require("../utils");
+const { printPath, createCoreApplication } = require("../utils");
 let assert = require("assert");
-const { recipesMock, getOverrideParams, randomString } = require("../../api-mock");
+const { recipesMock, getOverrideParams } = require("../../api-mock");
 const {
     AccountLinking,
     Session,
@@ -29,25 +29,8 @@ const {
 const OTPAuth = require("otpauth");
 
 describe(`mfa-recipeFunctions: ${printPath("[test/mfa/mfa.recipeFunctions.test.js]")}`, function () {
-    let globalConnectionURI;
-
-    const startST = async () => {
-        return createTenant(globalConnectionURI, randomString());
-    };
-
-    before(async function () {
-        await killAllST();
-        await setupST();
-        globalConnectionURI = await globalStartST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     it("test getFactorsSetupForUser for emailpassword user", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -76,7 +59,7 @@ describe(`mfa-recipeFunctions: ${printPath("[test/mfa/mfa.recipeFunctions.test.j
     });
 
     it("test getFactorsSetupForUser with otp-phone", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -108,7 +91,7 @@ describe(`mfa-recipeFunctions: ${printPath("[test/mfa/mfa.recipeFunctions.test.j
     });
 
     it("test getFactorsSetupForUser with totp", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -148,7 +131,7 @@ describe(`mfa-recipeFunctions: ${printPath("[test/mfa/mfa.recipeFunctions.test.j
     });
 
     it("test getFactorsSetupForUser with linked accounts", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -184,7 +167,7 @@ describe(`mfa-recipeFunctions: ${printPath("[test/mfa/mfa.recipeFunctions.test.j
     });
 
     it("test getMFARequirementsForAuth with passwordless otp-email", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,
@@ -246,7 +229,7 @@ describe(`mfa-recipeFunctions: ${printPath("[test/mfa/mfa.recipeFunctions.test.j
     });
 
     it("test add, remove get required factors for user", async function () {
-        const connectionURI = await startST();
+        const connectionURI = await createCoreApplication();
         SuperTokens.init({
             supertokens: {
                 connectionURI,

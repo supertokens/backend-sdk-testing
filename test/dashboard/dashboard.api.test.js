@@ -12,17 +12,15 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { printPath, setupST, killAllST, cleanST, startST: globalStartST, createTenant } = require("../utils");
+const { printPath, createCoreApplication, getCoreUrl } = require("../utils");
 let assert = require("assert");
 const { recipesMock, request } = require("../../api-mock");
 const { EmailPassword, Session, supertokens, ThirdParty, Multitenancy, Passwordless, MultiFactorAuth } = recipesMock;
 
-let connectionURI;
-
 async function stInitWithThirdParty(includeInNonPublicTenantsByDefault = undefined) {
     await supertokens.init({
         supertokens: {
-            connectionURI,
+            connectionURI: await createCoreApplication(),
         },
         appInfo: {
             appName: "SuperTokens",
@@ -65,7 +63,7 @@ async function stInitWithThirdParty(includeInNonPublicTenantsByDefault = undefin
 async function stInitWithoutThirdParty() {
     await supertokens.init({
         supertokens: {
-            connectionURI,
+            connectionURI: await createCoreApplication(),
         },
         appInfo: {
             appName: "SuperTokens",
@@ -77,17 +75,6 @@ async function stInitWithoutThirdParty() {
 }
 
 describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}`, function () {
-    beforeEach(async function () {
-        await killAllST();
-        await setupST();
-        connectionURI = await globalStartST();
-    });
-
-    afterEach(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     describe("multitenancy", function () {
         describe("createOrUpdateThirdPartyConfig", function () {
             describe("with public tenant", function () {
@@ -302,7 +289,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                 it("test delete existing config from core", async function () {
                     await supertokens.init({
                         supertokens: {
-                            connectionURI,
+                            connectionURI: await createCoreApplication(),
                         },
                         appInfo: {
                             appName: "SuperTokens",
@@ -433,7 +420,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                 it("test delete existing config from core", async function () {
                     await supertokens.init({
                         supertokens: {
-                            connectionURI,
+                            connectionURI: await createCoreApplication(),
                         },
                         appInfo: {
                             appName: "SuperTokens",
@@ -567,7 +554,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test create new tenant", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -659,7 +646,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test delete existing tenant", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -763,7 +750,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                 it("test with only emailpassword initialised", async function () {
                     await supertokens.init({
                         supertokens: {
-                            connectionURI,
+                            connectionURI: await createCoreApplication(),
                         },
                         appInfo: {
                             appName: "SuperTokens",
@@ -795,7 +782,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                 it("test with only passwordless initialised with only one factor", async function () {
                     await supertokens.init({
                         supertokens: {
-                            connectionURI,
+                            connectionURI: await createCoreApplication(),
                         },
                         appInfo: {
                             appName: "SuperTokens",
@@ -834,7 +821,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test non-existing tenant info", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -1115,7 +1102,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test get invalid static config resolves after adding valid config in core", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -1232,7 +1219,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test list all tenants with login methods", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -1310,7 +1297,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test login methods based on SDK init", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -1383,7 +1370,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test update core config with valid config", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -1444,7 +1431,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test update core config with invalid config", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -1505,7 +1492,10 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test update public tenant core config", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        // Trying to edit the default `public` tenant config
+                        // Needs to go to the core, not to applications
+                        // Edits allowed in applications.
+                        connectionURI: getCoreUrl(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -1514,8 +1504,6 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
                     },
                     recipeList: [Session.init(), EmailPassword.init(), ThirdParty.init()],
                 });
-
-                await Multitenancy.createOrUpdateTenant("t1", { firstFactors: null });
 
                 let res = await new Promise((resolve) =>
                     request()
@@ -1543,7 +1531,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test enabling first factor", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -1597,7 +1585,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test disabling first factor", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -1649,7 +1637,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test enabling first factor that is not initialised", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -1685,7 +1673,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test enabling first factor that does not have a valid contact method", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -1729,7 +1717,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test enabling first factor that does not have a valid flow type", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -1775,7 +1763,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test enabling secondary factor", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -1829,7 +1817,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test disabling secondary factor", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -1916,7 +1904,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test enabling secondary factor that is not initialised", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -1952,7 +1940,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test enabling secondary factor that does not have a valid contact method", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",
@@ -1997,7 +1985,7 @@ describe(`dashboardTests: ${printPath("[test/dashboard/dashboard.api.test.js]")}
             it("test enabling secondary factor that does not have a valid flow type", async function () {
                 await supertokens.init({
                     supertokens: {
-                        connectionURI,
+                        connectionURI: await createCoreApplication(),
                     },
                     appInfo: {
                         appName: "SuperTokens",

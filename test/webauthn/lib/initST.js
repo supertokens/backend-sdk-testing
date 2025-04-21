@@ -1,14 +1,14 @@
 const { recipesMock } = require("../../../api-mock");
 const { Session, supertokens, WebAuthn } = recipesMock;
 let assert = require("assert");
-const { startST } = require("../../utils");
+const { createCoreApplication } = require("../../utils");
 
 const _origin = "https://supertokens.io";
 const _rpId = "supertokens.io";
 const _rpName = "SuperTokens";
 
 const initST = async ({ origin = true, rpId = true, rpName = true, functions, apis } = {}) => {
-    const connectionURI = await startST();
+    const connectionURI = await createCoreApplication();
 
     const config = {
         override: {

@@ -12,7 +12,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const { printPath, setupST, killAllST, cleanST } = require("../utils");
+const { printPath } = require("../utils");
 let assert = require("assert");
 
 const getWebauthnLib = require("./lib/getWebAuthnLib");
@@ -24,16 +24,6 @@ const createSignInOptions = require("./lib/createSignInOptions");
 const userContext = {};
 
 describe(`recipeImplementationFunctions: ${printPath("[test/webauthn/recipeImplementation.test.js]")}`, function () {
-    beforeEach(async function () {
-        await killAllST();
-        await setupST();
-    });
-
-    after(async function () {
-        await killAllST();
-        await cleanST();
-    });
-
     describe("[registerOptions]", function () {
         it("correctly creates the options with email", async function () {
             await initST();
