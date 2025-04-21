@@ -2,4 +2,7 @@ spec: test/**/*.test.js
 exit: true
 slow: 10000
 timeout: 20000
-reporter: spec
+reporter: mocha-multi-reporters
+require: test/hooks.js
+reporter-option:
+  - configFile=mocha-multi-reporters.json
