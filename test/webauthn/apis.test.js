@@ -371,13 +371,6 @@ describe(`apisFunctions: ${printPath("[test/webauthn/apis.test.js]")}`, function
 
             const { signUpResponse, credential } = await createUser(rpId, rpName, origin);
 
-            await getWebAuthnRecipe().removeCredential({
-                userId: signUpResponse.user.id,
-                credentialId: credential.attestation.id,
-                tenantId: "public",
-                userContext: {},
-            });
-
             const signInOptionsResponse = await createSignInOptions();
 
             const signInResponse = await new Promise((resolve, reject) =>
