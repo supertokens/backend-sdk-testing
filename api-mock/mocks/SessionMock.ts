@@ -222,7 +222,7 @@ class RemoteSessionObject implements SessionContainerInterface {
     }
 }
 
-function deserializeSession(session) {
+export function deserializeSession(session) {
     if (!session) return session;
     return new RemoteSessionObject(session);
 }
@@ -268,6 +268,28 @@ export const SessionMock: Partial<typeof Session> = {
                 accessTokenPayload,
                 sessionDataInDatabase,
                 disableAntiCsrf,
+                userContext,
+            },
+        });
+        return deserializeSession(response);
+    },
+    createNewSession: async (
+        req,
+        res,
+        tenantId,
+        recipeUserId,
+        accessTokenPayload,
+        sessionDataInDatabase,
+        userContext
+    ) => {
+        const response = await queryAPI({
+            method: "post",
+            path: "/test/session/createnewsession",
+            input: {
+                tenantId,
+                recipeUserId: recipeUserId.getAsString(),
+                accessTokenPayload,
+                sessionDataInDatabase,
                 userContext,
             },
         });
