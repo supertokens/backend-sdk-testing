@@ -103,7 +103,7 @@ const createNewSession = async (
 
 describe(`sessionTests: ${printPath("[test/session/session.test.js]")}`, function () {
     describe("Cookie checks", function () {
-        it("create new session", async function () {
+        it("access and refresh tokens set correctly on new session", async function () {
             const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
