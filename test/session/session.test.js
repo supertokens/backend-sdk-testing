@@ -14,7 +14,7 @@
  */
 const { printPath, createCoreApplication } = require("../utils");
 const assert = require("assert");
-const { recipesMock } = require("../../api-mock");
+const { recipesMock, request } = require("../../api-mock");
 const { EmailPassword, Session, supertokens } = recipesMock;
 const SuperTokens = require("supertokens-node");
 const { getMockStatus, initApp, fdiVersion, API_PORT } = require("../../build/api-mock/fetcher");
@@ -56,6 +56,54 @@ async function queryAPI({ method, path, input, headers, returnResponse, skipInit
         throw await error.json().catch(() => undefined);
     }
 }
+
+const signUpOriginal = async (tenantId, email, password, session, userContext) => {
+    let response = await new Promise((resolve) =>
+        request()
+            .post("/auth/signup")
+            .send({
+                formFields: [
+                    {
+                        id: "email",
+                        value: email,
+                    },
+                    {
+                        id: "password",
+                        value: password,
+                    },
+                ],
+                tenantId,
+                session,
+                userContext,
+            })
+            .expect(200)
+            .end((err, res) => {
+                if (err) {
+                    resolve(undefined);
+                } else {
+                    resolve(res);
+                }
+            })
+    );
+
+    response = response.body;
+
+    console.log(response);
+
+    return {
+        ...response,
+        ...("user" in response
+            ? {
+                  user: new UserClass(response.user),
+              }
+            : {}),
+        ...("recipeUserId" in response
+            ? {
+                  recipeUserId: SuperTokens.convertToRecipeUserId(response.recipeUserId),
+              }
+            : {}),
+    };
+};
 
 const signUp = async (tenantId, email, password, session, userContext) => {
     const { response } = await queryAPI({
@@ -101,6 +149,29 @@ const createNewSession = async (
     return { session: deserializeSession(response), headers };
 };
 
+const createNewSessionWithoutRequestResponse = async (
+    tenantId,
+    recipeUserId,
+    accessTokenPayload,
+    sessionDataInDatabase,
+    disableAntiCsrf,
+    userContext
+) => {
+    const { response, headers } = await queryAPI({
+        method: "post",
+        path: "/test/session/createnewsessionwithoutrequestresponse",
+        input: {
+            tenantId,
+            recipeUserId: recipeUserId.getAsString(),
+            accessTokenPayload,
+            sessionDataInDatabase,
+            disableAntiCsrf,
+            userContext,
+        },
+    });
+    return { session: deserializeSession(response), headers };
+}
+
 describe(`sessionTests: ${printPath("[test/session/session.test.js]")}`, function () {
     describe("Cookie checks", function () {
         it("access and refresh tokens set correctly on new session", async function () {
@@ -117,7 +188,7 @@ describe(`sessionTests: ${printPath("[test/session/session.test.js]")}`, functio
                 recipeList: [EmailPassword.init(), Session.init({ getTokenTransferMethod: "cookie" })],
             });
 
-            const signUpResponse = await signUp("public", "test@example.com", "password123");
+            const signUpResponse = await signUpOriginal("public", "test@example.com", "password123");
             const epUser = signUpResponse.user;
 
             // Create a new session for the user, get headers from the response
