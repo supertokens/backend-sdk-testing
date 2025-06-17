@@ -34,7 +34,6 @@ describe(`sessionTests: ${printPath("[test/session/cookies.test.js]")}`, functio
                 websiteDomain: "supertokens.io",
             },
             recipeList: [EmailPassword.init(), Session.init()],
-            debug: true,
         });
 
         user = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
