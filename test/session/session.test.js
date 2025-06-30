@@ -17,47 +17,10 @@ const assert = require("assert");
 const { recipesMock, request } = require("../../api-mock");
 const { EmailPassword, Session, supertokens } = recipesMock;
 const SuperTokens = require("supertokens-node");
-const { getMockStatus, initApp, fdiVersion, API_PORT } = require("../../build/api-mock/fetcher");
-const { deserializeSession } = require("../../build/api-mock/mocks/SessionMock");
 const setCookieParser = require("set-cookie-parser");
 const { User: UserClass } = require("supertokens-node/lib/build/user");
-const fetch = require("cross-fetch");
 
-// Re-defined functions since these tests require response headers to be parsed
-async function queryAPI({ method, path, input, headers, returnResponse, skipInit }) {
-    if (!skipInit && getMockStatus() === "NOT_READY") {
-        await initApp();
-    }
-    try {
-        let response = await fetch(`http://localhost:${API_PORT}${path}`, {
-            method,
-            headers: {
-                "Content-Type": "application/json",
-                "fdi-version": fdiVersion,
-                ...headers,
-            },
-            body: JSON.stringify(input),
-        });
-
-        if (returnResponse) {
-            return { response, headers: response.headers };
-        }
-
-        if (!response.ok) {
-            throw response;
-        }
-
-        return {
-            response: await response.json().catch(() => undefined),
-            headers: response.headers,
-        };
-    } catch (error) {
-        console.log(error);
-        throw await error.json().catch(() => undefined);
-    }
-}
-
-const signUpOriginal = async (tenantId, email, password, session, userContext) => {
+const signUp = async (tenantId, email, password, session, userContext) => {
     let response = await new Promise((resolve) =>
         request()
             .post("/auth/signup")
@@ -86,91 +49,24 @@ const signUpOriginal = async (tenantId, email, password, session, userContext) =
             })
     );
 
-    response = response.body;
-
-    console.log(response);
+    const responseBody = response.body;
 
     return {
-        ...response,
-        ...("user" in response
+        headers: response.headers,
+        response: {
+        ...responseBody,
+        ...("user" in responseBody
             ? {
-                  user: new UserClass(response.user),
+                  user: new UserClass(responseBody.user),
               }
             : {}),
-        ...("recipeUserId" in response
+        ...("recipeUserId" in responseBody
             ? {
-                  recipeUserId: SuperTokens.convertToRecipeUserId(response.recipeUserId),
+                  recipeUserId: SuperTokens.convertToRecipeUserId(responseBody.recipeUserId),
               }
             : {}),
-    };
+    }};
 };
-
-const signUp = async (tenantId, email, password, session, userContext) => {
-    const { response } = await queryAPI({
-        method: "post",
-        path: "/test/emailpassword/signup",
-        input: { tenantId, email, password, session, userContext },
-    });
-    return {
-        ...response,
-        ...("user" in response
-            ? {
-                  user: new UserClass(response.user),
-              }
-            : {}),
-        ...("recipeUserId" in response
-            ? {
-                  recipeUserId: SuperTokens.convertToRecipeUserId(response.recipeUserId),
-              }
-            : {}),
-    };
-};
-
-const createNewSession = async (
-    tenantId,
-    recipeUserId,
-    accessTokenPayload,
-    sessionDataInDatabase,
-    disableAntiCsrf,
-    userContext
-) => {
-    const { response, headers } = await queryAPI({
-        method: "post",
-        path: "/test/session/createnewsession",
-        input: {
-            tenantId,
-            recipeUserId: recipeUserId.getAsString(),
-            accessTokenPayload,
-            sessionDataInDatabase,
-            disableAntiCsrf,
-            userContext,
-        },
-    });
-    return { session: deserializeSession(response), headers };
-};
-
-const createNewSessionWithoutRequestResponse = async (
-    tenantId,
-    recipeUserId,
-    accessTokenPayload,
-    sessionDataInDatabase,
-    disableAntiCsrf,
-    userContext
-) => {
-    const { response, headers } = await queryAPI({
-        method: "post",
-        path: "/test/session/createnewsessionwithoutrequestresponse",
-        input: {
-            tenantId,
-            recipeUserId: recipeUserId.getAsString(),
-            accessTokenPayload,
-            sessionDataInDatabase,
-            disableAntiCsrf,
-            userContext,
-        },
-    });
-    return { session: deserializeSession(response), headers };
-}
 
 describe(`sessionTests: ${printPath("[test/session/session.test.js]")}`, function () {
     describe("Cookie checks", function () {
@@ -188,13 +84,15 @@ describe(`sessionTests: ${printPath("[test/session/session.test.js]")}`, functio
                 recipeList: [EmailPassword.init(), Session.init({ getTokenTransferMethod: "cookie" })],
             });
 
-            const signUpResponse = await signUpOriginal("public", "test@example.com", "password123");
-            const epUser = signUpResponse.user;
+            const { response, headers } = await signUp("public", "test@example.com", "password123");
+            const epUser = response.user;
 
             // Create a new session for the user, get headers from the response
-            const { session, headers } = await createNewSession("public", epUser.loginMethods[0].recipeUserId);
+            const session = await Session.createNewSessionWithoutRequestResponse("public", epUser.loginMethods[0].recipeUserId);
 
-            let cookies = headers.get("set-cookie");
+            let cookies = headers?.["set-cookie"];
+            assert(cookies, "No cookies found in response headers");
+
             if (!Array.isArray(cookies)) {
                 cookies = [cookies];
             }

@@ -273,28 +273,6 @@ export const SessionMock: Partial<typeof Session> = {
         });
         return deserializeSession(response);
     },
-    createNewSession: async (
-        req,
-        res,
-        tenantId,
-        recipeUserId,
-        accessTokenPayload,
-        sessionDataInDatabase,
-        userContext
-    ) => {
-        const response = await queryAPI({
-            method: "post",
-            path: "/test/session/createnewsession",
-            input: {
-                tenantId,
-                recipeUserId: recipeUserId.getAsString(),
-                accessTokenPayload,
-                sessionDataInDatabase,
-                userContext,
-            },
-        });
-        return deserializeSession(response);
-    },
     getSessionWithoutRequestResponse: async (
         accessToken: string,
         antiCsrfToken?: string,
