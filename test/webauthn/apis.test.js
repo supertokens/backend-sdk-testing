@@ -12,10 +12,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+const { User: UserClass } = require("supertokens-node/lib/build/user");
 const { printPath, createCoreApplication } = require("../utils");
 let assert = require("assert");
 const { recipesMock, request } = require("../../api-mock");
-const { supertokens, WebAuthn } = recipesMock;
+const { supertokens, WebAuthn, Session } = recipesMock;
 
 const getWebauthnLib = require("./lib/getWebAuthnLib");
 const getWebAuthnRecipe = require("./lib/getWebAuthnRecipe");
@@ -725,6 +726,49 @@ describe(`apisFunctions: ${printPath("[test/webauthn/apis.test.js]")}`, function
             );
 
             assert.equal(recoverAccountResponse.status, "INVALID_AUTHENTICATOR_ERROR");
+        });
+    });
+
+    describe("[registerCredentialPOST]", function () {
+        it("should register a new credential for an existing user", async function () {
+            await initST();
+
+            const { email, signUpResponse } = await createUser(rpId, rpName, origin);
+            const registerOptionsResponse = await createRegisterOptions(email);
+
+            const { createCredential } = await getWebauthnLib();
+            const credential = createCredential(registerOptionsResponse, {
+                rpId,
+                rpName,
+                origin,
+                userNotPresent: false,
+                userNotVerified: false,
+            });
+
+            const session = await Session.createNewSessionWithoutRequestResponse(
+                "public",
+                new UserClass(signUpResponse.user).loginMethods[0].recipeUserId
+            );
+            const sessionTokens = session.getAllSessionTokensDangerously();
+            const registerCredentialResponse = await new Promise((resolve, reject) =>
+                request()
+                    .post("/auth/webauthn/credential")
+                    .set("Authorization", `Bearer ${sessionTokens.accessToken}`)
+                    .send({
+                        credential,
+                        webauthnGeneratedOptionsId: registerOptionsResponse.webauthnGeneratedOptionsId,
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(JSON.parse(res.text));
+                        }
+                    })
+            );
+
+            assert.equal(registerCredentialResponse.status, "OK");
         });
     });
 });
