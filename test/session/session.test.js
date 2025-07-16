@@ -42,7 +42,7 @@ const signUp = async (tenantId, email, password, session, userContext) => {
             .expect(200)
             .end((err, res) => {
                 if (err) {
-                    resolve(undefined);
+                    reject(undefined);
                 } else {
                     resolve(res);
                 }
@@ -54,18 +54,19 @@ const signUp = async (tenantId, email, password, session, userContext) => {
     return {
         headers: response.headers,
         response: {
-        ...responseBody,
-        ...("user" in responseBody
-            ? {
-                  user: new UserClass(responseBody.user),
-              }
-            : {}),
-        ...("recipeUserId" in responseBody
-            ? {
-                  recipeUserId: SuperTokens.convertToRecipeUserId(responseBody.recipeUserId),
-              }
-            : {}),
-    }};
+            ...responseBody,
+            ...("user" in responseBody
+                ? {
+                    user: new UserClass(responseBody.user),
+                }
+                : {}),
+            ...("recipeUserId" in responseBody
+                ? {
+                    recipeUserId: SuperTokens.convertToRecipeUserId(responseBody.recipeUserId),
+                }
+                : {}),
+        }
+    };
 };
 
 describe(`sessionTests: ${printPath("[test/session/session.test.js]")}`, function () {
@@ -102,12 +103,27 @@ describe(`sessionTests: ${printPath("[test/session/session.test.js]")}`, functio
                 .flat() // Ensure we have a flat array of cookies
                 // Split cookie strings into arrays
                 .map((cookieStr) => setCookieParser.splitCookiesString(cookieStr))
-                .flat() // Since we have an array of arrays now
-                // `parse` the cookies
+                .flat(); // Since we have an array of arrays now
+
+            console.log(cookies);
+
+            cookies.forEach((cookieStr) => {
+                if (cookieStr.startsWith("sAccessToken=") || cookieStr.startsWith("sRefreshToken=")) {
+                    cookieStr.split("; ").forEach((part) => {
+                        if (part.startsWith("Expires=")) {
+                            assert(part.endsWith("GMT"), "Cookie expiry is not in GMT format");
+                        }
+                    });
+                }
+            });
+
+            const parsedCookies = cookies
                 .map(setCookieParser.parseString);
 
-            const accessTokenCookie = cookies.find((info) => (info?.key ?? info?.name) == "sAccessToken");
-            const refreshTokenCookie = cookies.find((info) => (info?.key ?? info?.name) === "sRefreshToken");
+            const accessTokenCookie = parsedCookies.find((info) => (info?.key ?? info?.name) == "sAccessToken");
+            const refreshTokenCookie = parsedCookies.find((info) => (info?.key ?? info?.name) === "sRefreshToken");
+
+            console.log(new Date(accessTokenCookie.expires).getTimezoneOffset())
 
             // Ensure cookies are set and with GMT timezones
             // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Date - Date headers are always GMT
@@ -115,14 +131,14 @@ describe(`sessionTests: ${printPath("[test/session/session.test.js]")}`, functio
             assert(accessTokenCookie, "Access token cookie not found");
             assert(accessTokenCookie.expires, "Access token cookie expiry not set");
             assert(
-                new Date(accessTokenCookie.expires).toUTCString().endsWith("GMT"),
+                new Date(accessTokenCookie.expires).getTimezoneOffset() === 0,
                 "Access token cookie expiry is not in GMT"
             );
 
             assert(refreshTokenCookie, "Refresh token cookie not found");
             assert(refreshTokenCookie.expires, "Refresh token cookie expiry not set");
             assert(
-                new Date(refreshTokenCookie.expires).toUTCString().endsWith("GMT"),
+                new Date(refreshTokenCookie.expires).getTimezoneOffset() === 0,
                 "Refresh token cookie expiry is not in GMT"
             );
 
