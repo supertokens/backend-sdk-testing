@@ -769,6 +769,134 @@ describe(`apisFunctions: ${printPath("[test/webauthn/apis.test.js]")}`, function
             );
 
             assert.equal(registerCredentialResponse.status, "OK");
+
+            const listCredentialsResponse = await WebAuthn.listCredentials({
+                recipeUserId: signUpResponse.user.id,
+                userContext: {},
+            });
+
+            assert.equal(listCredentialsResponse.status, "OK");
+            assert.equal(
+                !!listCredentialsResponse.credentials.find((c) => c.webauthnCredentialId === credential.id),
+                true
+            );
+        });
+    });
+
+    describe("[listCredentialsGET]", function () {
+        it("should return all credentials for an existing user that has multiple credentials", async function () {
+            await initST();
+
+            const { email, signUpResponse, credential: credential1 } = await createUser(rpId, rpName, origin);
+            const registerOptionsResponse = await createRegisterOptions(email);
+
+            const { createCredential } = await getWebauthnLib();
+            const credential2 = createCredential(registerOptionsResponse, {
+                rpId,
+                rpName,
+                origin,
+                userNotPresent: false,
+                userNotVerified: false,
+            });
+
+            await WebAuthn.registerCredential({
+                credential: credential2,
+                webauthnGeneratedOptionsId: registerOptionsResponse.webauthnGeneratedOptionsId,
+                recipeUserId: signUpResponse.user.id,
+                userContext: {},
+            });
+
+            const session = await Session.createNewSessionWithoutRequestResponse(
+                "public",
+                new UserClass(signUpResponse.user).loginMethods[0].recipeUserId
+            );
+            const sessionTokens = session.getAllSessionTokensDangerously();
+            const listCredentialsResponse = await new Promise((resolve, reject) =>
+                request()
+                    .get("/auth/webauthn/credential/list")
+                    .set("Authorization", `Bearer ${sessionTokens.accessToken}`)
+                    .send()
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(JSON.parse(res.text));
+                        }
+                    })
+            );
+
+            assert.equal(listCredentialsResponse.status, "OK");
+            assert.equal(listCredentialsResponse.credentials.length, 2);
+            assert.equal(
+                !!listCredentialsResponse.credentials.find((c) => c.webauthnCredentialId === credential1.assertion.id),
+                true
+            );
+            assert.equal(
+                !!listCredentialsResponse.credentials.find((c) => c.webauthnCredentialId === credential2.id),
+                true
+            );
+        });
+    });
+
+    describe("[removeCredentialPOST]", function () {
+        it("should delete a credential for an existing user", async function () {
+            await initST();
+
+            const { email, signUpResponse, credential: credential1 } = await createUser(rpId, rpName, origin);
+            const registerOptionsResponse = await createRegisterOptions(email);
+
+            const { createCredential } = await getWebauthnLib();
+            const credential2 = createCredential(registerOptionsResponse, {
+                rpId,
+                rpName,
+                origin,
+                userNotPresent: false,
+                userNotVerified: false,
+            });
+
+            await WebAuthn.registerCredential({
+                credential: credential2,
+                webauthnGeneratedOptionsId: registerOptionsResponse.webauthnGeneratedOptionsId,
+                recipeUserId: signUpResponse.user.id,
+                userContext: {},
+            });
+
+            const session = await Session.createNewSessionWithoutRequestResponse(
+                "public",
+                new UserClass(signUpResponse.user).loginMethods[0].recipeUserId
+            );
+            const sessionTokens = session.getAllSessionTokensDangerously();
+            const deleteCredentialResponse = await new Promise((resolve, reject) =>
+                request()
+                    .post("/auth/webauthn/credential/remove")
+                    .set("Authorization", `Bearer ${sessionTokens.accessToken}`)
+                    .send({
+                        webauthnCredentialId: credential1.assertion.id,
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(JSON.parse(res.text));
+                        }
+                    })
+            );
+
+            assert.equal(deleteCredentialResponse.status, "OK");
+
+            const listCredentialsResponse = await WebAuthn.listCredentials({
+                recipeUserId: signUpResponse.user.id,
+                userContext: {},
+            });
+
+            assert.equal(listCredentialsResponse.status, "OK");
+            assert.equal(listCredentialsResponse.credentials.length, 1);
+            assert.equal(
+                !!listCredentialsResponse.credentials.find((c) => c.webauthnCredentialId === credential2.id),
+                true
+            );
         });
     });
 });
