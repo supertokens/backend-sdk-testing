@@ -22,7 +22,7 @@ describe(`sessionTests: ${printPath("[test/session/cookies.test.js]")}`, functio
     let user;
     let session;
 
-    before(async function () {
+    beforeEach(async function () {
         const connectionURI = await createCoreApplication();
         supertokens.init({
             supertokens: {
@@ -62,8 +62,13 @@ describe(`sessionTests: ${printPath("[test/session/cookies.test.js]")}`, functio
             );
             assert(res.body.userId === user.id);
         });
+
         it("should parse unencoded cookies correctly", async function () {
-            const cookies = ["sAccessToken=" + session.getAccessToken(), ";somethingElse=test%%%again"];
+            const cookies = [
+                `sAccessToken=${session.getAccessToken()}`,
+                `;somethingElse=${session.getAccessToken()}test%%%again`,
+            ].join("");
+
             let res = await new Promise((resolve) =>
                 request()
                     .post("/getsession")
@@ -80,13 +85,15 @@ describe(`sessionTests: ${printPath("[test/session/cookies.test.js]")}`, functio
             );
             assert(res.body.userId === user.id);
         });
+
         it("should parse multiple unencoded cookies correctly", async function () {
             const cookies = [
                 "sAccessToken=" + session.getAccessToken(),
                 ";somethingElse=test%%%once", // invalid %% format
                 ";somethingElse=test%%%again", // invalid %% format
                 ";completelyDifferent=test%80", // invalid utf-8 character
-            ];
+            ].join("");
+
             let res = await new Promise((resolve) =>
                 request()
                     .post("/getsession")
@@ -103,11 +110,13 @@ describe(`sessionTests: ${printPath("[test/session/cookies.test.js]")}`, functio
             );
             assert(res.body.userId === user.id);
         });
+
         it("should return 401 if invalid sAccessToken is passed", async function () {
             const cookies = [
-                "sAccessToken=" + session.getAccessToken(),
-                ";sAccessToken=somethingElse%80test%%%again",
-            ];
+                `sAccessToken=${session.getAccessToken()}`,
+                ";sAccessToken=somethingElse%80test%%%again"
+            ].join("");
+
             await new Promise((resolve) =>
                 request()
                     .post("/getsession")
