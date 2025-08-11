@@ -105,13 +105,14 @@ describe(`sessionTests: ${printPath("[test/session/session.test.js]")}`, functio
                 .map((cookieStr) => setCookieParser.splitCookiesString(cookieStr))
                 .flat(); // Since we have an array of arrays now
 
-            console.log(cookies);
-
+            // Ensure cookies are set and with GMT timezones
+            // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Date - Date headers are always GMT
+            // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#expiresdate - Invalid cookies become session cookies
             cookies.forEach((cookieStr) => {
                 if (cookieStr.startsWith("sAccessToken=") || cookieStr.startsWith("sRefreshToken=")) {
                     cookieStr.split("; ").forEach((part) => {
                         if (part.startsWith("Expires=")) {
-                            assert(part.endsWith("GMT"), "Cookie expiry is not in GMT format");
+                            assert(part.endsWith("GMT"), "Cookie expiry is not in GMT");
                         }
                     });
                 }
@@ -123,24 +124,11 @@ describe(`sessionTests: ${printPath("[test/session/session.test.js]")}`, functio
             const accessTokenCookie = parsedCookies.find((info) => (info?.key ?? info?.name) == "sAccessToken");
             const refreshTokenCookie = parsedCookies.find((info) => (info?.key ?? info?.name) === "sRefreshToken");
 
-            console.log(new Date(accessTokenCookie.expires).getTimezoneOffset())
-
-            // Ensure cookies are set and with GMT timezones
-            // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Date - Date headers are always GMT
-            // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#expiresdate - Invalid cookies become session cookies
             assert(accessTokenCookie, "Access token cookie not found");
             assert(accessTokenCookie.expires, "Access token cookie expiry not set");
-            assert(
-                new Date(accessTokenCookie.expires).getTimezoneOffset() === 0,
-                "Access token cookie expiry is not in GMT"
-            );
 
             assert(refreshTokenCookie, "Refresh token cookie not found");
             assert(refreshTokenCookie.expires, "Refresh token cookie expiry not set");
-            assert(
-                new Date(refreshTokenCookie.expires).getTimezoneOffset() === 0,
-                "Refresh token cookie expiry is not in GMT"
-            );
 
             assert(session.getUserId() === session.getRecipeUserId().getAsString());
         });
