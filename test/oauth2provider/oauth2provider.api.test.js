@@ -13,11 +13,7 @@
  * under the License.
  */
 
-const {
-    printPath,
-    createCoreApplication,
-    extractInfoFromResponse,
-} = require("../utils");
+const { printPath, createCoreApplication, extractInfoFromResponse } = require("../utils");
 let assert = require("assert");
 const { recipesMock, API_PORT, request, getOverrideLogs } = require("../../api-mock");
 const { OAuth2Provider, EmailPassword, Session, supertokens: SuperTokens } = recipesMock;
@@ -949,6 +945,57 @@ describe(`OAuth2Provider-API: ${printPath("[test/oauth2provider/oauth2provider.a
                 "The client_id in the id_token_hint does not match the client_id in the request."
             );
         });
+    });
+
+    it("return the proper response if the refresh token is invalid", async function () {
+        const connectionURI = await createCoreApplication();
+
+        const apiDomain = `http://localhost:${API_PORT}`;
+        const websiteDomain = "http://supertokens.io";
+        const scope = "profile offline_access openid";
+
+        SuperTokens.init({
+            supertokens: {
+                connectionURI,
+            },
+            appInfo: {
+                apiDomain,
+                appName: "SuperTokens",
+                websiteDomain,
+            },
+            recipeList: [EmailPassword.init(), OAuth2Provider.init(), Session.init()],
+        });
+
+        const redirectUri = "http://localhost:4000/redirect-url";
+        const { client } = await OAuth2Provider.createOAuth2Client(
+            {
+                redirectUris: [redirectUri],
+                scope,
+                skipConsent: true,
+                grantTypes: ["authorization_code", "refresh_token"],
+                responseTypes: ["code", "id_token"],
+                tokenEndpointAuthMethod: "client_secret_post",
+            },
+            {}
+        );
+
+        const res = await fetch(`${apiDomain}/auth/oauth/token`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                client_id: client.clientId,
+                client_secret: client.clientSecret,
+                grant_type: "refresh_token",
+                refresh_token:
+                    "st_rt_ruOUJ-wwtgxyUkxc593SzCo9kGbU8g4Ijtn_8dOH8Lg.UyurspkIYWzkqu5fKun2gaoJVDaxviXqLcmFKxFbXh0",
+            }),
+        });
+        const tokenResp = await res.json();
+
+        assert.strictEqual(res.status, 400);
+        assert(tokenResp.error === "invalid_grant");
     });
 
     it("should simulate a successful OAuth2 login flow (id_token implicit flow)", async function () {
