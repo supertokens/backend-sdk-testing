@@ -178,7 +178,10 @@ export async function queryAPI({
 
         return await response.json().catch(() => undefined);
     } catch (error) {
-        throw await error.json().catch(() => undefined);
+        if ("json" in error) {
+            throw await error.json().catch(() => undefined);
+        }
+        throw error;
     }
 }
 

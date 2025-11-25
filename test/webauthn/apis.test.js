@@ -756,6 +756,7 @@ describe(`apisFunctions: ${printPath("[test/webauthn/apis.test.js]")}`, function
                     .set("Authorization", `Bearer ${sessionTokens.accessToken}`)
                     .send({
                         credential,
+                        recipeUserId: signUpResponse.user.id,
                         webauthnGeneratedOptionsId: registerOptionsResponse.webauthnGeneratedOptionsId,
                     })
                     .expect(200)
