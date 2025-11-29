@@ -7,7 +7,7 @@ export const API_PORT = Number(process.env.API_PORT || 3030);
 let apiStatus: "NOT_READY" | "OK" = "NOT_READY";
 let stConfig: string;
 
-const fdiVersion = "4.0";
+export const fdiVersion = "4.1";
 
 type Callback = (
     error: any | null,
@@ -184,6 +184,10 @@ export async function queryAPI({
 
 export function setMockStatus(newStatus: "NOT_READY" | "OK") {
     apiStatus = newStatus;
+}
+
+export function getMockStatus() {
+    return apiStatus;
 }
 
 export function setSTConfig(config) {

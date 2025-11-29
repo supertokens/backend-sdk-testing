@@ -222,7 +222,7 @@ class RemoteSessionObject implements SessionContainerInterface {
     }
 }
 
-function deserializeSession(session) {
+export function deserializeSession(session) {
     if (!session) return session;
     return new RemoteSessionObject(session);
 }
