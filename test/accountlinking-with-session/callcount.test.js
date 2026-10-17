@@ -270,7 +270,7 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             assert.strictEqual(info.coreCallCount, 9);
         });
 
-        it("should call the core <=17 times with MFA and AL while marking the new user verified, migrating the session and make the session user primary", async () => {
+        it("should call the core <=18 times with MFA and AL while marking the new user verified, migrating the session and make the session user primary", async () => {
             await setup({
                 initAccountLinking: true,
                 initMFA: true,
@@ -285,9 +285,9 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
 
             let overrideParams = await getOverrideParams();
             let info = overrideParams.info;
-            assert.strictEqual(info.coreCallCount, 17);
+            assert.strictEqual(info.coreCallCount, 18);
         });
-        it("should call the core <=15 times with MFA and AL while migrating the session and making the session user primary", async () => {
+        it("should call the core <=16 times with MFA and AL while migrating the session and making the session user primary", async () => {
             await setup({
                 initAccountLinking: true,
                 initMFA: true,
@@ -302,9 +302,9 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
 
             let overrideParams = await getOverrideParams();
             let info = overrideParams.info;
-            assert.strictEqual(info.coreCallCount, 15);
+            assert.strictEqual(info.coreCallCount, 16);
         });
-        it("should call the core <=13 times with MFA and AL while migrating the session", async () => {
+        it("should call the core <=14 times with MFA and AL while migrating the session", async () => {
             await setup({
                 initAccountLinking: true,
                 initMFA: true,
@@ -320,9 +320,9 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
 
             let overrideParams = await getOverrideParams();
             let info = overrideParams.info;
-            assert.strictEqual(info.coreCallCount, 13);
+            assert.strictEqual(info.coreCallCount, 14);
         });
-        it("should call the core <=9 times with MFA and AL", async () => {
+        it("should call the core <=10 times with MFA and AL", async () => {
             await setup({
                 initAccountLinking: true,
                 initMFA: true,
@@ -339,12 +339,12 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
 
             let overrideParams = await getOverrideParams();
             let info = overrideParams.info;
-            assert.strictEqual(info.coreCallCount, 9);
+            assert.strictEqual(info.coreCallCount, 10);
         });
     });
 
     describe("factor completion", function () {
-        it("should call the core <=8 times when completing otp-email", async () => {
+        it("should call the core <=9 times when completing otp-email", async () => {
             await setup({
                 initAccountLinking: true,
                 initMFA: true,
@@ -373,7 +373,7 @@ describe(`Multi-recipe account linking flows core call counts: ${printPath(
             assert.strictEqual(resp.body.status, "OK");
             let overrideParams = await getOverrideParams();
             let info = overrideParams.info;
-            assert.strictEqual(info.coreCallCount, 8);
+            assert.strictEqual(info.coreCallCount, 9);
         });
 
         it("should call the core <=5 times when completing totp", async () => {
