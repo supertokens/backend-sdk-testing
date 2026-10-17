@@ -66,6 +66,80 @@ describe(`emailverificationTests: ${printPath("[test/accountlinking/emailverific
                 "google",
                 "abcd",
                 "test@example.com",
+                true
+            );
+            // with a verified email the user is made primary when it's created
+            assert(tpUser.user.isPrimaryUser === true);
+
+            let epUser = (await EmailPassword.signUp("public", "test@example.com", "password123")).user;
+            assert(epUser.isPrimaryUser === false);
+
+            let token = await EmailVerification.createEmailVerificationToken(
+                "public",
+                epUser.loginMethods[0].recipeUserId
+            );
+
+            {
+                let user = await supertokens.getUser(epUser.id);
+                assert(user.isPrimaryUser === false);
+            }
+
+            let userFromVerification = await EmailVerification.verifyEmailUsingToken("public", token.token);
+            assert(userFromVerification.user.recipeUserId.getAsString() === epUser.id);
+
+            {
+                let user = await supertokens.getUser(epUser.id);
+                assert(user.isPrimaryUser === true);
+                assert(user.id === tpUser.user.id);
+            }
+        });
+
+        it("verifyEmailUsingToken does not link into a primary user whose email is not verified", async function () {
+            const connectionURI = await createCoreApplication();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    EmailPassword.init(),
+                    EmailVerification.init({
+                        mode: "OPTIONAL",
+                    }),
+                    Session.init(),
+                    ThirdParty.init({
+                        signInAndUpFeature: {
+                            providers: [
+                                {
+                                    config: {
+                                        thirdPartyId: "google",
+                                        clients: [
+                                            {
+                                                clientId: "",
+                                                clientSecret: "",
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    }),
+                    AccountLinking.init({
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
+                    }),
+                ],
+            });
+
+            let tpUser = await ThirdParty.manuallyCreateOrUpdateUser(
+                "public",
+                "google",
+                "abcd",
+                "test@example.com",
                 false
             );
             assert(tpUser.user.isPrimaryUser === false);
@@ -89,8 +163,12 @@ describe(`emailverificationTests: ${printPath("[test/accountlinking/emailverific
 
             {
                 let user = await supertokens.getUser(epUser.id);
-                assert(user.isPrimaryUser === true);
-                assert(user.id === tpUser.user.id);
+                assert(user.isPrimaryUser === false);
+                assert(user.id === epUser.id);
+            }
+            {
+                let user = await supertokens.getUser(tpUser.user.id);
+                assert(user.loginMethods.length === 1);
             }
         });
 
