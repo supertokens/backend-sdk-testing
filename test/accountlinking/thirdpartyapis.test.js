@@ -1272,7 +1272,107 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
             );
         });
 
-        it("signInUpPOST returns OK if isEmailChangeAllowed returns true and primary user exists with same email, new email is verified for recipe user, but not for primary user", async function () {
+        it("signInUpPOST returns OK if isEmailChangeAllowed returns true and primary user exists with same email, new email is verified for recipe user and for primary user", async function () {
+            const connectionURI = await createCoreApplication();
+            supertokens.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [
+                    EmailPassword.init(),
+                    EmailVerification.init({
+                        mode: "OPTIONAL",
+                    }),
+                    Session.init(),
+                    ThirdParty.init({
+                        signInAndUpFeature: {
+                            providers: [
+                                this.customProviderWithEmailNotVerified,
+
+                                {
+                                    config: {
+                                        thirdPartyId: "google",
+                                        clients: [
+                                            {
+                                                clientId: "",
+                                                clientSecret: "",
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    }),
+                    AccountLinking.init({
+                        shouldDoAutomaticAccountLinking:
+                            shouldDoAutomaticAccountLinkingOverride.automaticallyLinkIfVerified,
+                    }),
+                ],
+            });
+
+            await mockExternalAPI("https://test.com").post("/oauth/token").reply(200, {});
+
+            let tpUser = (
+                await ThirdParty.manuallyCreateOrUpdateUser("public", "custom-no-ev", "user", "email2@test.com", false)
+            ).user;
+            assert(tpUser.isPrimaryUser === false);
+
+            let token = await EmailVerification.createEmailVerificationToken(
+                "public",
+                tpUser.loginMethods[0].recipeUserId,
+                "email@test.com"
+            );
+            await EmailVerification.verifyEmailUsingToken("public", token.token);
+
+            let tpUser2 = (
+                await ThirdParty.manuallyCreateOrUpdateUser("public", "google", "user", "email@test.com", true)
+            ).user;
+            // with a verified email the user is made primary when it's created
+            assert(tpUser2.isPrimaryUser === true);
+
+            let response = await new Promise((resolve, reject) =>
+                request()
+                    .post("/auth/signinup")
+                    .send({
+                        thirdPartyId: "custom-no-ev",
+                        redirectURIInfo: {
+                            redirectURIOnProviderDashboard: "http://127.0.0.1/callback",
+                            redirectURIQueryParams: {
+                                code: "abcdefghj",
+                            },
+                        },
+                    })
+                    .expect(200)
+                    .end((err, res) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(res);
+                        }
+                    })
+            );
+
+            assert.strictEqual(response.body.status, "OK");
+            assert.strictEqual(response.body.createdNewRecipeUser, false);
+            assert.strictEqual(response.body.user.id, tpUser2.id);
+            assert.strictEqual(response.body.user.loginMethods.length, 2);
+
+            const tokens = extractInfoFromResponse(response);
+            const session = await Session.getSessionWithoutRequestResponse(tokens.accessTokenFromAny);
+            assert.strictEqual(session.getUserId(), tpUser2.id);
+            assert.strictEqual(session.getRecipeUserId().getAsString(), tpUser.id);
+            assert.notEqual(
+                await ProcessState.getInstance().waitForEvent(PROCESS_STATE.IS_SIGN_IN_ALLOWED_CALLED),
+                undefined
+            );
+        });
+
+        it("signInUpPOST returns OK without linking if isEmailChangeAllowed returns true and primary user exists with same email, new email is verified for recipe user, but not for primary user", async function () {
             const connectionURI = await createCoreApplication();
             supertokens.init({
                 supertokens: {
@@ -1359,12 +1459,12 @@ describe(`accountlinkingTests: ${printPath("[test/accountlinking/thirdpartyapis.
 
             assert.strictEqual(response.body.status, "OK");
             assert.strictEqual(response.body.createdNewRecipeUser, false);
-            assert.strictEqual(response.body.user.id, tpUser2.id);
-            assert.strictEqual(response.body.user.loginMethods.length, 2);
+            assert.strictEqual(response.body.user.id, tpUser.id);
+            assert.strictEqual(response.body.user.loginMethods.length, 1);
 
             const tokens = extractInfoFromResponse(response);
             const session = await Session.getSessionWithoutRequestResponse(tokens.accessTokenFromAny);
-            assert.strictEqual(session.getUserId(), tpUser2.id);
+            assert.strictEqual(session.getUserId(), tpUser.id);
             assert.strictEqual(session.getRecipeUserId().getAsString(), tpUser.id);
             assert.notEqual(
                 await ProcessState.getInstance().waitForEvent(PROCESS_STATE.IS_SIGN_IN_ALLOWED_CALLED),
